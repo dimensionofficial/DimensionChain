@@ -379,8 +379,8 @@ namespace eosio { namespace chain {
 class context_aware_api {
    public:
       context_aware_api(wasm_interface& wasm, bool context_free = false )
-      :context(intrinsics_accessor::get_context(wasm).context)
-      ,code(intrinsics_accessor::get_context(wasm).code)
+      :code(intrinsics_accessor::get_context(wasm).code)
+      ,context(intrinsics_accessor::get_context(wasm).context)
       ,vm(intrinsics_accessor::get_context(wasm).vm)
       {
          if( context.context_free )
