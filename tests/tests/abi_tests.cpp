@@ -111,10 +111,10 @@ const char* my_abi = R"=====(
          "type": "string[]"
       },{
          "name": "time",
-         "type": "time"
+         "type": "eosio_time"
       },{
          "name": "time_arr",
-         "type": "time[]"
+         "type": "eosio_time[]"
       },{
          "name": "signature",
          "type": "signature"
@@ -469,7 +469,7 @@ BOOST_FIXTURE_TEST_CASE(abigen_all_types, abi_gen_helper)
    //@abi action
    struct test_struct {
       std::string             field1;
-      time                    field2;
+      eosio_time              field2;
       signature               field3;
       checksum256             field4;
       field_name              field5;
@@ -522,7 +522,7 @@ BOOST_FIXTURE_TEST_CASE(abigen_all_types, abi_gen_helper)
                "type": "string"
           },{
              "name": "field2",
-             "type": "time"
+             "type": "eosio_time"
           },{
              "name": "field3",
              "type": "signature"
