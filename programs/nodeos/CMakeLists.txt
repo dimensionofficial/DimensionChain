@@ -43,6 +43,8 @@ else()
   set(no_whole_archive_flag "--no-whole-archive")
 endif()
 
+SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -rdynamic" )
+
 target_link_libraries( nodeos
         PRIVATE appbase
         PRIVATE -Wl,${whole_archive_flag} debug_plugin -Wl,${no_whole_archive_flag} debug_plugin

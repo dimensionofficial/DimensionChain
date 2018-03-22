@@ -56,11 +56,11 @@ namespace eosio {
       printi(num);
    }
 
+   #ifndef EOSIO_NATIVE_CONTRACT_COMPILATION
    inline void print( long num ) {
       printi(num);
    }
 
-   #ifndef EOSIO_NATIVE_CONTRACT_COMPILATION
    /**
     * Prints unsigned integer as a 64 bit unsigned integer
     * @brief Prints unsigned integer

@@ -88,7 +88,11 @@ void debug_plugin_impl::dummy_action_handler(chain::apply_context& context) {
       eosio::name action_name;
       account_name.value = context.act.account;
       action_name.value = context.act.name;
-      FC_ASSERT( false, "Unable to execute native debug action ${action} for account ${account}", ("account", account_name.to_string())("action", action_name.to_string()));
+      std::string reason = "wasm code for contract was not loaded";
+      if (fn_handle == 0) reason = "Dynamic library was not loaded";
+
+      FC_ASSERT( false, "Unable to execute native debug action ${action} for account ${account}: ${reason}",
+                 ("account", account_name.to_string())("action", action_name.to_string())("reason", reason));
    }
 }
 }

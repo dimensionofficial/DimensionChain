@@ -1300,222 +1300,6 @@ class database_api : public context_aware_api {
       DB_API_METHOD_WRAPPERS_SIMPLE_SECONDARY(idx128, uint128_t)
       DB_API_METHOD_WRAPPERS_ARRAY_SECONDARY(idx256, 2, uint128_t)
       DB_API_METHOD_WRAPPERS_SIMPLE_SECONDARY(idx_double, uint64_t)
-
-
-
-template<typename ObjectType>
-class db_api : public context_aware_api {
-   using KeyType = typename ObjectType::key_type;
-   static constexpr int KeyCount = ObjectType::number_of_keys;
-   using KeyArrayType = KeyType[KeyCount];
-   using ContextMethodType = int(apply_context::*)(const table_id_object&, const account_name&, const KeyType*, const char*, size_t);
-
-   private:
-      int call(ContextMethodType method, const scope_name& scope, const name& table, account_name bta, array_ptr<const char> data, size_t data_len) {
-         const auto& t_id = context.find_or_create_table(context.receiver, scope, table);
-         FC_ASSERT(data_len >= KeyCount * sizeof(KeyType), "Data is not long enough to contain keys");
-         const KeyType* keys = reinterpret_cast<const KeyType *>((const char *)data);
-
-         const char* record_data =  ((const char*)data) + sizeof(KeyArrayType);
-         size_t record_len = data_len - sizeof(KeyArrayType);
-         return (context.*(method))(t_id, bta, keys, record_data, record_len) + sizeof(KeyArrayType);
-      }
-
-   public:
-      using context_aware_api::context_aware_api;
-      typedef KeyArrayType& KeyParamType;
-
-      int store(const scope_name& scope, const name& table, const account_name& bta, array_ptr<const char> data, size_t data_len) {
-         auto res = call(&apply_context::store_record<ObjectType>, scope, table, bta, data, data_len);
-         //ilog("STORE [${scope},${code},${table}] => ${res} :: ${HEX}", ("scope",scope)("code",context.receiver)("table",table)("res",res)("HEX", fc::to_hex(data, data_len)));
-         return res;
-      }
-
-      int update(const scope_name& scope, const name& table, const account_name& bta, array_ptr<const char> data, size_t data_len) {
-         return call(&apply_context::update_record<ObjectType>, scope, table, bta, data, data_len);
-      }
-
-      int remove(const scope_name& scope, const name& table, const KeyArrayType &keys) {
-         const auto& t_id = context.find_or_create_table(context.receiver, scope, table);
-         return context.remove_record<ObjectType>(t_id, keys);
-      }
-};
-
-template<>
-class db_api<keystr_value_object> : public context_aware_api {
-   using KeyType = std::string;
-   static constexpr int KeyCount = 1;
-   using KeyArrayType = KeyType[KeyCount];
-   using ContextMethodType = int(apply_context::*)(const table_id_object&, const KeyType*, const char*, size_t);
-
-/* TODO something weird is going on here, will maybe fix before DB changes or this might get
- * totally changed anyway
-   private:
-      int call(ContextMethodType method, const scope_name& scope, const name& table, account_name bta,
-            null_terminated_ptr key, size_t key_len, array_ptr<const char> data, size_t data_len) {
-         const auto& t_id = context.find_or_create_table(context.receiver, scope, table);
-         const KeyType keys((const char*)key.value, key_len);
-
-         const char* record_data =  ((const char*)data);
-         size_t record_len = data_len;
-         return (context.*(method))(t_id, bta, &keys, record_data, record_len);
-      }
-*/
-   public:
-      using context_aware_api::context_aware_api;
-
-      int store_str(const scope_name& scope, const name& table, const account_name& bta,
-            null_terminated_ptr key, uint32_t key_len, array_ptr<const char> data, size_t data_len) {
-         const auto& t_id = context.find_or_create_table(context.receiver, scope, table);
-         const KeyType keys(key.value, key_len);
-         const char* record_data =  ((const char*)data);
-         size_t record_len = data_len;
-         return context.store_record<keystr_value_object>(t_id, bta, &keys, record_data, record_len);
-         //return call(&apply_context::store_record<keystr_value_object>, scope, table, bta, key, key_len, data, data_len);
-      }
-
-      int update_str(const scope_name& scope,  const name& table, const account_name& bta,
-            null_terminated_ptr key, uint32_t key_len, array_ptr<const char> data, size_t data_len) {
-         const auto& t_id = context.find_or_create_table(context.receiver, scope, table);
-         const KeyType keys((const char*)key, key_len);
-         const char* record_data =  ((const char*)data);
-         size_t record_len = data_len;
-         return context.update_record<keystr_value_object>(t_id, bta, &keys, record_data, record_len);
-         //return call(&apply_context::update_record<keystr_value_object>, scope, table, bta, key, key_len, data, data_len);
-      }
-
-      int remove_str(const scope_name& scope, const name& table, const array_ptr<const char> &key, uint32_t key_len) {
-         const auto& t_id = context.find_or_create_table(scope, context.receiver, table);
-         const KeyArrayType k = {std::string(key, key_len)};
-         return context.remove_record<keystr_value_object>(t_id, k);
-      }
-};
-
-template<typename IndexType, typename Scope>
-class db_index_api : public context_aware_api {
-   using KeyType = typename IndexType::value_type::key_type;
-   static constexpr int KeyCount = IndexType::value_type::number_of_keys;
-   using KeyArrayType = KeyType[KeyCount];
-   using ContextMethodType = int(apply_context::*)(const table_id_object&, KeyType*, char*, size_t);
-
-
-   int call(ContextMethodType method, const account_name& code, const scope_name& scope, const name& table, array_ptr<char> data, size_t data_len) {
-      auto maybe_t_id = context.find_table(code, scope, table);
-      if (maybe_t_id == nullptr) {
-         return -1;
-      }
-
-      const auto& t_id = *maybe_t_id;
-      FC_ASSERT(data_len >= KeyCount * sizeof(KeyType), "Data is not long enough to contain keys");
-      KeyType* keys = reinterpret_cast<KeyType *>((char *)data);
-
-      char* record_data =  ((char*)data) + sizeof(KeyArrayType);
-      size_t record_len = data_len - sizeof(KeyArrayType);
-
-      auto res = (context.*(method))(t_id, keys, record_data, record_len);
-      if (res != -1) {
-         res += sizeof(KeyArrayType);
-      }
-      return res;
-   }
-
-   public:
-      using context_aware_api::context_aware_api;
-
-      int load(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::load_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-      int front(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::front_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-      int back(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::back_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-      int next(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::next_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-      int previous(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::previous_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-      int lower_bound(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::lower_bound_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-      int upper_bound(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::upper_bound_record<IndexType, Scope>, scope, code, table, data, data_len);
-         return res;
-      }
-
-};
-
-template<>
-class db_index_api<keystr_value_index, by_scope_primary> : public context_aware_api {
-   using KeyType = std::string;
-   static constexpr int KeyCount = 1;
-   using KeyArrayType = KeyType[KeyCount];
-   using ContextMethodType = int(apply_context::*)(const table_id_object&, KeyType*, char*, size_t);
-
-
-   int call(ContextMethodType method, const scope_name& scope, const account_name& code, const name& table,
-         array_ptr<char> &key, uint32_t key_len, array_ptr<char> data, size_t data_len) {
-      auto maybe_t_id = context.find_table(scope, context.receiver, table);
-      if (maybe_t_id == nullptr) {
-         return 0;
-      }
-
-      const auto& t_id = *maybe_t_id;
-      //FC_ASSERT(data_len >= KeyCount * sizeof(KeyType), "Data is not long enough to contain keys");
-      KeyType keys((const char*)key, key_len); // = reinterpret_cast<KeyType *>((char *)data);
-
-      char* record_data =  ((char*)data); // + sizeof(KeyArrayType);
-      size_t record_len = data_len; // - sizeof(KeyArrayType);
-
-      return (context.*(method))(t_id, &keys, record_data, record_len); // + sizeof(KeyArrayType);
-   }
-
-   public:
-      using context_aware_api::context_aware_api;
-
-      int load_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         auto res = call(&apply_context::load_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-         return res;
-      }
-
-      int front_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         return call(&apply_context::front_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-      }
-
-      int back_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         return call(&apply_context::back_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-      }
-
-      int next_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         return call(&apply_context::next_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-      }
-
-      int previous_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         return call(&apply_context::previous_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-      }
-
-      int lower_bound_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         return call(&apply_context::lower_bound_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-      }
-
-      int upper_bound_str(const scope_name& scope, const account_name& code, const name& table, array_ptr<char> key, size_t key_len, array_ptr<char> data, size_t data_len) {
-         return call(&apply_context::upper_bound_record<keystr_value_index, by_scope_primary>, scope, code, table, key, key_len, data, data_len);
-      }
->>>>>>> DAWN-551 Contract Debugging add support for native contract debugging
 };
 
 class memory_api : public context_aware_api {
@@ -1981,64 +1765,64 @@ REGISTER_INTRINSICS(producer_api,
 
 
 #define DB_SECONDARY_INDEX_METHODS_SIMPLE(IDX, TYPE) \
-   (db_##IDX##_store,          int(int64_t,int64_t,int64_t,int64_t,int), (int, (int64_t scope, int64_t table, int64_t payer, int64_t id, TYPE* secondary),\
+   (db_##IDX##_store,          int(int64_t,int64_t,int64_t,int64_t,int), (int32_t, (int64_t scope, int64_t table, int64_t payer, int64_t id, TYPE* secondary),\
                                                                                (scope, table, payer, id, *secondary)))\
    (db_##IDX##_remove,         void(int),                                (void, (int32_t iter), (iter)))\
    (db_##IDX##_update,         void(int,int64_t,int),                    (void, (int32_t iter, int64_t payer, const TYPE* secondary), (iter, payer, *secondary)))\
-   (db_##IDX##_find_primary,   int(int64_t,int64_t,int64_t,int,int64_t), (int, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t primary),\
+   (db_##IDX##_find_primary,   int(int64_t,int64_t,int64_t,int,int64_t), (int32_t, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t primary),\
                                                                                (code, scope, table, *secondary, primary)))\
-   (db_##IDX##_find_secondary, int(int64_t,int64_t,int64_t,int,int),     (int, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t* primary),\
+   (db_##IDX##_find_secondary, int(int64_t,int64_t,int64_t,int,int),     (int32_t, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t* primary),\
                                                                                (code, scope, table, *secondary, *primary)))\
-   (db_##IDX##_lowerbound,     int(int64_t,int64_t,int64_t,int,int),     (int, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t* primary),\
+   (db_##IDX##_lowerbound,     int(int64_t,int64_t,int64_t,int,int),     (int32_t, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t* primary),\
                                                                                (code, scope, table, *secondary, *primary)))\
-   (db_##IDX##_upperbound,     int(int64_t,int64_t,int64_t,int,int),     (int, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t* primary),\
+   (db_##IDX##_upperbound,     int(int64_t,int64_t,int64_t,int,int),     (int32_t, (int64_t code, int64_t scope, int64_t table, TYPE* secondary, uint64_t* primary),\
                                                                                (code, scope, table, *secondary, *primary)))\
-   (db_##IDX##_end,            int(int64_t,int64_t,int64_t),             (int, (uint64_t code, uint64_t scope, uint64_t table), (code, scope, table)))\
-   (db_##IDX##_next,           int(int, int),                            (int, (int32_t iter, uint64_t* primary), (iter, *primary)))\
-   (db_##IDX##_previous,       int(int, int),                            (int, (int32_t iter, uint64_t* primary), (iter, *primary)))
+   (db_##IDX##_end,            int(int64_t,int64_t,int64_t),             (int32_t, (uint64_t code, uint64_t scope, uint64_t table), (code, scope, table)))\
+   (db_##IDX##_next,           int(int, int),                            (int32_t, (int32_t iter, uint64_t* primary), (iter, *primary)))\
+   (db_##IDX##_previous,       int(int, int),                            (int32_t, (int32_t iter, uint64_t* primary), (iter, *primary)))
 
 #define DB_SECONDARY_INDEX_METHODS_ARRAY(IDX) \
       (db_##IDX##_store,          int(int64_t,int64_t,int64_t,int64_t,int,int),\
-                                  (int, (int64_t scope, int64_t table, int64_t payer, int64_t id, const uint128_t* secondary, uint32_t data_len),\
+                                  (int32_t, (int64_t scope, int64_t table, int64_t payer, int64_t id, const uint128_t* secondary, uint32_t data_len),\
                                         (scope, table, payer, id, array_ptr<const uint128_t>(secondary), data_len)))\
       (db_##IDX##_remove,         void(int),                                    (void, (int32_t iter), (iter)))\
       (db_##IDX##_update,         void(int,int64_t,int,int),                    (void, (int32_t iter, int64_t payer, const uint128_t* secondary, uint32_t data_len),\
                                                                                        (iter, payer, array_ptr<const uint128_t>(secondary), data_len)))\
       (db_##IDX##_find_primary,   int(int64_t,int64_t,int64_t,int,int,int64_t),\
-                                  (int, (int64_t code, int64_t scope, int64_t table, uint128_t* secondary, uint32_t data_len, uint64_t primary),\
+                                  (int32_t, (int64_t code, int64_t scope, int64_t table, uint128_t* secondary, uint32_t data_len, uint64_t primary),\
                                         (code, scope, table, array_ptr<uint128_t>(secondary), data_len, primary)))\
       (db_##IDX##_find_secondary, int(int64_t,int64_t,int64_t,int,int,int),\
-                                  (int, (int64_t code, int64_t scope, int64_t table, const uint128_t* secondary, uint32_t data_len, uint64_t* primary),\
+                                  (int32_t, (int64_t code, int64_t scope, int64_t table, const uint128_t* secondary, uint32_t data_len, uint64_t* primary),\
                                         (code, scope, table, array_ptr<const uint128_t>(secondary), data_len, *primary)))\
       (db_##IDX##_lowerbound,     int(int64_t,int64_t,int64_t,int,int,int),\
-                                  (int, (int64_t code, int64_t scope, int64_t table, uint128_t* secondary, uint32_t data_len, uint64_t* primary),\
+                                  (int32_t, (int64_t code, int64_t scope, int64_t table, uint128_t* secondary, uint32_t data_len, uint64_t* primary),\
                                         (code, scope, table, array_ptr<uint128_t>(secondary), data_len, *primary)))\
       (db_##IDX##_upperbound,     int(int64_t,int64_t,int64_t,int,int,int),\
-                                  (int, (int64_t code, int64_t scope, int64_t table, uint128_t* secondary, uint32_t data_len, uint64_t* primary),\
+                                  (int32_t, (int64_t code, int64_t scope, int64_t table, uint128_t* secondary, uint32_t data_len, uint64_t* primary),\
                                         (code, scope, table, array_ptr<uint128_t>(secondary), data_len, *primary)))\
-      (db_##IDX##_end,            int(int64_t,int64_t,int64_t),                 (int, (uint64_t code, uint64_t scope, uint64_t table), (code, scope, table)))\
-      (db_##IDX##_next,           int(int, int),                                (int, (int32_t iter, uint64_t* primary), (iter, *primary)))\
-      (db_##IDX##_previous,       int(int, int),                               (int, (int32_t iter, uint64_t* primary), (iter, *primary)))
+      (db_##IDX##_end,            int(int64_t,int64_t,int64_t),                 (int32_t, (uint64_t code, uint64_t scope, uint64_t table), (code, scope, table)))\
+      (db_##IDX##_next,           int(int, int),                                (int32_t, (int32_t iter, uint64_t* primary), (iter, *primary)))\
+      (db_##IDX##_previous,       int(int, int),                                (int32_t, (int32_t iter, uint64_t* primary), (iter, *primary)))
 
 
 REGISTER_INTRINSICS( database_api,
-   (db_store_i64,        int(int64_t,int64_t,int64_t,int64_t,int,int), (int, (int64_t scope, int64_t table, int64_t payer, int64_t id, const char* data, uint32_t length),
+   (db_store_i64,        int(int64_t,int64_t,int64_t,int64_t,int,int), (int32_t, (int64_t scope, int64_t table, int64_t payer, int64_t id, const char* data, uint32_t length),
                                                                              (scope, table, payer, id, array_ptr<const char>(data), length)))
    (db_update_i64,       void(int,int64_t,int,int),                    (void, (int32_t iter, int64_t payer, const char* data, uint32_t length),
                                                                               (iter, payer, array_ptr<const char>(data), length)))
    (db_remove_i64,       void(int),                                    (void, (int32_t iter), (iter)))
-   (db_get_i64,          int(int, int, int),                           (int, (int32_t iter, char* data, uint32_t length), (iter, array_ptr<char>(data), length)))
-   (db_next_i64,         int(int, int),                                (int, (int32_t iter, uint64_t* primary), (iter, *primary)))
-   (db_previous_i64,     int(int, int),                                (int, (int32_t iter, uint64_t* primary), (iter, *primary)))
-   (db_find_i64,         int(int64_t,int64_t,int64_t,int64_t),         (int, (int64_t code, int64_t scope, int64_t table, int64_t id), (code, scope, table, id)))
-   (db_lowerbound_i64,   int(int64_t,int64_t,int64_t,int64_t),         (int, (int64_t code, int64_t scope, int64_t table, int64_t id), (code, scope, table, id)))
-   (db_upperbound_i64,   int(int64_t,int64_t,int64_t,int64_t),         (int, (int64_t code, int64_t scope, int64_t table, int64_t id), (code, scope, table, id)))
-   (db_end_i64,          int(int64_t,int64_t,int64_t),                 (int, (uint64_t code, uint64_t scope, uint64_t table), (code, scope, table)))
+   (db_get_i64,          int(int, int, int),                           (int32_t, (int32_t iter, char* data, uint32_t length), (iter, array_ptr<char>(data), length)))
+   (db_next_i64,         int(int, int),                                (int32_t, (int32_t iter, uint64_t* primary), (iter, *primary)))
+   (db_previous_i64,     int(int, int),                                (int32_t, (int32_t iter, uint64_t* primary), (iter, *primary)))
+   (db_find_i64,         int(int64_t,int64_t,int64_t,int64_t),         (int32_t, (int64_t code, int64_t scope, int64_t table, int64_t id), (code, scope, table, id)))
+   (db_lowerbound_i64,   int(int64_t,int64_t,int64_t,int64_t),         (int32_t, (int64_t code, int64_t scope, int64_t table, int64_t id), (code, scope, table, id)))
+   (db_upperbound_i64,   int(int64_t,int64_t,int64_t,int64_t),         (int32_t, (int64_t code, int64_t scope, int64_t table, int64_t id), (code, scope, table, id)))
+   (db_end_i64,          int(int64_t,int64_t,int64_t),                 (int32_t, (uint64_t code, uint64_t scope, uint64_t table), (code, scope, table)))
 
    DB_SECONDARY_INDEX_METHODS_SIMPLE(idx64, uint64_t)
    DB_SECONDARY_INDEX_METHODS_SIMPLE(idx128, uint128_t)
    DB_SECONDARY_INDEX_METHODS_ARRAY(idx256)
-   DB_SECONDARY_INDEX_METHODS_SIMPLE(idx_double)
+   DB_SECONDARY_INDEX_METHODS_SIMPLE(idx_double, uint64_t)
 );
 
 REGISTER_INTRINSICS(crypto_api,
