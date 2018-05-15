@@ -431,21 +431,76 @@ namespace eosio {
       static void populate(handshake_message &hello);
    };
 
+   /**
+    * proposed class refactoring for connection class
+    * peer i/o management
+    *       ^
+    >       |
+    * peer queuing
+    *       ^
+    >       |
+    * peer synchronization
+    *       ^
+    >       |
+    * peer timestamp
+    *       ^
+    >       |
+    * peer message handling
+    *       ^
+    >       |
+    * peer essage dispatching
+    *       ^
+    >       |
+    * peer connection
+   **/
    class connection : public std::enable_shared_from_this<connection> {
    public:
-      explicit connection( string endpoint );
+      // peer i/o management
 
-      explicit connection( socket_ptr s );
-      ~connection();
-      void initialize();
 
-      peer_block_state_index       blk_state;
-      transaction_state_index trx_state;
-      optional<sync_state>    peer_requested;  // this peer is requesting info from us
-      socket_ptr              socket;
 
-      fc::message_buffer<1024*1024>    pending_message_buffer;
-      vector<char>            blk_buffer;
+      bool connected();
+      bool current();
+      void reset();
+      void close();
+      void send_handshake();
+
+
+
+      const string peer_name();
+
+      void queue_write(std::shared_ptr<vector<char>> buff,
+                       bool trigger_send,
+                       std::function<void(boost::system::error_code, std::size_t)> callback);
+      void do_queue_write();
+
+
+      socket_ptr                     socket;
+      fc::message_buffer<1024*1024>  pending_message_buffer;
+      vector<char>                   blk_buffer;
+      bool                           connecting;
+      uint16_t                       protocol_version;
+      string                         peer_addr;
+      unique_ptr<boost::asio::steady_timer> response_expected;
+      optional<request_message>      pending_fetch;
+      go_away_reason                 no_retry;
+      optional<request_message>      last_req;
+
+      //----------------------------------------------------------------------------------------------
+      // peer queuing
+
+
+      void txn_send_pending(const vector<transaction_id_type> &ids);
+      void txn_send(const vector<transaction_id_type> &txn_lis);
+
+      void blk_send_branch();
+      void blk_send(const vector<block_id_type> &txn_lis);
+      void stop_send();
+
+      void enqueue( transaction_id_type id );
+      void enqueue( const net_message &msg, bool trigger_send = true );
+      void cancel_sync(go_away_reason);
+      void flush_queues();
 
       struct queued_write {
          std::shared_ptr<vector<char>> buff;
@@ -453,31 +508,31 @@ namespace eosio {
       };
       deque<queued_write>     write_queue;
       deque<queued_write>     out_queue;
+      bool                    syncing;
 
+      //----------------------------------------------------------------------------------------------
+      // peer synchronization
+      bool enqueue_sync_block();
+      void request_sync_blocks (uint32_t start, uint32_t end);
+
+      void cancel_wait();
+      void sync_wait();
+      void fetch_wait();
+      void sync_timeout(boost::system::error_code ec);
+      void fetch_timeout(boost::system::error_code ec);
+
+      peer_block_state_index  blk_state;
+      transaction_state_index trx_state;
+      optional<sync_state>    peer_requested;  // this peer is requesting info from us
+      block_id_type           fork_head;
+      uint32_t                fork_head_num;
       fc::sha256              node_id;
       handshake_message       last_handshake_recv;
       handshake_message       last_handshake_sent;
       int16_t                 sent_handshake_count;
-      bool                    connecting;
-      bool                    syncing;
-      uint16_t                protocol_version;
-      string                  peer_addr;
-      unique_ptr<boost::asio::steady_timer> response_expected;
-      optional<request_message> pending_fetch;
-      go_away_reason         no_retry;
-      block_id_type          fork_head;
-      uint32_t               fork_head_num;
-      optional<request_message> last_req;
 
-      connection_status get_status()const {
-         connection_status stat;
-         stat.peer = peer_addr;
-         stat.connecting = connecting;
-         stat.syncing = syncing;
-         stat.last_handshake = last_handshake_recv;
-         return stat;
-      }
-
+      //----------------------------------------------------------------------------------------------
+      // peer timestamp
       /** \name Peer Timestamps
        *  Time message handling
        *  @{
@@ -494,13 +549,6 @@ namespace eosio {
       static const size_t            ts_buffer_size{32};
       char                           ts[ts_buffer_size];          //!< working buffer for making human readable timestamps
       /** @} */
-
-      bool connected();
-      bool current();
-      void reset();
-      void close();
-      void send_handshake();
-
       /** \name Peer Timestamps
        *  Time message handling
        */
@@ -526,33 +574,8 @@ namespace eosio {
          return std::chrono::system_clock::now().time_since_epoch().count();
       }
       /** @} */
-
-      const string peer_name();
-
-      void txn_send_pending(const vector<transaction_id_type> &ids);
-      void txn_send(const vector<transaction_id_type> &txn_lis);
-
-      void blk_send_branch();
-      void blk_send(const vector<block_id_type> &txn_lis);
-      void stop_send();
-
-      void enqueue( transaction_id_type id );
-      void enqueue( const net_message &msg, bool trigger_send = true );
-      void cancel_sync(go_away_reason);
-      void flush_queues();
-      bool enqueue_sync_block();
-      void request_sync_blocks (uint32_t start, uint32_t end);
-
-      void cancel_wait();
-      void sync_wait();
-      void fetch_wait();
-      void sync_timeout(boost::system::error_code ec);
-      void fetch_timeout(boost::system::error_code ec);
-
-      void queue_write(std::shared_ptr<vector<char>> buff,
-                       bool trigger_send,
-                       std::function<void(boost::system::error_code, std::size_t)> callback);
-      void do_queue_write();
+      //----------------------------------------------------------------------------------------------
+      // peer message handling
 
       /** \brief Process the next message from the pending message buffer
        *
@@ -564,6 +587,25 @@ namespace eosio {
        * encountered unpacking or processing the message.
        */
       bool process_next_message(net_plugin_impl& impl, uint32_t message_length);
+
+      //----------------------------------------------------------------------------------------------
+      // peer essage dispatching
+      //----------------------------------------------------------------------------------------------
+      // peer connection
+      explicit connection( string endpoint );
+
+      explicit connection( socket_ptr s );
+      ~connection();
+      void initialize();
+
+      connection_status get_status()const {
+         connection_status stat;
+         stat.peer = peer_addr;
+         stat.connecting = connecting;
+         stat.syncing = syncing;
+         stat.last_handshake = last_handshake_recv;
+         return stat;
+      }
    };
 
    struct msgHandler : public fc::visitor<void> {
@@ -1324,7 +1366,7 @@ namespace eosio {
          if( end > sync_known_lib_num )
             end = sync_known_lib_num;
          if( end > 0 && end >= start ) {
-            fc_dlog(logger, "conn ${n} requesting range ${s} to ${e}, calling sync_wait",
+            fc_ilog(logger, "conn ${n} requesting range ${s} to ${e}, calling sync_wait",
                     ("n",source->peer_name())("s",start)("e",end));
             source->request_sync_blocks(start, end);
             sync_last_requested_num = end;
@@ -1497,16 +1539,18 @@ namespace eosio {
       if (!accepted) {
          uint32_t head_num = chain_plug->chain().head_block_num();
          if (head_num != last_repeated) {
-            ilog ("block not accepted, try requesting one more time");
+            fc_wlog (logger,"block not accepted, try requesting one more time");
             last_repeated = head_num;
             send_handshakes();
          }
          else {
-            ilog ("second attempt to retrive block ${n} failed",
+            fc_wlog (logger, "second attempt to retrive block ${n} failed",
                   ("n", head_num + 1));
             last_repeated = 0;
             sync_last_requested_num = 0;
             my_impl->close(c);
+            reset_lib_num(c);
+            set_state(in_sync);
          }
          return;
       }
@@ -1540,7 +1584,7 @@ namespace eosio {
       }
       else if (state == lib_catchup) {
          if( blk_num == sync_known_lib_num ) {
-            fc_dlog( logger, "All caught up with last known last irreversible block resending handshake");
+            fc_ilog( logger, "All caught up with last known last irreversible block resending handshake");
             set_state(in_sync);
             send_handshakes();
          }
