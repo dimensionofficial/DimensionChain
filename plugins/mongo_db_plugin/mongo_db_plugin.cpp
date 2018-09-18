@@ -753,8 +753,8 @@ void mongo_db_plugin_impl::_process_accepted_transaction( const chain::transacti
    try {
       mongocxx::options::update update_opts{};
       update_opts.upsert( true );
-      if( !_trans.update_one( make_document( kvp( "trx_id", trx_id_str ) ),
-                              make_document( kvp( "$set", trans_doc.view() ) ), update_opts ) ) {
+      if( !_trans.update_many( make_document( kvp( "trx_id", trx_id_str ) ),
+                               make_document( kvp( "$set", trans_doc.view() ) ), update_opts ) ) {
          EOS_ASSERT( false, chain::mongo_db_insert_fail, "Failed to insert trans ${id}", ("id", trx_id) );
       }
    } catch( ... ) {
@@ -930,8 +930,8 @@ void mongo_db_plugin_impl::_process_accepted_block( const chain::block_state_ptr
       block_state_doc.append( kvp( "createdAt", b_date{now} ) );
 
       try {
-         if( !_block_states.update_one( make_document( kvp( "block_id", block_id_str ) ),
-                                        make_document( kvp( "$set", block_state_doc.view() ) ), update_opts ) ) {
+         if( !_block_states.update_many( make_document( kvp( "block_id", block_id_str ) ),
+                                         make_document( kvp( "$set", block_state_doc.view() ) ), update_opts ) ) {
             EOS_ASSERT( false, chain::mongo_db_insert_fail, "Failed to insert block_state ${bid}", ("bid", block_id) );
          }
       } catch( ... ) {
@@ -963,8 +963,8 @@ void mongo_db_plugin_impl::_process_accepted_block( const chain::block_state_ptr
       block_doc.append( kvp( "createdAt", b_date{now} ) );
 
       try {
-         if( !_blocks.update_one( make_document( kvp( "block_id", block_id_str ) ),
-                                  make_document( kvp( "$set", block_doc.view() ) ), update_opts ) ) {
+         if( !_blocks.update_many( make_document( kvp( "block_id", block_id_str ) ),
+                                   make_document( kvp( "$set", block_doc.view() ) ), update_opts ) ) {
             EOS_ASSERT( false, chain::mongo_db_insert_fail, "Failed to insert block ${bid}", ("bid", block_id) );
          }
       } catch( ... ) {
@@ -999,7 +999,7 @@ void mongo_db_plugin_impl::_process_irreversible_block(const chain::block_state_
                                                                    kvp( "validated", b_bool{bs->validated} ),
                                                                    kvp( "updatedAt", b_date{now} ) ) ) );
 
-      _blocks.update_one( make_document( kvp( "_id", ir_block->view()["_id"].get_oid() ) ), update_doc.view() );
+      _blocks.update_many( make_document( kvp( "_id", ir_block->view()["_id"].get_oid() ) ), update_doc.view() );
    }
 
    if( store_block_states ) {
@@ -1014,7 +1014,7 @@ void mongo_db_plugin_impl::_process_irreversible_block(const chain::block_state_
                                                                    kvp( "validated", b_bool{bs->validated} ),
                                                                    kvp( "updatedAt", b_date{now} ) ) ) );
 
-      _block_states.update_one( make_document( kvp( "_id", ir_block->view()["_id"].get_oid() ) ), update_doc.view() );
+      _block_states.update_many( make_document( kvp( "_id", ir_block->view()["_id"].get_oid() ) ), update_doc.view() );
    }
 
    if( store_transactions ) {
@@ -1042,7 +1042,7 @@ void mongo_db_plugin_impl::_process_irreversible_block(const chain::block_state_
                                                                       kvp( "block_num", b_int32{static_cast<int32_t>(block_num)} ),
                                                                       kvp( "updatedAt", b_date{now} ) ) ) );
 
-         mongocxx::model::update_one update_op{make_document( kvp( "trx_id", trx_id_str ) ), update_doc.view()};
+         mongocxx::model::update_many update_op{make_document( kvp( "trx_id", trx_id_str ) ), update_doc.view()};
          update_op.upsert( true );
          bulk.append( update_op );
          transactions_in_block = true;
@@ -1081,7 +1081,7 @@ void mongo_db_plugin_impl::add_pub_keys( const vector<chain::key_weight>& keys, 
       auto update_doc = make_document( kvp( "$set", make_document( bsoncxx::builder::concatenate_doc{find_doc.view()},
                                                                    kvp( "createdAt", b_date{now} ))));
 
-      mongocxx::model::update_one insert_op{find_doc.view(), update_doc.view()};
+      mongocxx::model::update_many insert_op{find_doc.view(), update_doc.view()};
       insert_op.upsert(true);
       bulk.append( insert_op );
    }
@@ -1138,7 +1138,7 @@ void mongo_db_plugin_impl::add_account_control( const vector<chain::permission_l
                                                                    kvp( "createdAt", b_date{now} ))));
 
 
-      mongocxx::model::update_one insert_op{find_doc.view(), update_doc.view()};
+      mongocxx::model::update_many insert_op{find_doc.view(), update_doc.view()};
       insert_op.upsert(true);
       bulk.append( insert_op );
    }
@@ -1187,7 +1187,7 @@ void create_account( mongocxx::collection& accounts, const name& name, std::chro
          kvp( "$set", make_document( kvp( "name", name_str),
                                      kvp( "createdAt", b_date{now} ))));
    try {
-      if( !accounts.update_one( make_document( kvp( "name", name_str )), update.view(), update_opts )) {
+      if( !accounts.update_many( make_document( kvp( "name", name_str )), update.view(), update_opts )) {
          EOS_ASSERT( false, chain::mongo_db_update_fail, "Failed to insert account ${n}", ("n", name));
       }
    } catch (...) {
@@ -1255,8 +1255,8 @@ void mongo_db_plugin_impl::update_account(const chain::action& act)
                                                  kvp( "updatedAt", b_date{now} ))));
 
                try {
-                  if( !_accounts.update_one( make_document( kvp( "_id", account->view()["_id"].get_oid())),
-                                             update_from.view())) {
+                  if( !_accounts.update_many( make_document( kvp( "_id", account->view()["_id"].get_oid())),
+                                              update_from.view())) {
                      EOS_ASSERT( false, chain::mongo_db_update_fail, "Failed to udpdate account ${n}", ("n", setabi.account));
                   }
                } catch( ... ) {
