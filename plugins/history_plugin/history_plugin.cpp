@@ -369,9 +369,29 @@ namespace eosio {
    }
 
 
-
-
+/**
+ * swagger annotations, api docs will be generated using the swagger maven plugin.
+ * 
+ * @Path("/v1/history/")
+ * @Api(value= "history_apis", tags = "History API")
+ * @Produces({application/json})
+ **/
    namespace history_apis {
+/**
+ * swagger annotations
+ * 
+ * @POST
+ * @Path("/get_actions")
+ * @ApiOperation(value="Retrieves all actions with specific account name referenced in their scope."
+ *               notes="")
+ * @ApiImplicitParams({
+ *    @ApiImplicitParam(name="get actions", paramType="body" description="Select actions for named account" required=true dataType="get_actions_params")
+ * })
+ * @ApiResponses (value = {
+ *    @ApiResponse(code=200, response="get_actions_result")
+ *    @ApiResponse(code=404 message="File not found") 
+ * })
+ **/
       read_only::get_actions_result read_only::get_actions( const read_only::get_actions_params& params )const {
          edump((params));
         auto& chain = history->chain_plug->chain();
@@ -441,7 +461,21 @@ namespace eosio {
         return result;
       }
 
-
+/**
+ * swagger annotations
+ * 
+ * @POST
+ * @Path("/get_transaction")
+ * @ApiOperation(value="Retrieves the transaction for the passed in transaction."
+ *               notes="")
+ * @ApiImplicitParams({
+ *    @ApiImplicitParam(name="get transactions", paramType="body" description="Select transactions from the blockchain" required=true dataType="get_transaction_params")
+ * })
+ * @ApiResponses (value = {
+ *    @ApiResponse(code=200, response="get_transaction_result")
+ *    @ApiResponse(code=404 message="File not found") 
+ * })
+ **/
       read_only::get_transaction_result read_only::get_transaction( const read_only::get_transaction_params& p )const {
          auto& chain = history->chain_plug->chain();
          const auto abi_serializer_max_time = history->chain_plug->get_abi_serializer_max_time();
@@ -564,6 +598,21 @@ namespace eosio {
          return result;
       }
 
+/**
+ * swagger annotations
+ * 
+ * @POST
+ * @Path("/get_key_accounts")
+ * @ApiOperation(value="Retrieves the account names for the passed in key."
+ *               notes="")
+ * @ApiImplicitParams({
+ *    @ApiImplicitParam(name="get accounts", paramType="body" description="Select accounts from the blockchain" required=true dataType="get_key_accounts_params")
+ * })
+ * @ApiResponses (value = {
+ *    @ApiResponse(code=200, response="get_key_accounts_results")
+ *    @ApiResponse(code=404 message="File not found") 
+ * })
+ **/
       read_only::get_key_accounts_results read_only::get_key_accounts(const get_key_accounts_params& params) const {
          std::set<account_name> accounts;
          const auto& db = history->chain_plug->chain().db();
@@ -574,6 +623,21 @@ namespace eosio {
          return {vector<account_name>(accounts.begin(), accounts.end())};
       }
 
+/**
+ * swagger annotations
+ * 
+ * @POST
+ * @Path("/get_controlled_accounts")
+ * @ApiOperation(value="Retrieves the account names for accounts controlled by the passed in account name."
+ *               notes="")
+ * @ApiImplicitParams({
+ *    @ApiImplicitParam(name="get accounts", paramType="body" description="Select accounts from the blockchain" required=true dataType="get_controlled_accounts_params")
+ * })
+ * @ApiResponses (value = {
+ *    @ApiResponse(code=200, response="get_controlled_accounts_results")
+ *    @ApiResponse(code=404 message="File not found") 
+ * })
+ **/
       read_only::get_controlled_accounts_results read_only::get_controlled_accounts(const get_controlled_accounts_params& params) const {
          std::set<account_name> accounts;
          const auto& db = history->chain_plug->chain().db();
@@ -585,7 +649,5 @@ namespace eosio {
       }
 
    } /// history_apis
-
-
 
 } /// namespace eosio
