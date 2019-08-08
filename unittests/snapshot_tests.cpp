@@ -4,6 +4,7 @@
  */
 #include <sstream>
 
+#include <eosio/chain/global_property_object.hpp>
 #include <eosio/chain/snapshot.hpp>
 #include <eosio/testing/tester.hpp>
 
@@ -107,6 +108,8 @@ struct variant_snapshot_suite {
    static snapshot_t load_from_file() {
       return Snapshot::json();
    }
+
+   static std::string extension() { return ".json" ;}
 };
 
 struct buffered_snapshot_suite {
@@ -154,6 +157,8 @@ struct buffered_snapshot_suite {
    static snapshot_t load_from_file() {
       return Snapshot::bin();
    }
+
+   static std::string extension() { return ".bin" ;}
 };
 
 BOOST_AUTO_TEST_SUITE(snapshot_tests)
@@ -382,6 +387,39 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_compatible_versions, SNAPSHOT_SUITE, snapshot
 
       BOOST_REQUIRE_EQUAL(v2_integrity_value.str(), latest_integrity_value.str());
    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_pending_schedule_snapshot, SNAPSHOT_SUITE, snapshot_suites)
+{
+   tester chain(setup_policy::full);
+   chain.produce_blocks();
+   chain.create_account(N(snapshot));
+   chain.produce_blocks();
+   auto res = chain.set_producers( {N(snapshot)} );
+   chain.produce_blocks();
+   chain.control->abort_block();
+   ///< End deterministic code to generate blockchain for comparison
+   auto base_integrity_value = chain.control->calculate_integrity_hash();
+
+   const auto& gpo = chain.control->get_global_properties();
+
+   static_assert(chain_snapshot_header::minimum_compatible_version <= 2, "version 2 unit test is no longer needed.  Please clean up data files");
+   auto v2 = SNAPSHOT_SUITE::template load_from_file<snapshots::snap_v2_prod_sched>();
+   snapshotted_tester v2_tester(chain.get_config(), SNAPSHOT_SUITE::get_reader(v2), 0);
+   auto v2_integrity_value = v2_tester.control->calculate_integrity_hash();
+   BOOST_REQUIRE_EQUAL(v2_integrity_value.str(), base_integrity_value.str());
+
+   // produce block
+   auto new_block = chain.produce_block();
+
+   // undo the auto-pending from tester
+   chain.control->abort_block();
+
+   auto integrity_value = chain.control->calculate_integrity_hash();
+
+   // push that block to all sub testers and validate the integrity of the database after it.
+   v2_tester.push_block(new_block);
+   BOOST_REQUIRE_EQUAL(integrity_value.str(), v2_tester.control->calculate_integrity_hash().str());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
