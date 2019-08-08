@@ -4,6 +4,7 @@
  */
 #include <sstream>
 
+#include <eosio/chain/global_property_object.hpp>
 #include <eosio/chain/snapshot.hpp>
 #include <eosio/testing/tester.hpp>
 
@@ -102,6 +103,7 @@ struct variant_snapshot_suite {
       return std::make_shared<reader>(buffer);
    }
 
+   static std::string extension() { return ".json" ;}
 };
 
 struct buffered_snapshot_suite {
@@ -145,6 +147,7 @@ struct buffered_snapshot_suite {
       return std::make_shared<reader>(std::make_shared<read_storage_t>(buffer));
    }
 
+   static std::string extension() { return ".bin" ;}
 };
 
 BOOST_AUTO_TEST_SUITE(snapshot_tests)
@@ -250,6 +253,45 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_replay_over_snapshot, SNAPSHOT_SUITE, snapsho
    // replay the block log from the snapshot child, from the snapshot
    snapshotted_tester replay_chain(chain.get_config(), SNAPSHOT_SUITE::get_reader(snapshot), 2, 1);
    BOOST_REQUIRE_EQUAL(expected_post_integrity_hash.str(), snap_chain.control->calculate_integrity_hash().str());
+}
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_pending_schedule_snapshot, SNAPSHOT_SUITE, snapshot_suites)
+{
+   tester chain(setup_policy::full);
+   chain.produce_blocks
+   chain.create_account(N(snapshot));
+   chain.produce_blocks();
+   auto res = chain.set_producers( {N(snapshot)} );
+   chain.produce_blocks();
+   chain.control->abort_block();
+
+   const auto& gpo = chain.control->get_global_properties();
+
+   // create a new snapshot child
+   auto writer = SNAPSHOT_SUITE::get_writer();
+   chain.control->write_snapshot(writer);
+   auto snapshot = SNAPSHOT_SUITE::finalize(writer);
+
+   auto snap_out = std::ofstream("snapshot_file" + SNAPSHOT_SUITE::extension(), (std::ios::out | std::ios::binary));
+   snap_out << snapshot;
+   snap_out.flush();
+   snap_out.close();
+
+// create a new child at this snapshot
+   snapshotted_tester sub_tester(chain.get_config(), SNAPSHOT_SUITE::get_reader(snapshot), 0);
+
+   // produce block
+   auto new_block = chain.produce_block();
+
+   // undo the auto-pending from tester
+   chain.control->abort_block();
+
+   auto integrity_value = chain.control->calculate_integrity_hash();
+
+   // push that block to all sub testers and validate the integrity of the database after it.
+   sub_tester.push_block(new_block);
+   BOOST_REQUIRE_EQUAL(integrity_value.str(), sub_tester.control->calculate_integrity_hash().str());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
