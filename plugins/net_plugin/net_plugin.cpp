@@ -94,10 +94,14 @@ namespace eosio {
       block_id_type id;
       uint32_t      block_num = 0;
       uint32_t      connection_id = 0;
-      bool          have_block = false; // true if we have received the block, false if only received id notification
+      bool          have_block = false; // true if we have received the block and it has been validated, false if only received id notification
+      std::shared_ptr<vector<char>> cached_block_net_message;
+
+      bool has_cached_block_net_message()const { return !!cached_block_net_message; }
    };
 
    struct by_block_id;
+   struct by_cached_blk;
 
    typedef multi_index_container<
       eosio::peer_block_state,
@@ -113,6 +117,13 @@ namespace eosio {
                composite_key< peer_block_state,
                      member<peer_block_state, block_id_type, &eosio::peer_block_state::id>,
                      member<peer_block_state, bool, &eosio::peer_block_state::have_block>
+               >,
+               composite_key_compare< sha256_less, std::greater<bool> >
+         >,
+         ordered_non_unique< tag<by_cached_blk>,
+               composite_key< peer_block_state,
+                     member<peer_block_state, block_id_type, &eosio::peer_block_state::id>,
+                     const_mem_fun<peer_block_state, bool, &eosio::peer_block_state::has_cached_block_net_message>
                >,
                composite_key_compare< sha256_less, std::greater<bool> >
          >,
@@ -189,6 +200,9 @@ namespace eosio {
 
       void retry_fetch(const connection_ptr& conn);
 
+      bool add_cached_block_message( const block_id_type& blkid, uint32_t connection_id,
+                                     std::shared_ptr<vector<char>> msg );
+      std::shared_ptr<vector<char>> get_cached_block_message( const block_id_type& blkid ) const;
       bool add_peer_block( const block_id_type& blkid, uint32_t connection_id );
       bool add_peer_block_id( const block_id_type& blkid, uint32_t connection_id );
       bool peer_has_block(const block_id_type& blkid, uint32_t connection_id) const;
@@ -1776,6 +1790,35 @@ namespace eosio {
    //------------------------------------------------------------------------
 
    // thread safe
+
+   bool dispatch_manager::add_cached_block_message( const block_id_type& blkid, uint32_t connection_id,
+                                                    std::shared_ptr<vector<char>> msg )
+   {
+      std::lock_guard<std::mutex> g( blk_state_mtx );
+      auto bptr = blk_state.get<by_id>().find( std::make_tuple( connection_id, std::ref( blkid )));
+      bool added = (bptr == blk_state.end());
+      if( added ) {
+         // have block is false because even though we have block it is not validated yet
+         blk_state.insert( {blkid, block_header::num_from_id( blkid ), connection_id, false, std::move( msg )} );
+      } else if( !bptr->cached_block_net_message ) {
+         blk_state.modify( bptr, [msg=std::move(msg)]( auto& pb ) mutable {
+            pb.cached_block_net_message = std::move(msg);
+         });
+      }
+      return added;
+   }
+
+   std::shared_ptr<vector<char>> dispatch_manager::get_cached_block_message( const block_id_type& blkid ) const {
+      std::lock_guard<std::mutex> g(blk_state_mtx);
+      // by_cached_blk orders first by those with cached_block_net_message
+      const auto& index = blk_state.get<by_cached_blk>();
+      auto blk_itr = index.find( blkid );
+      if( blk_itr != index.end() ) {
+         return blk_itr->cached_block_net_message;
+      }
+      return {};
+   }
+
    bool dispatch_manager::add_peer_block( const block_id_type& blkid, uint32_t connection_id) {
       std::lock_guard<std::mutex> g( blk_state_mtx );
       auto bptr = blk_state.get<by_id>().find( std::make_tuple( connection_id, std::ref( blkid )));
@@ -1912,7 +1955,10 @@ namespace eosio {
       } );
 
       if( !have_connection ) return;
-      std::shared_ptr<std::vector<char>> send_buffer = create_send_buffer( bs->block );
+      std::shared_ptr<std::vector<char>> send_buffer = get_cached_block_message( bs->id );
+      if ( !send_buffer ) {
+         send_buffer = create_send_buffer( bs->block );
+      }
 
       for_each_block_connection( [this, bs, send_buffer]( auto& cp ) {
          if( !cp->current() ) {
@@ -2410,11 +2456,13 @@ namespace eosio {
                return true;
             }
 
-            auto ds = pending_message_buffer.create_datastream();
-            fc::raw::unpack( ds, which ); // throw away
             shared_ptr<signed_block> ptr = std::make_shared<signed_block>();
-            fc::raw::unpack( ds, *ptr );
+            fc::raw::unpack( peek_ds, *ptr );
             handle_message( blk_id, std::move( ptr ) );
+
+            auto send_buffer = std::make_shared<vector<char>>(message_length);
+            pending_message_buffer.read( send_buffer->data(), message_length );
+            my_impl->dispatcher->add_cached_block_message( blk_id, connection_id, std::move( send_buffer ) );
 
          } else if( which == packed_transaction_which ) {
             auto ds = pending_message_buffer.create_datastream();
