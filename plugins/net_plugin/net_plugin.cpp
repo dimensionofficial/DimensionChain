@@ -2462,8 +2462,18 @@ namespace eosio {
             fc::raw::unpack( sb_peek_ds, *ptr );
             handle_message( blk_id, std::move( ptr ) );
 
-            auto send_buffer = std::make_shared<vector<char>>(message_length);
-            pending_message_buffer.read( send_buffer->data(), message_length );
+            // save already packed signed_block net_message including message header
+            const uint32_t payload_size = message_length;
+            const char* const header = reinterpret_cast<const char* const>(&payload_size); // avoid variable size encoding of uint32_t
+            constexpr size_t header_size = sizeof( payload_size );
+            static_assert( header_size == message_header_size, "invalid message_header_size" );
+            const size_t buffer_size = header_size + payload_size;
+
+            auto send_buffer = std::make_shared<vector<char>>( buffer_size );
+            fc::datastream<char*> ds( send_buffer->data(), buffer_size );
+            ds.write( header, header_size );
+            ds.write( pending_message_buffer.read_ptr(), message_length );
+
             my_impl->dispatcher->add_cached_block_message( blk_id, connection_id, std::move( send_buffer ) );
 
          } else if( which == packed_transaction_which ) {
