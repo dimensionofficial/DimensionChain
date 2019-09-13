@@ -2456,8 +2456,10 @@ namespace eosio {
                return true;
             }
 
+            auto sb_peek_ds = pending_message_buffer.create_peek_datastream();
+            fc::raw::unpack( sb_peek_ds, which ); // throw away
             shared_ptr<signed_block> ptr = std::make_shared<signed_block>();
-            fc::raw::unpack( peek_ds, *ptr );
+            fc::raw::unpack( sb_peek_ds, *ptr );
             handle_message( blk_id, std::move( ptr ) );
 
             auto send_buffer = std::make_shared<vector<char>>(message_length);
