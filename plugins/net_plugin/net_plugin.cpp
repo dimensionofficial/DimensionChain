@@ -2473,6 +2473,7 @@ namespace eosio {
             fc::datastream<char*> ds( send_buffer->data(), buffer_size );
             ds.write( header, header_size );
             ds.write( pending_message_buffer.read_ptr(), message_length );
+            pending_message_buffer.advance_read_ptr( message_length );
 
             my_impl->dispatcher->add_cached_block_message( blk_id, connection_id, std::move( send_buffer ) );
 
