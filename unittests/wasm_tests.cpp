@@ -756,27 +756,40 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
    create_accounts( {N(nested)} );
    produce_block();
 
+   std::cout << "##### CHECKPOINT 1";;
    // nested loops
    {
       std::stringstream ss;
+      std::cout << "##### CHECKPOINT 1.1";
       ss << "(module (export \"apply\" (func $apply)) (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
+      std::cout << "##### CHECKPOINT 1.2";
       for(unsigned int i = 0; i < 1023; ++i)
          ss << "(loop (drop (i32.const " <<  i << "))";
+      std::cout << "##### CHECKPOINT 1.3";
       for(unsigned int i = 0; i < 1023; ++i)
          ss << ")";
+      std::cout << "##### CHECKPOINT 1.4";
       ss << "))";
+      std::cout << "##### CHECKPOINT 1.5";
       set_code(N(nested), ss.str().c_str());
    }
+   std::cout << "##### CHECKPOINT 2";
    {
       std::stringstream ss;
+      std::cout << "##### CHECKPOINT 2.1";
       ss << "(module (export \"apply\" (func $apply)) (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
+      std::cout << "##### CHECKPOINT 2.2";
       for(unsigned int i = 0; i < 1024; ++i)
          ss << "(loop (drop (i32.const " <<  i << "))";
+      std::cout << "##### CHECKPOINT 2.3";
       for(unsigned int i = 0; i < 1024; ++i)
          ss << ")";
+      std::cout << "##### CHECKPOINT 2.4";
       ss << "))";
+      std::cout << "##### CHECKPOINT 2.5";
       BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), eosio::chain::wasm_execution_error);
    }
+   std::cout << "##### CHECKPOINT 3";
 
    // nested blocks
    {
@@ -789,6 +802,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       ss << "))";
       set_code(N(nested), ss.str().c_str());
    }
+   std::cout << "##### CHECKPOINT 4";
    {
       std::stringstream ss;
       ss << "(module (export \"apply\" (func $apply)) (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
@@ -799,6 +813,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       ss << "))";
       BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), eosio::chain::wasm_execution_error);
    }
+   std::cout << "##### CHECKPOINT 5";
    // nested ifs
    {
       std::stringstream ss;
@@ -810,6 +825,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       ss << "))";
       set_code(N(nested), ss.str().c_str());
    }
+   std::cout << "##### CHECKPOINT 6";
    {
       std::stringstream ss;
       ss << "(module (export \"apply\" (func $apply)) (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
@@ -820,6 +836,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       ss << "))";
       BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), eosio::chain::wasm_execution_error);
    }
+   std::cout << "##### CHECKPOINT 7";
    // mixed nested
    {
       std::stringstream ss;
@@ -837,6 +854,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       ss << "))";
       set_code(N(nested), ss.str().c_str());
    }
+   std::cout << "##### CHECKPOINT 8";
    {
       std::stringstream ss;
       ss << "(module (export \"apply\" (func $apply)) (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
@@ -853,7 +871,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       ss << "))";
       BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), eosio::chain::wasm_execution_error);
    }
-
+   std::cout << "##### CHECKPOINT 9";
 } FC_LOG_AND_RETHROW()
 
 
