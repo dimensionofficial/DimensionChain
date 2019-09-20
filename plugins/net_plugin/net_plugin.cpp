@@ -714,9 +714,9 @@ namespace eosio {
       : blk_state(),
         trx_state(),
         peer_requested(),
-        server_ioc( my_impl->thread_pool->get_executor() ),
+        server_ioc( app().get_io_service() ),
         strand( app().get_io_service() ),
-        socket( std::make_shared<tcp::socket>( my_impl->thread_pool->get_executor() ) ),
+        socket( std::make_shared<tcp::socket>( app().get_io_service() ) ),
         node_id(),
         last_handshake_recv(),
         last_handshake_sent(),
@@ -740,7 +740,7 @@ namespace eosio {
       : blk_state(),
         trx_state(),
         peer_requested(),
-        server_ioc( my_impl->thread_pool->get_executor() ),
+        server_ioc( app().get_io_service() ),
         strand( app().get_io_service() ),
         socket( s ),
         node_id(),
@@ -767,8 +767,8 @@ namespace eosio {
    void connection::initialize() {
       auto *rnd = node_id.data();
       rnd[0] = 0;
-      response_expected.reset(new boost::asio::steady_timer( my_impl->thread_pool->get_executor() ));
-      read_delay_timer.reset(new boost::asio::steady_timer( my_impl->thread_pool->get_executor() ));
+      response_expected.reset(new boost::asio::steady_timer( app().get_io_service() ));
+      read_delay_timer.reset(new boost::asio::steady_timer( app().get_io_service() ));
    }
 
    bool connection::connected() {
@@ -792,7 +792,7 @@ namespace eosio {
    void connection::close() {
       if(socket) {
          socket->close();
-         socket.reset( new tcp::socket( my_impl->thread_pool->get_executor() ) );
+         socket.reset( new tcp::socket( app().get_io_service() ) );
       }
       else {
          fc_wlog( logger, "no socket to close!" );
@@ -1877,7 +1877,7 @@ namespace eosio {
          return;
       }
 
-      shared_ptr<tcp::resolver> resolver = std::make_shared<tcp::resolver>( my_impl->thread_pool->get_executor() );
+      shared_ptr<tcp::resolver> resolver = std::make_shared<tcp::resolver>( app().get_io_service() );
       c->strand.post( [this, c, resolver{std::move(resolver)}](){
          auto colon = c->peer_addr.find(':');
          auto host = c->peer_addr.substr( 0, colon );
@@ -1952,7 +1952,7 @@ namespace eosio {
 
 
    void net_plugin_impl::start_listen_loop() {
-      auto socket = std::make_shared<tcp::socket>( my_impl->thread_pool->get_executor() );
+      auto socket = std::make_shared<tcp::socket>( app().get_io_service() );
       acceptor->async_accept( *socket, [socket, this]( boost::system::error_code ec ) {
             app().post( priority::low, [socket, this, ec]() {
             if( !ec ) {
@@ -2683,8 +2683,8 @@ namespace eosio {
    }
 
    void net_plugin_impl::start_monitors() {
-      connector_check.reset(new boost::asio::steady_timer( my_impl->thread_pool->get_executor() ));
-      transaction_check.reset(new boost::asio::steady_timer( my_impl->thread_pool->get_executor() ));
+      connector_check.reset(new boost::asio::steady_timer( app().get_io_service() ));
+      transaction_check.reset(new boost::asio::steady_timer( app().get_io_service() ));
       start_conn_timer(connector_period, std::weak_ptr<connection>());
       start_txn_timer();
    }
@@ -3041,7 +3041,7 @@ namespace eosio {
       // currently thread_pool only used for server_ioc
       my->thread_pool.emplace( "net", my->thread_pool_size );
 
-      shared_ptr<tcp::resolver> resolver = std::make_shared<tcp::resolver>( my_impl->thread_pool->get_executor() );
+      shared_ptr<tcp::resolver> resolver = std::make_shared<tcp::resolver>( app().get_io_service() );
       if( my->p2p_address.size() > 0 ) {
          auto host = my->p2p_address.substr( 0, my->p2p_address.find( ':' ));
          auto port = my->p2p_address.substr( host.size() + 1, my->p2p_address.size());
@@ -3050,7 +3050,7 @@ namespace eosio {
 
          my->listen_endpoint = *resolver->resolve( query );
 
-         my->acceptor.reset( new tcp::acceptor( my_impl->thread_pool->get_executor() ) );
+         my->acceptor.reset( new tcp::acceptor( app().get_io_service() ) );
 
          if( !my->p2p_server_address.empty() ) {
             my->p2p_address = my->p2p_server_address;
@@ -3088,7 +3088,7 @@ namespace eosio {
          cc.accepted_block.connect(  boost::bind(&net_plugin_impl::accepted_block, my.get(), _1));
       }
 
-      my->keepalive_timer.reset( new boost::asio::steady_timer( my->thread_pool->get_executor() ) );
+      my->keepalive_timer.reset( new boost::asio::steady_timer( app().get_io_service() ) );
       my->ticker();
 
       my->incoming_transaction_ack_subscription = app().get_channel<channels::transaction_ack>().subscribe(boost::bind(&net_plugin_impl::transaction_ack, my.get(), _1));
