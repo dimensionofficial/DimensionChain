@@ -2184,7 +2184,6 @@ namespace eosio {
             block_id_type blk_id = bh.id();
             uint32_t blk_num = bh.block_num();
             if( cc.fetch_block_by_id( blk_id ) ) {
-               sync_master->recv_block( conn, blk_id, blk_num );
                conn->pending_message_buffer.advance_read_ptr( message_length );
                return true;
             }
