@@ -1588,9 +1588,8 @@ namespace eosio {
       fc_dlog(logger, "got block ${bn} from ${p}",("bn",blk_num)("p",c->peer_name()));
       if (state == lib_catchup) {
          if (blk_num != sync_next_expected_num) {
-            fc_wlog( logger, "expected block ${ne} but got ${bn}, closing connection: ${p}",
+            fc_wlog( logger, "expected block ${ne} but got ${bn}, from connection: ${p}",
                      ("ne",sync_next_expected_num)("bn",blk_num)("p",c->peer_name()) );
-            my_impl->close(c);
             return;
          }
          sync_next_expected_num = blk_num + 1;
@@ -2184,6 +2183,7 @@ namespace eosio {
             block_id_type blk_id = bh.id();
             uint32_t blk_num = bh.block_num();
             if( cc.fetch_block_by_id( blk_id ) ) {
+               sync_master->recv_block( conn, blk_id, blk_num );
                conn->pending_message_buffer.advance_read_ptr( message_length );
                return true;
             }
