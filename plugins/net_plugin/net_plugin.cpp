@@ -1292,7 +1292,7 @@ namespace eosio {
       fc_dlog(logger, "last req = ${req}, last recv = ${recv} known = ${known} our head = ${head}",
               ("req",sync_last_requested_num)("recv",sync_next_expected_num)("known",sync_known_lib_num)("head",chain_plug->chain().fork_db_pending_head_block_num()));
 
-      return( ( sync_last_requested_num != 0 && sync_last_requested_num < sync_known_lib_num) ||
+      return( sync_last_requested_num < sync_known_lib_num ||
               chain_plug->chain().fork_db_pending_head_block_num() < sync_last_requested_num );
    }
 
