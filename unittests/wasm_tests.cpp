@@ -1865,6 +1865,35 @@ BOOST_FIXTURE_TEST_CASE( varuint_memory_flags_tests, TESTER ) try {
    produce_block();
 } FC_LOG_AND_RETHROW()
 
+BOOST_AUTO_TEST_CASE( many_setcode ) try {
+   fc::temp_directory tempdir;
+   TESTER t{tempdir, [](auto& cfg) { cfg.state_size = 1024*1024*128; }, true};
+   t.produce_block();
+   for(int i = 1; i < 32768; ++i) {
+      if (i % 1024 == 0 || i > 7168) std::cout << i << std::endl;
+      name n = name(i*1024);
+      t.create_accounts({n});
+      t.produce_block();
+      {
+         std::stringstream ss;
+         ss << "(module (func (export \"apply\") (param i64 i64 i64) (drop (i32.const " << i << "))))";
+         t.set_code(n, ss.str().c_str());
+      }
+      t.produce_block();
+
+      signed_transaction trx;
+      action act;
+      act.account = n;
+      act.name = N();
+      act.authorization = vector<permission_level>{{n,config::active_name}};
+      trx.actions.push_back(act);
+      t.set_transaction_headers(trx);
+      trx.sign(t.get_private_key( n, "active" ), t.control->get_chain_id());
+      t.push_transaction(trx);
+      t.produce_block();
+   }
+} FC_LOG_AND_RETHROW()
+
 // TODO: Update to use eos-vm once merged
 BOOST_AUTO_TEST_CASE( code_size )  try {
    using namespace IR;
