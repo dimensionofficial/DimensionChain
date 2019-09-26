@@ -2036,21 +2036,14 @@ namespace eosio {
             }
          };
 
-         if( conn->buffer_queue.write_queue_size() > def_max_write_queue_size ||
-             conn->trx_in_progress_size > def_max_trx_in_progress_size )
+         if( conn->buffer_queue.write_queue_size() > def_max_write_queue_size )
          {
             // too much queued up, reschedule
-            if( conn->buffer_queue.write_queue_size() > def_max_write_queue_size ) {
-               peer_wlog( conn, "write_queue full ${s} bytes", ("s", conn->buffer_queue.write_queue_size()) );
-            } else {
-               peer_wlog( conn, "max trx in progress ${s} bytes", ("s", conn->trx_in_progress_size) );
-            }
-            if( conn->buffer_queue.write_queue_size() > 2*def_max_write_queue_size ||
-                conn->trx_in_progress_size > 2*def_max_trx_in_progress_size )
+            peer_wlog( conn, "write_queue full ${s} bytes", ("s", conn->buffer_queue.write_queue_size()) );
+            if( conn->buffer_queue.write_queue_size() > 2*def_max_write_queue_size )
             {
                fc_elog( logger, "queues over full, giving up on connection ${p}", ("p", conn->peer_name()) );
                fc_elog( logger, "  write_queue ${s} bytes", ("s", conn->buffer_queue.write_queue_size()) );
-               fc_elog( logger, "  max trx in progress ${s} bytes", ("s", conn->trx_in_progress_size) );
                my_impl->close( conn );
                return;
             }
@@ -2533,6 +2526,10 @@ namespace eosio {
       if( sync_master->is_active(c) ) {
          fc_dlog(logger, "got a txn during sync - dropping");
          return;
+      }
+
+      if( c->trx_in_progress_size > def_max_trx_in_progress_size ) {
+         fc_elog( logger, "Max trx in progress ${s} bytes, dropping trx", ("s", c->trx_in_progress_size) );
       }
 
       auto ptrx = std::make_shared<transaction_metadata>( trx );
