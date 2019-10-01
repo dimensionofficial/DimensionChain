@@ -452,6 +452,7 @@ namespace eosio { namespace chain {
       my->close();
 
       block_log::construct_index(my->block_file.get_file_path(), my->index_file.get_file_path());
+      ilog("\nReconstructing Block Log Index complete!");
 
       my->reopen();
    } // construct_index
@@ -777,6 +778,12 @@ namespace eosio { namespace chain {
 	 
       if (_start_of_buffer_position > _current_position_in_file) {
          update_buffer();
+         if (_start_of_buffer_position < _current_position_in_file) {
+            std::cerr << '.';
+         }
+         else {
+            std::cerr << '*';
+         }
       }
 
       char* buf = _buffer_ptr.get();
