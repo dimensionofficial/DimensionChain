@@ -149,7 +149,7 @@ public:
             const auto& pt = receipt.trx.get<packed_transaction>();
             auto itr = queue.get<by_trx_id>().find( pt.id() );
             if( itr != queue.get<by_trx_id>().end() ) {
-               if( itr->trx_type != trx_enum_type::persisted ) {
+               if( itr->trx_type != trx_enum_type::persisted && itr->trx_type != trx_enum_type::incoming ) {
                   idx.erase( itr );
                }
             }
