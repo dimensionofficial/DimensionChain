@@ -3042,13 +3042,13 @@ namespace eosio {
       boost::asio::post( my_impl->thread_pool->get_executor(), [this, results]() {
          const auto& id = results.second->id();
          if (results.first) {
-            fc_dlog( logger, "signaled NACK, trx-id = ${id} : ${why}", ("id", id)( "why", results.first->to_detail_string() ) );
+            fc_ilog( logger, "signaled NACK, trx-id = ${id} : ${why}", ("id", id)( "why", results.first->to_detail_string() ) );
 
             uint32_t head_blk_num = 0;
             std::tie( std::ignore, head_blk_num, std::ignore, std::ignore, std::ignore, std::ignore ) = get_chain_info();
             dispatcher->rejected_transaction(results.second->packed_trx(), head_blk_num);
          } else {
-            fc_dlog( logger, "signaled ACK, trx-id = ${id}", ("id", id) );
+            fc_ilog( logger, "signaled ACK, trx-id = ${id}", ("id", id) );
             dispatcher->bcast_transaction(*results.second->packed_trx());
          }
       });
