@@ -2804,11 +2804,11 @@ namespace eosio {
             [weak, trx](const static_variant<fc::exception_ptr, transaction_trace_ptr>& result) mutable {
          // next (this lambda) called from application thread
          if (result.contains<fc::exception_ptr>()) {
-            fc_dlog( logger, "bad packed_transaction : ${m}", ("m", result.get<fc::exception_ptr>()->what()) );
+            fc_elog( logger, "bad packed_transaction : ${m}", ("m", result.get<fc::exception_ptr>()->what()) );
          } else {
             const transaction_trace_ptr& trace = result.get<transaction_trace_ptr>();
             if( !trace->except ) {
-               fc_dlog( logger, "chain accepted transaction, bcast ${id}", ("id", trace->id) );
+               fc_ilog( logger, "chain accepted transaction, bcast ${id}", ("id", trace->id) );
             } else {
                fc_elog( logger, "bad packed_transaction : ${m}", ("m", trace->except->what()));
             }
