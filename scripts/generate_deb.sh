@@ -38,7 +38,6 @@ echo "Package: ${PROJECT}
 Version: ${VERSION_NO_SUFFIX}-${RELEASE}
 Section: devel
 Priority: optional
-Depends: libc6, libgcc1, ${RELEASE_SPECIFIC_DEPS}, libstdc++6, libtinfo5, zlib1g, libusb-1.0-0, libcurl3-gnutls
 Architecture: amd64
 Homepage: ${URL}
 Maintainer: ${EMAIL}
@@ -56,3 +55,20 @@ tar -xzvf ${NAME}.tar.gz -C ${PROJECT} || exit 1
 dpkg-deb --build ${PROJECT} || exit 1
 mv ${PROJECT}.deb ${NAME}.deb || exit 1
 rm -r ${PROJECT} || exit 1
+
+# for testing conan
+mkdir -p conan-libs/DEBIAN
+chmod 0755 conan-libs/DEBIAN || exit 1
+echo "Package: conan-libs
+Version: ${VERSION_NO_SUFFIX}-${RELEASE}
+Section: devel
+Priority: optional
+Architecture: amd64
+Homepage: ${URL}
+Maintainer: ${EMAIL}
+Description: ${DESC}" &> conan-libs/DEBIAN/control
+cat conan-libs/DEBIAN/control
+
+tar -zxvf conan-libs.tar.gz -C conan-libs || exit 1
+dpkg-deb --build conan-libs || exit 1
+rm -r conan-libs
