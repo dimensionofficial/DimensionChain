@@ -31,7 +31,7 @@ for FILE in $(ls $CICD_DIR/platforms/$PLATFORM_TYPE); do
     ( [[ $SKIP_MAC == true ]] && [[ $FILE =~ 'macos' ]] ) && continue
     ( [[ $SKIP_LINUX == true ]] && [[ ! $FILE =~ 'macos' ]] ) && continue
     # use pinned or unpinned, not both sets of platform files
-    if [[ $PINNED == false || $UNPINNED == true || $USE_CONAN == true ]]; then
+    if [[ $PINNED == false || $UNPINNED == true ]]; then
         export SKIP_CONTRACT_BUILDER=${SKIP_CONTRACT_BUILDER:-true}
         export SKIP_PACKAGE_BUILDER=${SKIP_PACKAGE_BUILDER:-true}
     fi
