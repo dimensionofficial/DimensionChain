@@ -71,5 +71,5 @@ cat conan-libs/DEBIAN/control
 
 tar -zxvf conan-libs.tar.gz -C conan-libs || exit 1
 dpkg-deb --build conan-libs || exit 1
-mv conan-libs.deb conan-libs-ubuntu-18.04_amd64.deb
+mv conan-libs.deb conan-libs_amd64.deb
 rm -r conan-libs
