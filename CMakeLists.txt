@@ -48,10 +48,10 @@ if("${USE_CONAN}" STREQUAL "true" OR "$ENV{USE_CONAN}" STREQUAL "true")
       URL https://api.bintray.com/conan/bincrafters/public-conan)
 
   # Handle Pinned/Unpinned Builds
-  set( CONANFILE "conanfile-unpinned.txt" )
-  if("$ENV{PINNED}" STREQUAL "true" OR "$ENV{UNPINNED}" STREQUAL "false")
-    set( CONANFILE "conanfile-pinned.txt" )
-  endif()
+  set( CONANFILE "conanfile-pinned.txt" )
+  # if("$ENV{PINNED}" STREQUAL "true" OR "$ENV{UNPINNED}" STREQUAL "false")
+  #   set( CONANFILE "conanfile-pinned.txt" )
+  # endif()
 
   conan_cmake_run(CONANFILE .conan/${CONANFILE}
     BASIC_SETUP
