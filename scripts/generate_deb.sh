@@ -52,7 +52,7 @@ export SSUBPREFIX
 . ./generate_tarball.sh ${NAME}
 echo "Unpacking tarball: ${NAME}.tar.gz..."
 tar -xzvf ${NAME}.tar.gz -C ${PROJECT} || exit 1
-# tar -zxvf conan-libs.tar.gz -C ${PROJECT} || exit 1  # for testing conan
+tar -zxvf conan-libs.tar.gz -C ${PROJECT} || exit 1  # for testing conan
 dpkg-deb --build ${PROJECT} || exit 1
 mv ${PROJECT}.deb ${NAME}.deb || exit 1
 rm -r ${PROJECT} || exit 1

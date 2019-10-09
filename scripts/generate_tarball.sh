@@ -43,7 +43,7 @@ tar -cvzf $NAME.tar.gz ./${PREFIX}/* || exit 1
 rm -r ${PREFIX} || exit 1
 
 # for testing conan
-# mkdir -p root/.conan || exit 1
-# cp -R ${BUILD_DIR}/conan/* root/.conan || exit 1
-# tar -cvzf conan-libs.tar.gz root || exit 1
-# rm -r root || exit 1
+mkdir -p root/.conan || exit 1
+cp -R ${BUILD_DIR}/conan/* root/.conan || exit 1
+tar -cvzf conan-libs.tar.gz root || exit 1
+rm -r root || exit 1
