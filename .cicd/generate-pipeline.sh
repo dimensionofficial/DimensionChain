@@ -31,10 +31,10 @@ for FILE in $(ls $CICD_DIR/platforms/$PLATFORM_TYPE); do
     ( [[ $SKIP_MAC == true ]] && [[ $FILE =~ 'macos' ]] ) && continue
     ( [[ $SKIP_LINUX == true ]] && [[ ! $FILE =~ 'macos' ]] ) && continue
     # use pinned or unpinned, not both sets of platform files
-    if [[ $PINNED == false || $UNPINNED == true ]]; then
-        export SKIP_CONTRACT_BUILDER=${SKIP_CONTRACT_BUILDER:-true}
-        export SKIP_PACKAGE_BUILDER=${SKIP_PACKAGE_BUILDER:-true}
-    fi
+    # if [[ $PINNED == false || $UNPINNED == true ]]; then
+    #     export SKIP_CONTRACT_BUILDER=${SKIP_CONTRACT_BUILDER:-true}
+    #     export SKIP_PACKAGE_BUILDER=${SKIP_PACKAGE_BUILDER:-true}
+    # fi
     export FILE_NAME="$(echo $FILE | awk '{split($0,a,/\.(d|s)/); print a[1] }')"
     export PLATFORM_NAME="$(echo $FILE_NAME | cut -d- -f1 | sed 's/os/OS/g')"
     export PLATFORM_NAME_UPCASE="$(echo $PLATFORM_NAME | tr a-z A-Z)"
