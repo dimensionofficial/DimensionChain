@@ -354,49 +354,6 @@ EOF
         echo ''
     fi
 done
-# trigger eosio-lrt post pr
-# if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB == "true" ]]; then
-#     if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
-    cat <<EOF
-  - label: ":pipeline: Trigger Long Running Tests"
-    trigger: "eosio-lrt"
-    depends_on: "$(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_UPCASE)_$(echo "$PLATFORM_JSON" | jq -r .VERSION_MAJOR)$(echo "$PLATFORM_JSON" | jq -r .VERSION_MINOR)_BUILD"
-    async: true
-    build:
-      message: "${BUILDKITE_MESSAGE}"
-      commit: "${BUILDKITE_COMMIT}"
-      branch: "${BUILDKITE_BRANCH}"
-      env:
-        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
-        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
-        SKIP_BUILD: "true"
-        PINNED: "${PINNED}"
-        UNPINNED: "${UNPINNED}"
-
-EOF
-#     fi
-# fi
-# trigger multiversion post pr
-# if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB = "true" ]]; then
-#     if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
-    cat <<EOF
-  - label: ":pipeline: Trigger Multiversion Test"
-    trigger: "eos-multiversion-tests"
-    depends_on: "$(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_UPCASE)_$(echo "$PLATFORM_JSON" | jq -r .VERSION_MAJOR)$(echo "$PLATFORM_JSON" | jq -r .VERSION_MINOR)_BUILD"
-    async: true
-    build:
-      message: "${BUILDKITE_MESSAGE}"
-      commit: "${BUILDKITE_COMMIT}"
-      branch: "${BUILDKITE_BRANCH}"
-      env:
-        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
-        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
-
-EOF
-#     fi
-# fi
 # pipeline tail
 cat <<EOF
     # packaging
@@ -480,6 +437,52 @@ cat <<EOF
     timeout: ${TIMEOUT:-30}
     skip: ${SKIP_CONTRACT_BUILDER}${SKIP_LINUX}
 
+EOF
+echo '  - wait'
+echo ''
+# trigger eosio-lrt post pr
+# if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB == "true" ]]; then
+#     if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
+    cat <<EOF
+  - label: ":pipeline: Trigger Long Running Tests"
+    trigger: "eosio-lrt"
+    async: true
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"
+      env:
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+        SKIP_BUILD: "true"
+        PINNED: "${PINNED}"
+        UNPINNED: "${UNPINNED}"
+
+EOF
+#     fi
+# fi
+# trigger multiversion post pr
+# if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB = "true" ]]; then
+#     if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
+    cat <<EOF
+  - label: ":pipeline: Trigger Multiversion Test"
+    trigger: "eos-multiversion-tests"
+    async: true
+    build:
+      message: "${BUILDKITE_MESSAGE}"
+      commit: "${BUILDKITE_COMMIT}"
+      branch: "${BUILDKITE_BRANCH}"
+      env:
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
+
+EOF
+#     fi
+# fi
+
+cat <<EOF
   - wait:
     continue_on_failure: true
 
