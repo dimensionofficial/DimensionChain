@@ -209,7 +209,7 @@ EOF
             - 'registry_2'
           pre-execute-sleep: 5
     timeout: ${TIMEOUT:-60}
-    agents: "queue=mac-anka-node-fleet"
+    agents: "queue=mac-anka-large-node-fleet"
     skip: \${SKIP_$(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_UPCASE)_$(echo "$PLATFORM_JSON" | jq -r .VERSION_MAJOR)$(echo "$PLATFORM_JSON" | jq -r .VERSION_MINOR)}${SKIP_UNIT_TESTS}
 
 EOF
