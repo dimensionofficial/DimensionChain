@@ -64,9 +64,9 @@ if [[ ! -z ${BUILDKITE_TRIGGERED_FROM_BUILD_ID} ]]; then
 fi
 export BUILD_SOURCE=${BUILD_SOURCE:---build \$BUILDKITE_BUILD_ID}
 # set trigger_job if master/release/develop branch and webhook
-# if [[ $BUILDKITE_BRANCH =~ ^release/[0-9]+\.[0-9]+\.x$ || $BUILDKITE_BRANCH =~ ^master$ || $BUILDKITE_BRANCH =~ ^develop$ ]]; then
-#     [[ $BUILDKITE_SOURCE == 'webhook' ]] && export TRIGGER_JOB=true
-# fi
+if [[ $BUILDKITE_BRANCH =~ ^release/[0-9]+\.[0-9]+\.x$ || $BUILDKITE_BRANCH =~ ^master$ || $BUILDKITE_BRANCH =~ ^develop$ ]]; then
+    [[ $BUILDKITE_SOURCE == 'webhook' ]] && export TRIGGER_JOB=true
+fi
 oIFS="$IFS"
 IFS=$''
 nIFS=$IFS # fix array splitting (\n won't work)
@@ -441,8 +441,8 @@ EOF
 echo '  - wait'
 echo ''
 # trigger eosio-lrt post pr
-# if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB == "true" ]]; then
-#     if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
+if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB == "true" ]]; then
+    if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
     cat <<EOF
   - label: ":pipeline: Trigger Long Running Tests"
     trigger: "eosio-lrt"
@@ -460,11 +460,11 @@ echo ''
         UNPINNED: "${UNPINNED}"
 
 EOF
-#     fi
-# fi
+    fi
+fi
 # trigger multiversion post pr
-# if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB = "true" ]]; then
-#     if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
+if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB = "true" ]]; then
+    if ( [[ ! $PINNED == false || $UNPINNED == true ]] ); then
     cat <<EOF
   - label: ":pipeline: Trigger Multiversion Test"
     trigger: "eos-multiversion-tests"
@@ -479,8 +479,8 @@ EOF
         BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
 
 EOF
-#     fi
-# fi
+    fi
+fi
 
 cat <<EOF
   - wait:
