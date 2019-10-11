@@ -61,4 +61,14 @@ namespace eosio { namespace chain {
 
    }
 
+   fc::optional<additional_block_signatures_extension> signed_block::get_additional_block_signatures(const flat_multimap<uint16_t, block_extension>& exts) {
+      //ilog("REMOVE get_additional_block_signatures");
+      if ( exts.count(additional_block_signatures_extension::extension_id()) > 0 ) {
+         //ilog("REMOVE get_additional_block_signatures 1");
+         return exts.lower_bound(additional_block_signatures_extension::extension_id())->second.get<additional_block_signatures_extension>();
+      }
+      //ilog("REMOVE get_additional_block_signatures 2");
+
+      return {};
+   }
 } } /// namespace eosio::chain

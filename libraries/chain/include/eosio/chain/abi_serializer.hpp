@@ -367,6 +367,8 @@ namespace impl {
 
       /**
        * overload of to_variant_object for actions
+       *
+       * This matches the FC_REFLECT for this type, but this is provided to extract the contents of act.data
        * @tparam Resolver
        * @param act
        * @param resolver
@@ -375,6 +377,9 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const action& act, Resolver resolver, abi_traverse_context& ctx )
       {
+         ilog("REMOVE resolver 0");
+         static_assert(fc::reflector<action>::total_member_count == 4);
+         //ilog("REMOVE action");
          auto h = ctx.enter_scope();
          mutable_variant_object mvo;
          mvo("account", act.account);
@@ -382,33 +387,51 @@ namespace impl {
          mvo("authorization", act.authorization);
 
          try {
+            ilog("REMOVE resolver 1");
             auto abi = resolver(act.account);
+            ilog("REMOVE resolver 2");
             if (abi.valid()) {
+               ilog("REMOVE resolver 3");
                auto type = abi->get_action_type(act.name);
+               ilog("REMOVE resolver 4");
                if (!type.empty()) {
+                  ilog("REMOVE resolver 5");
                   try {
                      binary_to_variant_context _ctx(*abi, ctx, type);
+                     ilog("REMOVE resolver 6");
                      _ctx.short_path = true; // Just to be safe while avoiding the complexity of threading an override boolean all over the place
                      mvo( "data", abi->_binary_to_variant( type, act.data, _ctx ));
+                     ilog("REMOVE resolver 7");
                      mvo("hex_data", act.data);
+                     ilog("REMOVE resolver 8");
                   } catch(...) {
+                     ilog("REMOVE resolver 9");
                      // any failure to serialize data, then leave as not serailzed
                      mvo("data", act.data);
+                     ilog("REMOVE resolver 10");
                   }
                } else {
+                  ilog("REMOVE resolver 11");
                   mvo("data", act.data);
+                  ilog("REMOVE resolver 12");
                }
             } else {
+               ilog("REMOVE resolver 13");
                mvo("data", act.data);
+               ilog("REMOVE resolver 14");
             }
          } catch(...) {
+            ilog("REMOVE resolver 15");
             mvo("data", act.data);
+            ilog("REMOVE resolver 16");
          }
          out(name, std::move(mvo));
       }
 
       /**
        * overload of to_variant_object for packed_transaction
+       *
+       * This matches the FC_REFLECT for this type, but this is provided to allow extracting the contents of ptrx.transaction
        * @tparam Resolver
        * @param act
        * @param resolver
@@ -417,6 +440,8 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const packed_transaction& ptrx, Resolver resolver, abi_traverse_context& ctx )
       {
+         static_assert(fc::reflector<packed_transaction>::total_member_count == 4);
+         //ilog("REMOVE packed_transaction");
          auto h = ctx.enter_scope();
          mutable_variant_object mvo;
          auto trx = ptrx.get_transaction();
@@ -427,6 +452,76 @@ namespace impl {
          mvo("context_free_data", ptrx.get_context_free_data());
          mvo("packed_trx", ptrx.get_packed_transaction());
          add(mvo, "transaction", trx, resolver, ctx);
+
+         out(name, std::move(mvo));
+      }
+
+      /**
+       * overload of to_variant_object for transaction
+       *
+       * This matches the FC_REFLECT for this type, but this is provided to allow extracting the contents of trx.transaction_extensions
+       */
+      template<typename Resolver>
+      static void add( mutable_variant_object &out, const char* name, const transaction& trx, Resolver resolver, abi_traverse_context& ctx )
+      {
+         static_assert(fc::reflector<transaction>::total_member_count == 9);
+         auto h = ctx.enter_scope();
+         mutable_variant_object mvo;
+         mvo("expiration", trx.expiration);
+         mvo("ref_block_num", trx.ref_block_num);
+         mvo("ref_block_prefix", trx.ref_block_prefix);
+         mvo("max_net_usage_words", trx.max_net_usage_words);
+         mvo("max_cpu_usage_ms", trx.max_cpu_usage_ms);
+         mvo("delay_sec", trx.delay_sec);
+         mvo("context_free_actions", trx.context_free_actions);
+         mvo("actions", trx.actions);
+
+         //ilog("REMOVE transaction add transactions extensions");
+         // process contents of block.transaction_extensions
+         auto exts = trx.validate_and_extract_extensions();
+         auto deferred_transaction_generation = transaction::get_deferred_transaction_generation_context(exts);
+         mvo("deferred_transaction_generation", deferred_transaction_generation);
+
+         out(name, std::move(mvo));
+      }
+
+      /**
+       * overload of to_variant_object for signed_block
+       *
+       * This matches the FC_REFLECT for this type, but this is provided to allow extracting the contents of
+       * block.header_extensions and block.block_extensions
+       */
+      template<typename Resolver>
+      static void add( mutable_variant_object &out, const char* name, const signed_block& block, Resolver resolver, abi_traverse_context& ctx )
+      {
+         static_assert(fc::reflector<signed_block>::total_member_count == 12);
+         auto h = ctx.enter_scope();
+         mutable_variant_object mvo;
+         mvo("timestamp", block.timestamp);
+         mvo("producer", block.producer);
+         mvo("confirmed", block.confirmed);
+         mvo("previous", block.previous);
+         mvo("transaction_mroot", block.transaction_mroot);
+         mvo("action_mroot", block.action_mroot);
+         mvo("schedule_version", block.schedule_version);
+         mvo("new_producers", block.new_producers);
+         //ilog("REMOVE signed_block add header extensions");
+
+         // process contents of block.header_extensions
+         flat_multimap<uint16_t, block_header_extension> header_exts = block.validate_and_extract_header_extensions();
+         auto new_protocol_features = signed_block::get_new_protocol_feature_activation(header_exts);
+         mvo("new_protocol_features", new_protocol_features);
+         const auto new_producer_schedule = block_header::get_new_producer_schedule(header_exts);
+         mvo("new_producer_schedule", new_producer_schedule);
+
+         mvo("producer_signature", block.producer_signature);
+         add(mvo, "transactions", block.transactions, resolver, ctx);
+
+         //ilog("REMOVE signed_block add block extensions");
+         // process contents of block.block_extensions
+         auto block_exts = block.validate_and_extract_extensions();
+         auto additional_signatures = signed_block::get_additional_block_signatures(block_exts);
+         mvo("additional_signatures", additional_signatures);
 
          out(name, std::move(mvo));
       }

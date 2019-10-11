@@ -1812,7 +1812,9 @@ struct controller_impl {
    { try {
       try {
          const signed_block_ptr& b = bsp->block;
+         //ilog("REMOVE apply_block get_new_protocol_feature_activations");
          const auto& new_protocol_feature_activations = bsp->get_new_protocol_feature_activations();
+         //ilog("REMOVE apply_block get_new_protocol_feature_activations done");
 
          auto producer_block_id = b->id();
          start_block( b->timestamp, b->confirmed, new_protocol_feature_activations, s, producer_block_id);

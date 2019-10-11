@@ -357,6 +357,55 @@ class Utils:
         return rtn
 
     @staticmethod
+    def summarizeBlockLog(blockLog):
+        summary = "["
+        lastProducer = None
+        prodCount = 0
+        lastScheduleVer = -1
+        lastBlockNum = None
+        for block in blockLog:
+            producer = block["producer"]
+            blockNum = block["block_num"]
+            scheduleVer = block["schedule_version"]
+            if lastBlockNum is not None and lastBlockNum + 1 != blockNum:
+                summary += "(!"
+                missingBlockNum = lastBlockNum + 1
+                last = None
+                while missingBlockNum != blockNum:
+                    last = missingBlockNum if missingBlockNum > lastBlockNum + 1 else None
+                    if last is None:
+                        summary += missingBlockNum
+                if last is not None:
+                    summary += "-" + missingBlockNum
+                summary += ")"
+
+            def prodHeader(blockNum, producer):
+                return " " + str(blockNum) + "-(" + producer + ")"
+
+            def versionHeader(version):
+                return "<" + str(version) + ">"
+
+            if producer != lastProducer:
+                if prodCount < 12:
+                    summary += "*"
+                prodCount = 1
+                if lastProducer is None:
+                    summary += versionHeader(scheduleVer)
+                summary += prodHeader(blockNum,producer)
+                lastProducer = producer
+
+            prodCount += 1
+
+            if prodCount > 12:
+                summary += prodHeader(blockNum,producer)
+                prodCount = 1
+
+            lastScheduleVer = scheduleVer
+
+        summary += "]"
+        return summary
+
+    @staticmethod
     def compare(obj1,obj2,context):
         type1=type(obj1)
         type2=type(obj2)

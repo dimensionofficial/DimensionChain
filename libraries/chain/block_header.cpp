@@ -64,4 +64,26 @@ namespace eosio { namespace chain {
       return results;
    }
 
+   fc::optional<producer_schedule_change_extension> block_header::get_new_producer_schedule(const flat_multimap<uint16_t, block_header_extension>& exts) {
+      //ilog("REMOVE  get_new_producer_schedule");
+      if ( exts.count(producer_schedule_change_extension::extension_id()) > 0 ) {
+         //ilog("REMOVE  get_new_producer_schedule 1");
+         return exts.lower_bound(producer_schedule_change_extension::extension_id())->second.get<producer_schedule_change_extension>();
+      }
+      //ilog("REMOVE  get_new_producer_schedule 2");
+
+      return {};
+   }
+
+   fc::optional<protocol_feature_activation> block_header::get_new_protocol_feature_activation(const flat_multimap<uint16_t, block_header_extension>& exts) {
+      //ilog("REMOVE  get_new_protocol_feature_activation");
+      if( exts.count(protocol_feature_activation::extension_id()) > 0 ) {
+         //ilog("REMOVE  get_new_protocol_feature_activation 1");
+         return exts.lower_bound(protocol_feature_activation::extension_id())->second.get<protocol_feature_activation>().protocol_features;
+      }
+      //ilog("REMOVE  get_new_protocol_feature_activation 2");
+
+      return {};
+   }
+
 } }

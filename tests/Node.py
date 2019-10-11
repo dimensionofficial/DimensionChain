@@ -1493,12 +1493,14 @@ class Node(object):
     def getSupportedProtocolFeatureDict(self, excludeDisabled=False, excludeUnactivatable=False):
         protocolFeatureDigestDict = {}
         supportedProtocolFeatures = self.getSupportedProtocolFeatures(excludeDisabled, excludeUnactivatable)
+        Utils.Print("supportedProtocolFeatures=%s" % (json.dumps(supportedProtocolFeatures)))
         for protocolFeature in supportedProtocolFeatures:
             for spec in protocolFeature["specification"]:
                 if (spec["name"] == "builtin_feature_codename"):
                     codename = spec["value"]
                     protocolFeatureDigestDict[codename] = protocolFeature
                     break
+        Utils.Print("protocolFeatureDigestDict=%s" % (json.dumps(protocolFeatureDigestDict)))
         return protocolFeatureDigestDict
 
     def waitForHeadToAdvance(self, timeout=6):

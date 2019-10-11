@@ -93,6 +93,7 @@ BOOST_FIXTURE_TEST_CASE( get_block_with_invalid_abi, TESTER ) try {
 
    // block should be decoded successfully
    std::string block_str = json::to_pretty_string(plugin.get_block(param));
+   ilog("block_str: ${b}",("b",block_str));
    BOOST_TEST(block_str.find("procassert") != std::string::npos);
    BOOST_TEST(block_str.find("condition") != std::string::npos);
    BOOST_TEST(block_str.find("Should Not Assert!") != std::string::npos);

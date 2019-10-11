@@ -265,6 +265,7 @@ try:
         blockNum+=1
         blockProducer=node.getBlockProducerByNum(blockNum)
 
+    Utils.errorExit("STOPPING EARLY")
 
     # ***   Identify what the production cycle is   ***
 
@@ -488,12 +489,13 @@ try:
 finally:
     TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killEosInstances=killEosInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
+    testSuccessful=False
     if not testSuccessful:
         Print(Utils.FileDivider)
         Print("Compare Blocklog")
         cluster.compareBlockLogs()
         Print(Utils.FileDivider)
-        Print("Compare Blocklog")
+        Print("Print Blocklog")
         cluster.printBlockLog()
         Print(Utils.FileDivider)
 

@@ -70,5 +70,10 @@ try:
 finally:
     TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
+    Utils.Print(Utils.FileDivider)
+    Utils.Print("Print Blocklog")
+    cluster.printBlockLog()
+    Utils.Print(Utils.FileDivider)
+
 exitCode = 0 if testSuccessful else 1
 exit(exitCode)

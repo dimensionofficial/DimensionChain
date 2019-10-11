@@ -19,14 +19,17 @@ namespace eosio { namespace chain {
                                                             const protocol_feature_set& pfs,
                                                             const protocol_feature_activation_set_ptr& pfa )
       {
+         //ilog("REMOVE extract_additional_signatures");
          auto exts = b->validate_and_extract_extensions();
+         //ilog("REMOVE extract_additional_signatures 1");
 
-         if ( exts.count(additional_sigs_eid) > 0 ) {
-            auto& additional_sigs = exts.lower_bound(additional_sigs_eid)->second.get<additional_block_signatures_extension>();
-
-            return std::move(additional_sigs.signatures);
+         auto additional_sigs = signed_block::get_additional_block_signatures(exts);
+         if ( additional_sigs ) {
+            //ilog("REMOVE extract_additional_signatures yes");
+            return std::move(additional_sigs->signatures);
          }
 
+         //ilog("REMOVE extract_additional_signatures nope");
          return {};
       }
 

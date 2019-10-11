@@ -353,29 +353,31 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
    trx_context.validate_referenced_accounts( trx, enforce_actor_whitelist_blacklist );
 
    if( control.is_builtin_activated( builtin_protocol_feature_t::no_duplicate_deferred_id ) ) {
+      ilog("REMOVE validate_and_extract_extensions");
       auto exts = trx.validate_and_extract_extensions();
-      if( exts.size() > 0 ) {
-         auto itr = exts.lower_bound( deferred_transaction_generation_context::extension_id() );
-
-         EOS_ASSERT( exts.size() == 1 && itr != exts.end(), invalid_transaction_extension,
-                     "only the deferred_transaction_generation_context extension is currently supported for deferred transactions"
+      ilog("REMOVE validate_and_extract_extensions 1");
+      auto context = transaction::get_deferred_transaction_generation_context(exts);
+      if( context ) {
+         ilog("REMOVE get_deferred_transaction_generation_context use");
+         EOS_ASSERT(context->sender == receiver, ill_formed_deferred_transaction_generation_context,
+                    "deferred transaction generaction context contains mismatching sender",
+                    ("expected", receiver)("actual", context->sender)
          );
-
-         const auto& context = itr->second.get<deferred_transaction_generation_context>();
-
-         EOS_ASSERT( context.sender == receiver, ill_formed_deferred_transaction_generation_context,
-                     "deferred transaction generaction context contains mismatching sender",
-                     ("expected", receiver)("actual", context.sender)
+         EOS_ASSERT(context->sender_id == sender_id, ill_formed_deferred_transaction_generation_context,
+                    "deferred transaction generaction context contains mismatching sender_id",
+                    ("expected", sender_id)("actual", context->sender_id)
          );
-         EOS_ASSERT( context.sender_id == sender_id, ill_formed_deferred_transaction_generation_context,
-                     "deferred transaction generaction context contains mismatching sender_id",
-                     ("expected", sender_id)("actual", context.sender_id)
+         EOS_ASSERT(context->sender_trx_id == trx_context.id, ill_formed_deferred_transaction_generation_context,
+                    "deferred transaction generaction context contains mismatching sender_trx_id",
+                    ("expected", trx_context.id)("actual", context->sender_trx_id)
          );
-         EOS_ASSERT( context.sender_trx_id == trx_context.id, ill_formed_deferred_transaction_generation_context,
-                     "deferred transaction generaction context contains mismatching sender_trx_id",
-                     ("expected", trx_context.id)("actual", context.sender_trx_id)
-         );
+         ilog("REMOVE get_deferred_transaction_generation_context done");
       } else {
+         ilog("REMOVE get_deferred_transaction_generation_context don't use size: ${s}",("s",exts.size()));
+         EOS_ASSERT(exts.size() == 0, invalid_transaction_extension,
+                    "only the deferred_transaction_generation_context extension is currently supported for deferred transactions"
+         );
+         ilog("REMOVE get_deferred_transaction_generation_context don't use done");
          emplace_extension(
             trx.transaction_extensions,
             deferred_transaction_generation_context::extension_id(),
