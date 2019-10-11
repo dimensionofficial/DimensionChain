@@ -201,6 +201,8 @@ EOF
           inherit-environment-vars: true
           vm-name: ${MOJAVE_ANKA_TEMPLATE_NAME}
           vm-registry-tag: "${MOJAVE_ANKA_TAG_BASE}::$(echo "$PLATFORM_JSON" | jq -r .HASHED_IMAGE_TAG)"
+          modify-cpu: 12
+          modify-ram: 24
           always-pull: true
           debug: true
           wait-network: true
