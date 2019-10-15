@@ -201,8 +201,6 @@ EOF
           inherit-environment-vars: true
           vm-name: ${MOJAVE_ANKA_TEMPLATE_NAME}
           vm-registry-tag: "${MOJAVE_ANKA_TAG_BASE}::$(echo "$PLATFORM_JSON" | jq -r .HASHED_IMAGE_TAG)"
-          modify-cpu: 12
-          modify-ram: 24
           always-pull: true
           debug: true
           wait-network: true
@@ -211,7 +209,7 @@ EOF
             - 'registry_2'
           pre-execute-sleep: 5
     timeout: ${TIMEOUT:-60}
-    agents: "queue=mac-anka-large-node-fleet"
+    agents: "queue=mac-anka-node-fleet"
     skip: \${SKIP_$(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_UPCASE)_$(echo "$PLATFORM_JSON" | jq -r .VERSION_MAJOR)$(echo "$PLATFORM_JSON" | jq -r .VERSION_MINOR)}${SKIP_UNIT_TESTS}
 
 EOF
