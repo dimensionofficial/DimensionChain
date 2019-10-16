@@ -68,7 +68,7 @@ cd cpython
 git checkout v3.8.0
 ./configure --with-openssl=$(brew --prefix openssl) --enable-optimizations --with-lto --prefix=/usr/local/cpython/
 make -j$(getconf _NPROCESSORS_ONLN)
-make install
+sudo make install
 cd ..
 # install mongoDB
 cd ~
