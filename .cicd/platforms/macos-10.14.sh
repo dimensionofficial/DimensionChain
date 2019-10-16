@@ -61,6 +61,15 @@ else
     # install boost from brew
     brew install boost || true
 fi
+# install cpython from source
+cd ~
+git clone https://github.com/python/cpython
+cd cpython
+git checkout v3.8.0
+./configure --with-openssl=$(brew --prefix openssl) --enable-optimizations --with-lto --prefix=/usr/local/cpython/
+make -j$(getconf _NPROCESSORS_ONLN)
+make install
+cd ..
 # install mongoDB
 cd ~
 curl -OL https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.6.3.tgz
