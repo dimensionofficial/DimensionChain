@@ -3045,7 +3045,7 @@ int main( int argc, char** argv ) {
          actions.emplace_back( create_setcode(name(account), code_bytes ) );
          if ( shouldSend ) {
             std::cerr << localized("Setting Code...") << std::endl;
-            send_actions(std::move(actions), packed_transaction::compression_type::zlib);
+            send_actions(std::move(actions), packed_transaction::compression_type::none);
          }
       } else {
          std::cerr << localized("Skipping set code because the new code is the same as the existing code") << std::endl;
@@ -3093,7 +3093,7 @@ int main( int argc, char** argv ) {
          } EOS_RETHROW_EXCEPTIONS(abi_type_exception,  "Fail to parse ABI JSON")
          if ( shouldSend ) {
             std::cerr << localized("Setting ABI...") << std::endl;
-            send_actions(std::move(actions), packed_transaction::compression_type::zlib);
+            send_actions(std::move(actions), packed_transaction::compression_type::none);
          }
       } else {
          std::cerr << localized("Skipping set abi because the new abi is the same as the existing abi") << std::endl;
@@ -3110,7 +3110,7 @@ int main( int argc, char** argv ) {
       set_abi_callback();
       if (actions.size()) {
          std::cerr << localized("Publishing contract...") << std::endl;
-         send_actions(std::move(actions), packed_transaction::compression_type::zlib);
+         send_actions(std::move(actions), packed_transaction::compression_type::none);
       } else {
          std::cout << "no transaction is sent" << std::endl;
       }
