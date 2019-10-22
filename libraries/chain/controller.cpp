@@ -1411,8 +1411,6 @@ struct controller_impl {
    {
       static code_timer ct_all("push_transaction", 10001);
       ct_all.start();
-      static code_timer ct_st("start", 10014);
-      ct_st.start();
 
       EOS_ASSERT(deadline != fc::time_point(), transaction_exception, "deadline cannot be uninitialized");
 
@@ -1434,7 +1432,6 @@ struct controller_impl {
 
          const signed_transaction& trn = trx->packed_trx()->get_signed_transaction();
          transaction_checktime_timer trx_timer(timer);
-         ct_st.stop();
          static code_timer ct("trx_context", 10002);
          ct.start();
          transaction_context trx_context(self, trn, trx->id(), std::move(trx_timer), start);
@@ -1484,10 +1481,7 @@ struct controller_impl {
             ct_final.start();
             trx_context.finalize(); // Automatically rounds up network and CPU usage in trace and bills payers if successful
             ct_final.stop();
-            static code_timer ct_mr("make_brp", 10011);
-            ct_mr.start();
             auto restore = make_block_restore_point();
-            ct_mr.stop();
 
             static code_timer ct_receipt("receipt", 10015);
             ct_receipt.start();
@@ -1506,13 +1500,8 @@ struct controller_impl {
             }
             ct_receipt.stop();
 
-            static code_timer ct_ma("move_append", 10012);
-            ct_ma.start();
             fc::move_append(pending->_block_stage.get<building_block>()._actions, move(trx_context.executed));
-            ct_ma.stop();
 
-            static code_timer ct_emit("emit", 10013);
-            ct_emit.start();
             // call the accept signal but only once for this transaction
             if (!trx->accepted) {
                trx->accepted = true;
@@ -1520,7 +1509,6 @@ struct controller_impl {
             }
 
             emit(self.applied_transaction, std::tie(trace, trn));
-            ct_emit.stop();
 
             static code_timer ct2("squash", 10005);
             ct2.start();

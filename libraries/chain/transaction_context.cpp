@@ -19,6 +19,32 @@
 
 #include <chrono>
 
+namespace{
+class code_timer {
+public:
+   explicit code_timer( std::string msg, size_t period = 1 )
+         : period_mod( period ), log_msg( std::move( msg ) ) {}
+
+   void start() {
+      begin = fc::time_point::now();
+   }
+
+   void stop() {
+      total += (fc::time_point::now() - begin);
+      if( ++count % period_mod == 0 ) {
+         elog( "${s}: ${t}us", ("s", log_msg)("t", total.count()/count) );
+      }
+   }
+
+private:
+   size_t           count = 0;
+   size_t           period_mod = 0;
+   std::string      log_msg;
+   fc::time_point   begin;
+   fc::microseconds total;
+};
+}
+
 namespace eosio { namespace chain {
 
    transaction_checktime_timer::transaction_checktime_timer(platform_timer& timer)
@@ -58,14 +84,20 @@ namespace eosio { namespace chain {
    ,net_usage(trace->net_usage)
    ,pseudo_start(s)
    {
+      static code_timer ct_all("transaction_context", 10021);
+      ct_all.start();
+      static code_timer ct_s("start_undo", 10022);
+      ct_s.start();
       if (!c.skip_db_sessions()) {
          undo_session = c.mutable_db().start_undo_session(true);
       }
+      ct_s.stop();
       trace->id = id;
       trace->block_num = c.head_block_num() + 1;
       trace->block_time = c.pending_block_time();
       trace->producer_block_id = c.pending_producer_block_id();
       executed.reserve( trx.total_actions() );
+      ct_all.stop();
    }
 
    void transaction_context::disallow_transaction_extensions( const char* error_msg )const {
