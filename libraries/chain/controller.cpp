@@ -1471,9 +1471,15 @@ struct controller_impl {
                );
                t.stop();
             }
-            trx_context.exec();
-            trx_context.finalize(); // Automatically rounds up network and CPU usage in trace and bills payers if successful
+            static code_timer ct_exec("trx_context.exec()", 10009);
 
+            ct_exec.start();
+            trx_context.exec();
+            ct_exec.stop();
+            static code_timer ct_final("trx_context.finalize()", 10008);
+            ct_final.start();
+            trx_context.finalize(); // Automatically rounds up network and CPU usage in trace and bills payers if successful
+            ct_final.stop();
             auto restore = make_block_restore_point();
 
             if (!trx->implicit) {
@@ -1512,6 +1518,7 @@ struct controller_impl {
             }
             ct2.stop();
 
+            ct_all.stop();
             return trace;
          } catch( const disallowed_transaction_extensions_bad_block_exception& ) {
             throw;
