@@ -43,9 +43,14 @@ namespace{
      }
 
      void stop() {
-        total += (fc::time_point::now() - begin);
+        fc::microseconds t = fc::time_point::now() - begin;
+        total += t;
+        if( t > max ) max = t;
+        if( t < min ) min = t;
         if( ++count % period_mod == 0 ) {
-           elog( "${s}: ${t}us", ("s", log_msg)("t", total.count()/count) );
+           elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us",
+                 ("s", log_msg)("avg", total.count()/count)("min", min)("max", max) );
+           total = fc::microseconds();
         }
      }
 
@@ -55,6 +60,8 @@ namespace{
      std::string      log_msg;
      fc::time_point   begin;
      fc::microseconds total;
+     fc::microseconds min = fc::microseconds::maximum();
+     fc::microseconds max;
   };
 }
 

@@ -30,9 +30,14 @@ public:
    }
 
    void stop() {
-      total += (fc::time_point::now() - begin);
+      fc::microseconds t = fc::time_point::now() - begin;
+      total += t;
+      if( t > max ) max = t;
+      if( t < min ) min = t;
       if( ++count % period_mod == 0 ) {
-         elog( "${s}: ${t}us", ("s", log_msg)("t", total.count()/count) );
+         elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us",
+               ("s", log_msg)("avg", total.count()/count)("min", min)("max", max) );
+         total = fc::microseconds();
       }
    }
 
@@ -42,6 +47,8 @@ private:
    std::string      log_msg;
    fc::time_point   begin;
    fc::microseconds total;
+   fc::microseconds min = fc::microseconds::maximum();
+   fc::microseconds max;
 };
 }
 
@@ -233,6 +240,8 @@ namespace eosio { namespace chain {
                                                  uint64_t packed_trx_prunable_size,
                                                  bool skip_recording )
    {
+      static code_timer ct_all("init_for_input_trx", 10029);
+      ct_all.start();
       if( trx.transaction_extensions.size() > 0 ) {
          disallow_transaction_extensions( "no transaction extensions supported yet for input transactions" );
       }
@@ -261,14 +270,24 @@ namespace eosio { namespace chain {
 
       published = control.pending_block_time();
       is_input = true;
+      static code_timer ct_val("init_for_input_trx", 10028);
+      ct_val.start();
       if (!control.skip_trx_checks()) {
          control.validate_expiration(trx);
          control.validate_tapos(trx);
          validate_referenced_accounts( trx, enforce_whiteblacklist && control.is_producing_block() );
       }
+      ct_val.stop();
+      static code_timer ct_i("init", 10027);
+      ct_i.start();
       init( initial_net_usage);
+      ct_i.stop();
+      static code_timer ct_r("record", 10026);
+      ct_r.start();
       if (!skip_recording)
          record_transaction( id, trx.expiration ); /// checks for dupes
+      ct_r.stop();
+      ct_all.stop();
    }
 
    void transaction_context::init_for_deferred_trx( fc::time_point p )
