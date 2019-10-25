@@ -50,6 +50,7 @@ namespace{
         if( ++count % period_mod == 0 ) {
            elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us",
                  ("s", log_msg)("avg", total.count()/count)("min", min)("max", max) );
+           count = 0;
            total = fc::microseconds();
            min = fc::microseconds::maximum();
            max = fc::microseconds();
