@@ -33,10 +33,11 @@ public:
       fc::microseconds t = fc::time_point::now() - begin;
       total += t;
       if( t > max ) max = t;
+      if( t > tmax ) tmax = t;
       if( t < min ) min = t;
       if( ++count % period_mod == 0 ) {
-         elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us",
-               ("s", log_msg)("avg", total.count()/count)("min", min)("max", max) );
+         elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us, tmax: ${tmax}",
+               ("s", log_msg)("avg", total.count()/count)("min", min)("max", max)("tmax", tmax) );
          count = 0;
          total = fc::microseconds();
          min = fc::microseconds::maximum();
@@ -52,6 +53,7 @@ private:
    fc::microseconds total;
    fc::microseconds min = fc::microseconds::maximum();
    fc::microseconds max;
+   fc::microseconds tmax;
 };
 }
 
@@ -273,7 +275,7 @@ namespace eosio { namespace chain {
 
       published = control.pending_block_time();
       is_input = true;
-      static code_timer ct_val("init_for_input_trx", 10028);
+      static code_timer ct_val("validate", 10028);
       ct_val.start();
       if (!control.skip_trx_checks()) {
          control.validate_expiration(trx);
@@ -660,10 +662,13 @@ namespace eosio { namespace chain {
 
    void transaction_context::record_transaction( const transaction_id_type& id, fc::time_point_sec expire ) {
       try {
+         static code_timer ct("create", 10021);
+         ct.start();
           control.mutable_db().create<transaction_object>([&](transaction_object& transaction) {
               transaction.trx_id = id;
               transaction.expiration = expire;
           });
+          ct.stop();
       } catch( const boost::interprocess::bad_alloc& ) {
          throw;
       } catch ( ... ) {
