@@ -38,6 +38,8 @@ public:
          elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us",
                ("s", log_msg)("avg", total.count()/count)("min", min)("max", max) );
          total = fc::microseconds();
+         min = fc::microseconds::maximum();
+         max = fc::microseconds();
       }
    }
 
