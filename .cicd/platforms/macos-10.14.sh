@@ -89,3 +89,5 @@ make -j $(getconf _NPROCESSORS_ONLN) VERBOSE=1
 sudo make install
 cd ../..
 rm -f mongo-cxx-driver-r3.4.0.tar.gz
+brew install nvm
+nvm install --lts=dubnium
