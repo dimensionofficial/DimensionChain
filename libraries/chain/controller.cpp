@@ -1502,7 +1502,10 @@ struct controller_impl {
                                                     ? transaction_receipt::executed
                                                     : transaction_receipt::delayed;
                trace->receipt = push_receipt(*trx->packed_trx(), s, trx_context.billed_cpu_time_us, trace->net_usage);
+               static code_timer ct_add("emplace trx", 10016);
+               ct_add.start();
                pending->_block_stage.get<building_block>()._pending_trx_metas.emplace_back(trx);
+               ct_add.stop();
             } else {
                transaction_receipt_header r;
                r.status = transaction_receipt::executed;
