@@ -36,9 +36,8 @@ public:
       if( t > tmax ) tmax = t;
       if( t < min ) min = t;
       if( ++count % period_mod == 0 ) {
-         elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us, tmax: ${tmax}",
-               ("s", log_msg)("avg", total.count()/count)("min", min)("max", max)("tmax", tmax) );
-         count = 0;
+         elog( "${s}: avg: ${avg}us, min: ${min}us, max: ${max}us, tmax: ${tmax}us, count: ${c}",
+               ("s", log_msg)("avg", total.count()/period_mod)("min", min)("max", max)("tmax", tmax)("c", count) );
          total = fc::microseconds();
          min = fc::microseconds::maximum();
          max = fc::microseconds();
