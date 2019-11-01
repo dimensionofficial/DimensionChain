@@ -3,7 +3,7 @@ ENV VERSION 1
 # install dependencies.
 RUN yum update -y && \
     yum install -y epel-release && \
-    yum --enablerepo=extras install -y which git autoconf automake libtool make bzip2 \
+    yum install -y which git autoconf automake libtool make bzip2 \
     graphviz bzip2-devel openssl-devel gmp-devel libicu-devel \
     python2-devel python36-devel gcc gcc-c++ file libusbx-devel \
     libcurl-devel vim-common jq
