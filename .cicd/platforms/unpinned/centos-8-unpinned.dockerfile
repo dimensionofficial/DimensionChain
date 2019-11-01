@@ -5,8 +5,8 @@ RUN yum update -y && \
     yum install -y epel-release && \
     yum install -y which git autoconf automake libtool make bzip2 \
     graphviz bzip2-devel openssl-devel gmp-devel libicu-devel \
-    python2-devel python36-devel gcc gcc-c++ file libusbx-devel \
-    libcurl-devel vim-common jq
+    python2-devel python36-devel clang file libusbx-devel \
+    libcurl-devel vim-common jq llvm-static llvm-devel
 # build cmake.
 RUN curl -LO https://cmake.org/files/v3.13/cmake-3.13.2.tar.gz && \
     tar -xzf cmake-3.13.2.tar.gz && \
