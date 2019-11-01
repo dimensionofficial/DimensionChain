@@ -67,6 +67,19 @@ private:
    fc::microseconds max;
    fc::microseconds tmax;
 };
+
+template<typename T>
+void move_append(std::deque<T> &dest, std::deque<T>&& src ) {
+   if (src.empty()) {
+      return;
+   } else if (dest.empty()) {
+      dest = std::move(src);
+   } else {
+      dest.insert(std::end(dest), std::make_move_iterator(std::begin(src)), std::make_move_iterator(std::end(src)));
+   }
+}
+
+
 }
 
 namespace eosio { namespace chain {
@@ -156,8 +169,8 @@ struct building_block {
    vector<digest_type>                   _new_protocol_feature_activations;
    size_t                                _num_new_protocol_features_that_have_activated = 0;
    vector<transaction_metadata_ptr>      _pending_trx_metas;
-   vector<transaction_receipt>           _pending_trx_receipts;
-   vector<digest_type>                   _action_receipt_digests;
+   deque<transaction_receipt>            _pending_trx_receipts;
+   deque<digest_type>                    _action_receipt_digests;
 };
 
 struct assembled_block {
@@ -198,7 +211,7 @@ struct pending_state {
       return _block_stage.get<assembled_block>()._pending_block_header_state;
    }
 
-   const vector<transaction_receipt>& get_trx_receipts()const {
+   const deque<transaction_receipt>& get_trx_receipts()const {
       if( _block_stage.contains<building_block>() )
          return _block_stage.get<building_block>()._pending_trx_receipts;
 
@@ -1166,8 +1179,8 @@ struct controller_impl {
          auto restore = make_block_restore_point();
          trace->receipt = push_receipt( gtrx.trx_id, transaction_receipt::soft_fail,
                                         trx_context.billed_cpu_time_us, trace->net_usage );
-         fc::move_append( pending->_block_stage.get<building_block>()._action_receipt_digests,
-                          std::move(trx_context.executed_action_receipt_digests) );
+         move_append( pending->_block_stage.get<building_block>()._action_receipt_digests,
+                      std::move(trx_context.executed_action_receipt_digests) );
 
          trx_context.squash();
          restore.cancel();
@@ -1305,8 +1318,8 @@ struct controller_impl {
                                         trx_context.billed_cpu_time_us,
                                         trace->net_usage );
 
-         fc::move_append( pending->_block_stage.get<building_block>()._action_receipt_digests,
-                          std::move(trx_context.executed_action_receipt_digests) );
+         move_append( pending->_block_stage.get<building_block>()._action_receipt_digests,
+                      std::move(trx_context.executed_action_receipt_digests) );
 
          trace->account_ram_delta = account_delta( gtrx.payer, trx_removal_ram_delta );
 
@@ -1516,8 +1529,8 @@ struct controller_impl {
             }
             ct_receipt.stop();
 
-            fc::move_append( pending->_block_stage.get<building_block>()._action_receipt_digests,
-                             std::move(trx_context.executed_action_receipt_digests) );
+            move_append( pending->_block_stage.get<building_block>()._action_receipt_digests,
+                         std::move(trx_context.executed_action_receipt_digests) );
 
             // call the accept signal but only once for this transaction
             if (!trx->accepted) {
@@ -1590,7 +1603,6 @@ struct controller_impl {
 
       const auto size = gpo.configuration.max_block_cpu_usage /
             ( gpo.configuration.min_transaction_cpu_usage ? gpo.configuration.min_transaction_cpu_usage : 1 );
-      bb._pending_trx_receipts.reserve( size );
       bb._pending_trx_metas.reserve( size );
 
       // modify state of speculative block only if we are in speculative read mode (otherwise we need clean state for head or read-only modes)
@@ -1922,7 +1934,6 @@ struct controller_impl {
 
          size_t packed_idx = 0;
          const auto& trx_receipts = pending->_block_stage.get<building_block>()._pending_trx_receipts;
-         pending->_block_stage.get<building_block>()._pending_trx_receipts.reserve( b->transactions.size() );
          pending->_block_stage.get<building_block>()._pending_trx_metas.reserve( b->transactions.size() );
          for( const auto& receipt : b->transactions ) {
             auto num_pending_receipts = trx_receipts.size();
@@ -2186,9 +2197,8 @@ struct controller_impl {
    }
 
    checksum256_type calculate_trx_merkle() {
-      vector<digest_type> trx_digests;
+      deque<digest_type> trx_digests;
       const auto& trxs = pending->_block_stage.get<building_block>()._pending_trx_receipts;
-      trx_digests.reserve( trxs.size() );
       for( const auto& a : trxs )
          trx_digests.emplace_back( a.digest() );
 
@@ -2839,7 +2849,7 @@ optional<block_id_type> controller::pending_producer_block_id()const {
    return my->pending->_producer_block_id;
 }
 
-const vector<transaction_receipt>& controller::get_pending_trx_receipts()const {
+const deque<transaction_receipt>& controller::get_pending_trx_receipts()const {
    EOS_ASSERT( my->pending, block_validate_exception, "no pending block" );
    return my->pending->get_trx_receipts();
 }

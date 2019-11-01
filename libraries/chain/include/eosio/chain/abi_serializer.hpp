@@ -325,6 +325,24 @@ namespace impl {
       }
 
       /**
+       * template which overloads add for deques of types which contain ABI information in their trees
+       * for these members we call ::add in order to trigger further processing
+       */
+      template<typename M, typename Resolver, require_abi_t<M> = 1>
+      static void add( mutable_variant_object &mvo, const char* name, const deque<M>& v, Resolver resolver, abi_traverse_context& ctx )
+      {
+         auto h = ctx.enter_scope();
+         deque<variant> array;
+
+         for (const auto& iter: v) {
+            mutable_variant_object elem_mvo;
+            add(elem_mvo, "_", iter, resolver, ctx);
+            array.emplace_back(std::move(elem_mvo["_"]));
+         }
+         mvo(name, std::move(array));
+      }
+
+      /**
        * template which overloads add for shared_ptr of types which contain ABI information in their trees
        * for these members we call ::add in order to trigger further processing
        */

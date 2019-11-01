@@ -219,7 +219,7 @@ namespace eosio { namespace chain {
          const block_signing_authority& pending_block_signing_authority()const;
          optional<block_id_type>        pending_producer_block_id()const;
 
-         const vector<transaction_receipt>& get_pending_trx_receipts()const;
+         const deque<transaction_receipt>& get_pending_trx_receipts()const;
 
          const producer_authority_schedule&    active_producers()const;
          const producer_authority_schedule&    pending_producers()const;
