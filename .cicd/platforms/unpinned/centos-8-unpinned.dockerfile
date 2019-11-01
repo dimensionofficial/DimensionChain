@@ -56,5 +56,3 @@ ENV PATH=${PATH}:/mongodb-linux-x86_64-amazon-3.6.3/bin
 # install ccache
 RUN curl -LO https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/c/ccache-3.7.4-1.el8.x86_64.rpm && \
     yum install -y ccache-3.7.4-1.el8.x86_64.rpm
-# fix ccache for centos
-RUN cd /usr/lib64/ccache && ln -s ../../bin/ccache c++
