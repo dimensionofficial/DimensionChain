@@ -69,7 +69,7 @@ private:
 };
 
 template<typename T>
-void move_append(std::deque<T> &dest, std::deque<T>&& src ) {
+void move_append(T &dest, T&& src ) {
    if (src.empty()) {
       return;
    } else if (dest.empty()) {
@@ -169,8 +169,8 @@ struct building_block {
    vector<digest_type>                   _new_protocol_feature_activations;
    size_t                                _num_new_protocol_features_that_have_activated = 0;
    vector<transaction_metadata_ptr>      _pending_trx_metas;
-   deque<transaction_receipt>            _pending_trx_receipts;
-   deque<digest_type>                    _action_receipt_digests;
+   fc::deque_1024<transaction_receipt>       _pending_trx_receipts;
+   fc::deque_1024<digest_type>               _action_receipt_digests;
 };
 
 struct assembled_block {
@@ -211,7 +211,7 @@ struct pending_state {
       return _block_stage.get<assembled_block>()._pending_block_header_state;
    }
 
-   const deque<transaction_receipt>& get_trx_receipts()const {
+   const deque_1024<transaction_receipt>& get_trx_receipts()const {
       if( _block_stage.contains<building_block>() )
          return _block_stage.get<building_block>()._pending_trx_receipts;
 
@@ -2197,7 +2197,7 @@ struct controller_impl {
    }
 
    checksum256_type calculate_trx_merkle() {
-      deque<digest_type> trx_digests;
+      deque_1024<digest_type> trx_digests;
       const auto& trxs = pending->_block_stage.get<building_block>()._pending_trx_receipts;
       for( const auto& a : trxs )
          trx_digests.emplace_back( a.digest() );
@@ -2849,7 +2849,7 @@ optional<block_id_type> controller::pending_producer_block_id()const {
    return my->pending->_producer_block_id;
 }
 
-const deque<transaction_receipt>& controller::get_pending_trx_receipts()const {
+const deque_1024<transaction_receipt>& controller::get_pending_trx_receipts()const {
    EOS_ASSERT( my->pending, block_validate_exception, "no pending block" );
    return my->pending->get_trx_receipts();
 }
