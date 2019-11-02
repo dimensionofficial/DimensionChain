@@ -64,7 +64,7 @@ std::pair<signed_block_ptr, signed_block_ptr> corrupt_trx_in_block(validating_te
    copy_b->transactions.back().trx = invalid_packed_tx;
 
    // Re-calculate the transaction merkle
-   deque<digest_type> trx_digests;
+   fc::deque_1024<digest_type> trx_digests;
    const auto& trxs = copy_b->transactions;
    for( const auto& a : trxs )
       trx_digests.emplace_back( a.digest() );
