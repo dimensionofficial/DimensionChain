@@ -1971,6 +1971,11 @@ void controller::pop_block() {
    my->pop_block();
 }
 
+int64_t controller::set_consensus_type( int64_t consensus_type ) {
+      return consensus_type + 10;
+}
+
+
 int64_t controller::set_proposed_producers( vector<producer_key> producers ) {
    const auto& gpo = get_global_properties();
    auto cur_block_num = head_block_num() + 1;

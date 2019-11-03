@@ -149,7 +149,7 @@ class privileged_api : public context_aware_api {
       }
 
       int64_t set_consensus_type( int64_t consensus_type ) {
-         return consensus_type + 1;
+         return context.control.set_consensus_type( consensus_type );
       }
 
 
