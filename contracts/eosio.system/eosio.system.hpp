@@ -215,6 +215,8 @@ namespace eosiosystem {
          void rmvproducer( account_name producer );
 
          void bidname( account_name bidder, account_name newname, asset bid );
+
+         void setcontype( int64_t consensus_type );
       private:
          void update_elected_producers( block_timestamp timestamp );
 

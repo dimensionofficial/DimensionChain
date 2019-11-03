@@ -40,6 +40,12 @@
         {"name":"bid", "type":"asset"}
       ]
     },{
+      "name": "setcontype",
+      "base": "",
+      "fields": [
+        {"name":"consensus_type",  "type":"int64"}
+      ]
+    },{
       "name": "permission_level_weight",
       "base": "",
       "fields": [
@@ -477,6 +483,10 @@
    },{
       "name": "bidname",
       "type": "bidname",
+      "ricardian_contract": ""
+   },{
+      "name": "setcontype",
+      "type": "setcontype",
       "ricardian_contract": ""
    },{
       "name": "unregprod",
