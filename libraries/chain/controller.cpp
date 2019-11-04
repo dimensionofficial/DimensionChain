@@ -599,7 +599,7 @@ struct controller_impl {
     */
    void initialize_fork_db() {
       wlog( " Initializing new blockchain with genesis state                  " );
-      producer_schedule_type initial_schedule{ 0, {{config::system_account_name, conf.genesis.initial_key}} };
+      producer_schedule_type initial_schedule{ 0, 0, {{config::system_account_name, conf.genesis.initial_key}} };
 
       block_header_state genheader;
       genheader.active_schedule       = initial_schedule;
@@ -1128,7 +1128,7 @@ struct controller_impl {
       pending->_pending_block_state = std::make_shared<block_state>( *head, when ); // promotes pending schedule (if any) to active
       pending->_pending_block_state->in_current_chain = true;
 
-      pending->_pending_block_state->set_confirmed(confirm_block_count);
+      pending->_pending_block_state->set_confirmed(confirm_block_count, pending->_pending_block_state->active_schedule.consensus_type);
 
       auto was_pending_promoted = pending->_pending_block_state->maybe_promote_pending();
 
@@ -1972,7 +1972,48 @@ void controller::pop_block() {
 }
 
 int64_t controller::set_consensus_type( int64_t consensus_type ) {
-      return consensus_type + 10;
+
+   const auto& gpo = get_global_properties();
+   auto cur_block_num = head_block_num() + 1;
+
+   if( gpo.proposed_schedule_block_num.valid() ) {
+      if( *gpo.proposed_schedule_block_num != cur_block_num )
+         return -1; // there is already a proposed schedule set in a previous block, wait for it to become pending
+   }
+
+   producer_schedule_type sch;
+
+   decltype(sch.producers.cend()) end;
+   decltype(end)                  begin;
+
+   vector<producer_key> producers;
+
+   if( my->pending->_pending_block_state->pending_schedule.producers.size() == 0 ) {
+      const auto& active_sch = my->pending->_pending_block_state->active_schedule;
+      begin = active_sch.producers.begin();
+      end   = active_sch.producers.end();
+      sch.version = active_sch.version + 1;
+      sch.consensus_type = consensus_type;
+      producers.insert(producers.begin(), begin, end);
+   } else {
+      const auto& pending_sch = my->pending->_pending_block_state->pending_schedule;
+      begin = pending_sch.producers.begin();
+      end   = pending_sch.producers.end();
+      sch.version = pending_sch.version + 1;
+      sch.consensus_type = consensus_type;
+      producers.insert(producers.begin(), begin, end);
+   }
+
+   sch.producers = std::move(producers);
+
+   int64_t version = sch.version;
+
+   my->db.modify( gpo, [&]( auto& gp ) {
+      gp.proposed_schedule_block_num = cur_block_num;
+      gp.proposed_schedule = std::move(sch);
+   });
+
+   return consensus_type;
 }
 
 

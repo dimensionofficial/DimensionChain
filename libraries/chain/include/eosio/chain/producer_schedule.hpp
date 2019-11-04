@@ -24,6 +24,7 @@ namespace eosio { namespace chain {
     */
    struct producer_schedule_type {
       uint32_t                                       version = 0; ///< sequentially incrementing version number
+      int64_t                                        consensus_type = 0;
       vector<producer_key>                           producers;
 
       public_key_type get_producer_key( account_name p )const {
@@ -40,6 +41,7 @@ namespace eosio { namespace chain {
 
       shared_producer_schedule_type& operator=( const producer_schedule_type& a ) {
          version = a.version;
+         consensus_type = a.consensus_type;
          producers.clear();
          producers.reserve( a.producers.size() );
          for( const auto& p : a.producers )
@@ -50,6 +52,7 @@ namespace eosio { namespace chain {
       operator producer_schedule_type()const {
          producer_schedule_type result;
          result.version = version;
+         result.consensus_type = consensus_type;
          result.producers.reserve(producers.size());
          for( const auto& p : producers )
             result.producers.push_back(p);
@@ -58,10 +61,12 @@ namespace eosio { namespace chain {
 
       void clear() {
          version = 0;
+         consensus_type = 0;
          producers.clear();
       }
 
       uint32_t                                       version = 0; ///< sequentially incrementing version number
+      int64_t                                        consensus_type = 0;
       shared_vector<producer_key>                    producers;
    };
 
@@ -83,5 +88,5 @@ namespace eosio { namespace chain {
 } } /// eosio::chain
 
 FC_REFLECT( eosio::chain::producer_key, (producer_name)(block_signing_key) )
-FC_REFLECT( eosio::chain::producer_schedule_type, (version)(producers) )
-FC_REFLECT( eosio::chain::shared_producer_schedule_type, (version)(producers) )
+FC_REFLECT( eosio::chain::producer_schedule_type, (version)(consensus_type)(producers) )
+FC_REFLECT( eosio::chain::shared_producer_schedule_type, (version)(consensus_type)(producers) )

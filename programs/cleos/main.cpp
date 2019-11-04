@@ -1253,6 +1253,7 @@ struct get_schedule_subcommand {
          return;
       }
       printf("%s schedule version %s\n", name, schedule["version"].as_string().c_str());
+      printf("%s consensus type %s\n", name, schedule["consensus_type"].as_string().c_str());
       printf("    %-13s %s\n", "Producer", "Producer key");
       printf("    %-13s %s\n", "=============", "==================");
       for (auto& row: schedule["producers"].get_array())

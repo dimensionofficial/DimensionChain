@@ -31,7 +31,7 @@ struct block_header_state {
     block_header_state   generate_next( block_timestamp_type when )const;
 
     void set_new_producers( producer_schedule_type next_pending );
-    void set_confirmed( uint16_t num_prev_blocks );
+    void set_confirmed( uint16_t num_prev_blocks, int64_t consensus_type );
     void add_confirmation( const header_confirmation& c );
     bool maybe_promote_pending();
 

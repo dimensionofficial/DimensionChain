@@ -44,6 +44,7 @@ namespace eosio { namespace chain {
     result.header.timestamp                                = when;
     result.header.previous                                 = id;
     result.header.schedule_version                         = active_schedule.version;
+    result.header.consensus_type                           = active_schedule.consensus_type;
                                                            
     auto prokey                                            = get_scheduled_producer(when);
     result.block_signing_key                               = prokey.block_signing_key;
@@ -161,7 +162,7 @@ namespace eosio { namespace chain {
      /// below this point is state changes that cannot be validated with headers alone, but never-the-less,
      /// must result in header state changes
 
-    result.set_confirmed( h.confirmed );
+    result.set_confirmed( h.confirmed, h.consensus_type );
 
     auto was_pending_promoted = result.maybe_promote_pending();
 
@@ -183,7 +184,7 @@ namespace eosio { namespace chain {
     return result;
   } /// next
 
-  void block_header_state::set_confirmed( uint16_t num_prev_blocks ) {
+  void block_header_state::set_confirmed( uint16_t num_prev_blocks, int64_t consensus_type ) {
      /*
      idump((num_prev_blocks)(confirm_count.size()));
 
@@ -197,6 +198,14 @@ namespace eosio { namespace chain {
      uint32_t blocks_to_confirm = num_prev_blocks + 1; /// confirm the head block too
      while( i >= 0 && blocks_to_confirm ) {
         --confirm_count[i];
+
+        if(confirm_count[i] != 0 && consensus_type > 2) {
+          --confirm_count[i];
+        }
+        if(confirm_count[i] != 0 && consensus_type > 2) {
+          --confirm_count[i];
+        }
+
         //idump((confirm_count[i]));
         if( confirm_count[i] == 0 )
         {
