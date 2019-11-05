@@ -82,9 +82,9 @@ namespace eosiosystem {
          top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
       }
 
-      if ( top_producers.size() < _gstate.last_producer_schedule_size ) {
-         return;
-      }
+      // if ( top_producers.size() < _gstate.last_producer_schedule_size ) {
+      //    return;
+      // }
 
       /// sort by producer name
       std::sort( top_producers.begin(), top_producers.end() );
