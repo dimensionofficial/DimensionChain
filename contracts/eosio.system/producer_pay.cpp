@@ -17,6 +17,8 @@ namespace eosiosystem {
    const uint64_t useconds_per_day      = 24 * 3600 * uint64_t(1000000);
    const uint64_t useconds_per_year     = seconds_per_year*1000000ll;
 
+   const uint16_t min_producer_size     = 4;
+
 
    void system_contract::onblock( block_timestamp timestamp, account_name producer ) {
       using namespace eosio;
@@ -24,7 +26,7 @@ namespace eosiosystem {
       require_auth(N(eosio));
 
       /** until activated stake crosses this threshold no new rewards are paid */
-      if( _gstate.total_proposal_stake < min_proposal_stake )
+      if( _gstate.total_proposal_stake < min_proposal_stake || get_producers_size() < min_producer_size )
          return;
 
       if( _gstate.last_pervote_bucket_fill == 0 )  /// start the presses
@@ -42,6 +44,10 @@ namespace eosiosystem {
                p.unpaid_blocks++;
          });
       }
+
+      // 有proposal时，不再使用update_elected_producers
+      // 临时措施
+      if(_gstate.proposal_num != 0) return;
 
       /// only update block producers once every minute, block_timestamp is in half seconds
       if( timestamp.slot - _gstate.last_producer_schedule_update.slot > 120 ) {
