@@ -45,6 +45,7 @@ def retry(args):
         logFile.write(args + '\n')
         if subprocess.call(args, shell=True):
             print('*** Retry')
+            sleep(0.5)
         else:
             break
 
@@ -109,8 +110,10 @@ def startNode(nodeIndex, account):
         '    --config-dir ' + os.path.abspath(dir) +
         '    --data-dir ' + os.path.abspath(dir) +
         '    --chain-state-db-size-mb 1024'
-        '    --http-server-address 127.0.0.1:' + str(8000 + nodeIndex) +
-        '    --p2p-listen-endpoint 127.0.0.1:' + str(9000 + nodeIndex) +
+        '    --http-validate-host false'
+        '    --access-control-allow-origin \'*\''
+        '    --http-server-address 0.0.0.0:' + str(8000 + nodeIndex) +
+        '    --p2p-listen-endpoint 0.0.0.0:' + str(9000 + nodeIndex) +
         '    --max-clients ' + str(maxClients) +
         '    --p2p-max-nodes-per-host ' + str(maxClients) +
         '    --enable-stale-production'
@@ -283,7 +286,7 @@ def stepStartWallet():
     importKeys()
 def stepStartBoot():
     startNode(0, {'name': 'eosio', 'pvt': args.private_key, 'pub': args.public_key})
-    sleep(1.5)
+    sleep(10)
 def stepInstallSystemContracts():
     run(args.cleos + 'set contract eosio.token ' + args.contracts_dir + 'eosio.token/')
     run(args.cleos + 'set contract eosio.msig ' + args.contracts_dir + 'eosio.msig/')
@@ -357,17 +360,17 @@ parser.add_argument('--genesis', metavar='', help="Path to genesis.json", defaul
 parser.add_argument('--wallet-dir', metavar='', help="Path to wallet directory", default='./wallet/')
 parser.add_argument('--log-path', metavar='', help="Path to log file", default='./output.log')
 parser.add_argument('--symbol', metavar='', help="The eosio.system symbol", default='SYS')
-parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=3000)
-parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=10)
+parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=50)
+parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=50)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)
 parser.add_argument('--min-stake', metavar='', help="Minimum stake before allocating unstaked funds", type=float, default=0.9)
 parser.add_argument('--max-unstaked', metavar='', help="Maximum unstaked funds", type=float, default=10)
-parser.add_argument('--producer-limit', metavar='', help="Maximum number of producers. (0 = no limit)", type=int, default=0)
+parser.add_argument('--producer-limit', metavar='', help="Maximum number of producers. (0 = no limit)", type=int, default=7)
 parser.add_argument('--min-producer-funds', metavar='', help="Minimum producer funds", type=float, default=1000.0000)
-parser.add_argument('--num-producers-vote', metavar='', help="Number of producers for which each user votes", type=int, default=20)
+parser.add_argument('--num-producers-vote', metavar='', help="Number of producers for which each user votes", type=int, default=50)
 parser.add_argument('--num-voters', metavar='', help="Number of voters", type=int, default=10)
 parser.add_argument('--num-senders', metavar='', help="Number of users to transfer funds randomly", type=int, default=10)
-parser.add_argument('--producer-sync-delay', metavar='', help="Time (s) to sleep to allow producers to sync", type=int, default=80)
+parser.add_argument('--producer-sync-delay', metavar='', help="Time (s) to sleep to allow producers to sync", type=int, default=40)
 parser.add_argument('-a', '--all', action='store_true', help="Do everything marked with (*)")
 parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for cleos')
 
