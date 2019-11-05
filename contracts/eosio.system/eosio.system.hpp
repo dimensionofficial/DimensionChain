@@ -83,6 +83,47 @@ namespace eosiosystem {
                         (unpaid_blocks)(last_claim_time)(location) )
    };
 
+   struct goverance_node_info {
+      account_name          owner;
+            
+      int64_t               bp_staked = 0;
+      block_timestamp       stake_time;
+      bool                  is_bp;
+      int64_t               status;
+      eosio::public_key     producer_key;
+      std::string           url;
+      uint16_t              location = 0;
+
+      uint64_t primary_key()const { return owner; }
+
+      EOSLIB_SERIALIZE( goverance_node_info, (owner)(bp_staked)(stake_time)(is_bp)(status)(producer_key)(url)(location) )
+   };
+
+   struct proposal_info {
+      uint64_t        id;
+
+      account_name            owner;
+      account_name            account;
+      block_timestamp      start_time;
+      block_timestamp      vote_end_time;
+      block_timestamp      exec_time;
+      uint32_t        block_height;
+      int64_t         type;
+      bool            is_satisfy;
+      bool            is_exec;
+      int64_t         status;
+      int64_t         total_yeas;
+      int64_t         total_nays;
+
+      uint64_t primary_key()const { return id; }
+      uint64_t by_vote_end_time()const { return vote_end_time.slot; }
+
+      EOSLIB_SERIALIZE( proposal_info, (id)(owner)(account)(start_time)(vote_end_time)(exec_time)
+                                       (block_height)(type)(is_satisfy)(is_exec)(status)(total_yeas)(total_nays) )
+   };
+
+
+
    struct voter_info {
       account_name                owner = 0; /// the voter
       account_name                proxy = 0; /// the proxy set by the voter, if any
@@ -121,6 +162,13 @@ namespace eosiosystem {
                                indexed_by<N(prototalvote), const_mem_fun<producer_info, double, &producer_info::by_votes>  >
                                >  producers_table;
 
+   typedef eosio::multi_index< N(gnode), goverance_node_info > goverance_node_table;
+
+   typedef eosio::multi_index< N(proposals), proposal_info,
+                               indexed_by<N(byvendtime), const_mem_fun<proposal_info, uint64_t, &proposal_info::by_vote_end_time>  >
+                               > proposals_table;
+
+
    typedef eosio::singleton<N(global), eosio_global_state> global_state_singleton;
 
    //   static constexpr uint32_t     max_inflation_rate = 5;  // 5% annual inflation
@@ -131,6 +179,8 @@ namespace eosiosystem {
       private:
          voters_table           _voters;
          producers_table        _producers;
+         goverance_node_table   _gnode;
+         proposals_table        _proposals;
          global_state_singleton _global;
 
          eosio_global_state     _gstate;

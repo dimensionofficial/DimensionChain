@@ -275,6 +275,37 @@
          {"name":"location",        "type":"uint16"}
       ]
     },{
+      "name": "goverance_node_info",
+      "base": "",
+      "fields": [
+         {"name":"owner",           "type":"account_name"},
+         {"name":"bp_staked",     "type":"int64"},
+         {"name":"stake_time",    "type":"block_timestamp_type"},
+         {"name":"is_bp",       "type":"bool"},
+         {"name":"status",             "type":"int64"},
+         {"name":"producer_key",   "type":"public_key"},
+         {"name":"url",            "type":"string"},
+         {"name":"location",        "type":"uint16"}
+      ]
+    },{
+      "name": "proposal_info",
+      "base": "",
+      "fields": [
+         {"name":"id",             "type":"uint64_t"},
+         {"name":"owner",          "type":"account_name"},
+         {"name":"account",        "type":"account_name"},
+         {"name":"start_time",      "type":"block_timestamp_type"},
+         {"name":"vote_end_time",   "type":"block_timestamp_type"},
+         {"name":"exec_time",       "type":"block_timestamp_type"},
+         {"name":"block_height",     "type":"uint32"},
+         {"name":"type",            "type":"int64"},
+         {"name":"is_satisfy",      "type":"bool"},
+         {"name":"is_exec",         "type":"bool"},
+         {"name":"status",          "type":"int64"},
+         {"name":"total_yeas",      "type":"int64"},
+         {"name":"total_nays",       "type":"int64"}
+      ]
+    },{
       "name": "regproducer",
       "base": "",
       "fields": [
@@ -529,6 +560,18 @@
       "type": "producer_info",
       "index_type": "i64",
       "key_names" : ["owner"],
+      "key_types" : ["uint64"]
+    },{
+      "name": "gnode",
+      "type": "goverance_node_info",
+      "index_type": "i64",
+      "key_names" : ["owner"],
+      "key_types" : ["uint64"]
+    },{
+      "name": "proposals",
+      "type": "proposal_info",
+      "index_type": "i64",
+      "key_names" : ["id"],
       "key_types" : ["uint64"]
     },{
       "name": "global",
