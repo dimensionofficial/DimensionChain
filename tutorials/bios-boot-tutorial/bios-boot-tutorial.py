@@ -184,8 +184,42 @@ def regProducers(b, e):
         a = accounts[i]
         retry(args.cleos + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
 
+def stakeGnodes(b, e):
+    for i in range(b, e):
+        a = accounts[i]
+        retry(args.cleos + 'system staketognode ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
+
+def newProposals(b, e):
+    for i in range(b, e):
+        a = accounts[i]
+        retry(args.cleos + 'system newproposal ' + a['name'] + ' ' + a['name'] + ' 100000' + ' 1' + ' 0')
+
+def voteProposals(b, e):
+    for i in range(b, e):
+        for j in range(0, len(accounts)):
+            a = accounts[j]
+            retry(args.cleos + 'system voteproposal ' + a['name'] + ' ' + str(i) + ' 1')
+
+def stepVoteAProp():
+    for j in range(0, len(accounts)):
+        a = accounts[j]
+        retry(args.cleos + 'system voteproposal ' + a['name'] + ' ' + str(args.default_id) + ' 1')
+
+
+def execProposals(b, e):
+    for i in range(b, e):
+        a = accounts[i]
+        retry(args.cleos + 'system execproposal ' + a['name'] + ' ' + str(i-b))
+
+
 def listProducers():
     run(args.cleos + 'system listproducers')
+
+def listGnodes():
+    run(args.cleos + 'get table eosio eosio gnode')
+
+def listProposals():
+    run(args.cleos + 'get table eosio eosio proposals')
 
 def vote(b, e):
     for i in range(b, e):
@@ -293,7 +327,7 @@ def stepInstallSystemContracts():
     run(args.cleos + 'set contract eosio.token ' + args.contracts_dir + 'eosio.token/')
     run(args.cleos + 'set contract eosio.msig ' + args.contracts_dir + 'eosio.msig/')
 def stepCreateTokens():
-    run(args.cleos + 'push action eosio.token create \'["eosio", "10000000000.0000 %s"]\' -p eosio.token' % (args.symbol))
+    run(args.cleos + 'push action eosio.token create \'["eosio", "20000000000.0000 %s"]\' -p eosio.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts)) + 10000000
     run(args.cleos + 'push action eosio.token issue \'["eosio", "%s", "memo"]\' -p eosio' % intToCurrency(totalAllocation))
     sleep(1)
@@ -309,6 +343,26 @@ def stepRegProducers():
     regProducers(firstProducer, firstProducer + numProducers)
     sleep(1)
     listProducers()
+
+def stepStakeGnodes():
+    stakeGnodes(firstProducer, firstProducer + numProducers)
+    sleep(1)
+    listGnodes()
+
+def stepNewProposals():
+    newProposals(firstProducer, firstProducer + numProducers)
+    sleep(1)
+    listProposals()
+
+def stepVoteProposals():
+    voteProposals(0, 0 + numProducers)
+    sleep(1)
+    listProposals()
+
+def stepExecProposals():
+    execProposals(firstProducer, firstProducer + numProducers)
+    sleep(1)
+
 def stepStartProducers():
     startProducers(firstProducer, firstProducer + numProducers)
     sleep(args.producer_sync_delay)
@@ -340,18 +394,23 @@ commands = [
     ('s', 'sys',            createSystemAccounts,       True,    "Create system accounts (eosio.*)"),
     ('c', 'contracts',      stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
     ('t', 'tokens',         stepCreateTokens,           True,    "Create tokens"),
-    ('e', 'blkpay',         stepTransferToEosioBlkpay,  True,    "Transfer to eosio.blkpay"),
+    ('e', 'blkpay',         stepTransferToEosioBlkpay,  True,    "Transfer to eosio.blkpay"), # dimension 出块奖励账号
     ('S', 'sys-contract',   stepSetSystemContract,      True,    "Set system contract"),
     ('T', 'stake',          stepCreateStakedAccounts,   True,    "Create staked accounts"),
-    ('p', 'reg-prod',       stepRegProducers,           True,    "Register producers"),
-    ('P', 'start-prod',     stepStartProducers,         True,    "Start producers"),
-    ('v', 'vote',           stepVote,                   True,    "Vote for producers"),
-    ('R', 'claim',          claimRewards,               True,    "Claim rewards"),
-    ('x', 'proxy',          stepProxyVotes,             True,    "Proxy votes"),
-    ('q', 'resign',         stepResign,                 True,    "Resign eosio"),
-    ('m', 'msg-replace',    msigReplaceSystem,          False,   "Replace system contract using msig"),
-    ('X', 'xfer',           stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
-    ('l', 'log',            stepLog,                    True,    "Show tail of node's log"),
+    # ('p', 'reg-prod',           stepRegProducers,           True,    "Register producers"),
+    ('P', 'start-prod',         stepStartProducers,         True,    "Start producers"),
+    # ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
+    ('g', 'stake-gnode',        stepStakeGnodes,            True,    "Stake to goverance node"), # dimension 抵押EON成为gnode
+    ('n', 'new-prop',           stepNewProposals,           True,    "New proposals"), # dimension 创建提案
+    ('V', 'vote-prop',          stepVoteProposals,          True,    "Vote proposals"), # dimension 对提案投票
+    ('E', 'exec-prop',          stepExecProposals,          True,   "Ecec proposals"), # dimension 执行提案
+    ('R', 'claim',              claimRewards,               True,    "Claim rewards"),
+    # ('x', 'proxy',              stepProxyVotes,             True,    "Proxy votes"),
+    ('q', 'resign',             stepResign,                 True,    "Resign eosio"),
+    ('o', 'vote-a-prop',        stepVoteAProp,              False,   "vote a propoasl"),
+    ('m', 'msg-replace',        msigReplaceSystem,          False,   "Replace system contract using msig"),
+    ('X', 'xfer',               stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
+    ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
 parser.add_argument('--public-key', metavar='', help="EOSIO Public Key", default='EOS8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
@@ -376,6 +435,7 @@ parser.add_argument('--num-producers-vote', metavar='', help="Number of producer
 parser.add_argument('--num-voters', metavar='', help="Number of voters", type=int, default=10)
 parser.add_argument('--num-senders', metavar='', help="Number of users to transfer funds randomly", type=int, default=10)
 parser.add_argument('--producer-sync-delay', metavar='', help="Time (s) to sleep to allow producers to sync", type=int, default=40)
+parser.add_argument('--default-id', metavar='', help="default proposal id", type=int, default=0)
 parser.add_argument('-a', '--all', action='store_true', help="Do everything marked with (*)")
 parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for cleos')
 
