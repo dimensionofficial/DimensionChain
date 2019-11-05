@@ -371,6 +371,16 @@
         {"name":"owner",   "type":"account_name"}
       ]
     },{
+      "name": "newproposal",
+      "base": "",
+      "fields": [
+        {"name":"owner",         "type":"account_name"},
+        {"name":"account",       "type":"account_name"},
+        {"name":"block_height",  "type":"uint32"},
+        {"name":"type",          "type":"int64"},
+        {"name":"status",        "type":"int64"}
+      ]
+    },{
       "name": "staketognode",
       "base": "",
       "fields": [
@@ -560,6 +570,10 @@
    },{
       "name": "claimrewards",
       "type": "claimrewards",
+      "ricardian_contract": ""
+   },{
+      "name": "newproposal",
+      "type": "newproposal",
       "ricardian_contract": ""
    },{
       "name": "staketognode",

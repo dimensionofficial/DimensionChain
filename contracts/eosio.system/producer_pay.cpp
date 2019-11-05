@@ -66,6 +66,63 @@ namespace eosiosystem {
 
    using namespace eosio;
 
+
+
+
+
+
+
+
+   //发起提案，只有gnode才可以发起提案。
+   // type 1: add bp 2: remove bp 3: switch consensus 
+   void system_contract::newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t status) {
+       require_auth( owner );
+       const auto now_time = now();
+
+       auto prod3 = _gnode.find( owner );
+       eosio_assert(prod3 != _gnode.end(), "only governance node can new proposal");
+
+       if(type == 1) {
+           eosio_assert(owner == account, "can not add other account to bp");
+       }
+
+       //account必须是出块节点
+       if(type == 2){
+
+       }
+
+       int64_t fee = _gstate.new_proposal_fee;
+       INLINE_ACTION_SENDER(eosio::token, transfer)(
+          N(eosio.token), { {owner, N(active)} },
+          { owner, N(eosio.prop), asset(fee), "transfer 1.5000 EON to new proposal" }
+       );
+
+       uint64_t id = _proposals.available_primary_key();
+
+       _proposals.emplace(_self, [&](auto &info) {
+           info.id = id;
+           info.owner = owner;
+           info.account = account;
+           info.start_time = block_timestamp(now_time);
+           if(type == 1 || type == 2) {
+               info.vote_end_time = block_timestamp(now_time + blocks_per_day * 1);
+           } else {
+               info.vote_end_time = block_timestamp(now_time + blocks_per_day * 30);
+           }
+        //    info.vote_end_time = ct; //测试
+           info.block_height = block_height;
+           info.type = type;
+           info.is_satisfy = false;
+           info.is_exec = false;
+           info.status = 0;
+           info.total_yeas     = 0;
+           info.total_nays     = 0;
+       });
+
+       _gstate.proposal_num += 1;
+
+   }
+
    // 抵押EON成为governance node, 可以发起提案
    void system_contract::staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location ) {
        require_auth( owner );
