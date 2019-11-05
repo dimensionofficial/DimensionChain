@@ -403,7 +403,7 @@
         {"name":"owner",         "type":"account_name"},
         {"name":"producer_key",  "type":"public_key"},
         {"name":"url",           "type":"string"},
-        {"name":"location",      "type":"uint16"},
+        {"name":"location",      "type":"uint16"}
       ]
     },{
       "name": "unstakegnode",
@@ -418,7 +418,7 @@
         {"name":"owner",         "type":"account_name"},
         {"name":"producer_key",  "type":"public_key"},
         {"name":"url",           "type":"string"},
-        {"name":"location",      "type":"uint16"},
+        {"name":"location",      "type":"uint16"}
       ]
     },{
       "name": "setpriv",
