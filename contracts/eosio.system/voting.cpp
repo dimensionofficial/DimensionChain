@@ -102,6 +102,168 @@ namespace eosiosystem {
       }
    }
 
+   // 提案type==1，将account 加到producer
+   void system_contract::add_elected_producers( account_name new_producer, public_key key, std::string url, uint16_t loc, uint64_t proposal_id ) {
+
+      const auto now_time = now();
+
+      _gstate.last_producer_schedule_update = block_timestamp(now_time);
+      
+      auto gnd = _gnode.find( new_producer );
+      eosio_assert(gnd != _gnode.end(), "account not in _gnode");
+      regproducer(new_producer, gnd->producer_key, url, gnd->location);
+
+      auto idx = _producers.get_index<N(prototalvote)>();
+
+      std::vector< std::pair<eosio::producer_key,uint16_t> > top_producers;
+      uint16_t new_size = get_producers_size(); //原有数量加一
+      top_producers.reserve( new_size );
+
+      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < new_size && it->active(); ++it ) {
+         top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
+      }
+
+      /// sort by producer name
+      std::sort( top_producers.begin(), top_producers.end() );
+
+      std::vector<eosio::producer_key> producers;
+
+      producers.reserve(top_producers.size());
+      for( const auto& item : top_producers )
+         producers.push_back(item.first);
+
+      auto packed_schedule = pack(producers);
+
+      if( set_proposed_producers( packed_schedule.data(),  packed_schedule.size() ) >= 0 ) {
+         _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
+      }
+
+      // 更新 proposals_table _proposals
+      const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
+      _proposals.modify(proposal_voting, _self, [&](auto &info) {
+          info.is_exec = true;
+          info.exec_time = block_timestamp(now_time);
+      });
+   }
+
+   // 提案type==2，将account 从producer移除
+   void system_contract::remove_elected_producers( account_name remove_producer, uint64_t proposal_id ) {
+
+      const auto now_time = now();
+      
+      _gstate.last_producer_schedule_update = block_timestamp(now_time);
+
+      auto idx = _producers.get_index<N(prototalvote)>();
+      // remove_producer是否在bp中
+      bool isExist = false;
+      for ( auto it = idx.cbegin(); it != idx.cend(); ++it ) {
+         if(remove_producer == it->owner) {
+            isExist = true;
+            break;
+         }
+      }
+      if( !isExist ) return;
+
+      std::vector< std::pair<eosio::producer_key,uint16_t> > top_producers;
+      uint16_t new_size = get_producers_size() - 1; //原有数量加一
+      top_producers.reserve(new_size);
+
+      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < new_size && it->active(); ++it ) {
+         if(remove_producer != it->owner)
+            top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
+      }
+
+      /// sort by producer name
+      std::sort( top_producers.begin(), top_producers.end() );
+
+      std::vector<eosio::producer_key> producers;
+
+      producers.reserve(top_producers.size());
+      for( const auto& item : top_producers )
+         producers.push_back(item.first);
+
+      auto packed_schedule = pack(producers);
+
+      if( set_proposed_producers( packed_schedule.data(),  packed_schedule.size() ) >= 0 ) {
+         _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
+      }
+
+      // 更新 proposals_table _proposals
+      const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
+      _proposals.modify(proposal_voting, _self, [&](auto &info) {
+          info.is_exec = true;
+          info.exec_time = block_timestamp(now_time);
+      });
+   }
+
+
+
+
+
+   // 对提案投票
+   void system_contract::voteproposal( const account_name voter_name, const uint64_t proposal_id, const bool yea ) {
+      require_auth( voter_name );
+      const auto now_time = now();
+
+      const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
+
+      proposal_vote_table pvotes(_self, proposal_id);
+      auto vote_info = pvotes.find(voter_name);
+
+      auto voter = _voters.find( voter_name );
+      int64_t pvote_weight = stake_to_proposal_votes( voter->staked );
+
+      if (vote_info != pvotes.end()) {
+          bool old_vote = vote_info->vote;
+          if (yea != old_vote) {
+              pvotes.modify(vote_info, voter_name, [&](auto &info) {
+                  info.vote = yea;
+                  info.vote_time = block_timestamp(now_time);
+              });
+              _proposals.modify(proposal_voting, voter_name, [&](auto &info) {
+                  if (yea) {
+                      info.total_nays -= pvote_weight;
+                      info.total_yeas += pvote_weight;
+                  } else {
+                      info.total_nays += pvote_weight;
+                      info.total_yeas -= pvote_weight;
+                  }
+              });
+          } else {
+              // print("skip same vote of ", name{voter}, "\n");
+          }
+      } else {
+          // RAM is from voter, so they need have some to vote
+          pvotes.emplace(voter_name, [&](auto &info) {
+              info.owner = voter_name;
+              info.vote = yea;
+              info.vote_time = block_timestamp(now_time);
+          });
+          _proposals.modify(proposal_voting, voter_name, [&](auto &info) {
+              if (yea) {
+                  info.total_yeas += pvote_weight;
+              } else {
+                  info.total_nays += pvote_weight;
+              }
+          });
+      }
+   }
+
+   // 账号抵押的cpu&net映射为票数
+   // t个EON换票计算：t/100 + t/1000 + t/10000 + t/100000 + t/1000000 + ...
+   int64_t system_contract::stake_to_proposal_votes( int64_t staked ) {
+       int64_t ret = 0;
+       staked /= 10'0000; 
+       while(staked != 0) {
+           ret += staked / 10;
+           staked /= 10;
+       }
+       return ret;
+   }
+
+
+
+
    double stake2vote( int64_t staked ) {
       /// TODO subtract 2080 brings the large numbers closer to this decade
       double weight = int64_t( (now() - (block_timestamp::block_timestamp_epoch / 1000)) / (seconds_per_day * 7) )  / double( 52 );

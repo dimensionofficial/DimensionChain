@@ -269,6 +269,8 @@ namespace eosiosystem {
 
          void unregprod( const account_name producer );
 
+         void voteproposal( const account_name voter_name, const uint64_t proposal_id, const bool yea );
+
          void setram( uint64_t max_ram_size );
 
          void voteproducer( const account_name voter, const account_name proxy, const std::vector<account_name>& producers );
@@ -297,6 +299,10 @@ namespace eosiosystem {
          void bidname( account_name bidder, account_name newname, asset bid );
       private:
          void update_elected_producers( block_timestamp timestamp );
+
+         void add_elected_producers( account_name new_producer, public_key key, std::string url, uint16_t loc, uint64_t proposal_id );
+         void remove_elected_producers( account_name new_producer, uint64_t proposal_id );
+         int64_t stake_to_proposal_votes( int64_t staked );
 
          // Implementation details:
 

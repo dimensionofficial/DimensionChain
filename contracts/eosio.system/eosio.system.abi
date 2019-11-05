@@ -332,6 +332,14 @@
         {"name":"producer",     "type":"account_name"}
       ]
     },{
+      "name": "voteproposal",
+      "base": "",
+      "fields": [
+        {"name":"voter_name",     "type":"account_name"},
+        {"name":"proposal_id",    "type":"uint64"},
+        {"name":"yea",            "type":"bool"}
+      ]
+    },{
       "name": "setram",
       "base": "",
       "fields": [
@@ -558,6 +566,10 @@
    },{
       "name": "unregprod",
       "type": "unregprod",
+      "ricardian_contract": ""
+   },{
+      "name": "voteproposal",
+      "type": "voteproposal",
       "ricardian_contract": ""
    },{
       "name": "regproxy",

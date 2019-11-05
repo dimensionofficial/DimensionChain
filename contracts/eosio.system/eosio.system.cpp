@@ -194,7 +194,7 @@ EOSIO_ABI( eosiosystem::system_contract,
      // delegate_bandwidth.cpp
      (buyrambytes)(buyram)(sellram)(delegatebw)(undelegatebw)(refund)
      // voting.cpp
-     (regproducer)(unregprod)(voteproducer)(regproxy)
+     (regproducer)(unregprod)(voteproposal)(voteproducer)(regproxy)
      // producer_pay.cpp
      (onblock)(newproposal)(staketognode)(unstakegnode)(updategnode)(claimrewards)
 )
