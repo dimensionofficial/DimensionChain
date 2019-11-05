@@ -280,6 +280,8 @@ namespace eosiosystem {
          // functions defined in producer_pay.cpp
          void claimrewards( const account_name& owner );
 
+         uint16_t get_producers_size();
+
          void newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t status);
 
          void staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location );

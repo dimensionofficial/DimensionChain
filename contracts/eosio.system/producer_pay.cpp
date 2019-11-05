@@ -66,6 +66,15 @@ namespace eosiosystem {
 
    using namespace eosio;
 
+   uint16_t system_contract::get_producers_size() {
+       uint16_t count = 0;
+       auto idx = _producers.get_index<N(prototalvote)>();
+
+       for ( auto it = idx.cbegin(); it != idx.cend(); ++it ) {
+          ++ count;
+       }
+       return count;
+   }
 
 
 
