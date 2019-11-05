@@ -292,9 +292,11 @@ def stepInstallSystemContracts():
     run(args.cleos + 'set contract eosio.msig ' + args.contracts_dir + 'eosio.msig/')
 def stepCreateTokens():
     run(args.cleos + 'push action eosio.token create \'["eosio", "10000000000.0000 %s"]\' -p eosio.token' % (args.symbol))
-    totalAllocation = allocateFunds(0, len(accounts))
+    totalAllocation = allocateFunds(0, len(accounts)) + 10000000
     run(args.cleos + 'push action eosio.token issue \'["eosio", "%s", "memo"]\' -p eosio' % intToCurrency(totalAllocation))
     sleep(1)
+def stepTransferToEosioBlkpay():
+    retry(args.cleos + 'transfer eosio eosio.blkpay "%s"' % intToCurrency(10000000))
 def stepSetSystemContract():
     retry(args.cleos + 'set contract eosio ' + args.contracts_dir + 'eosio.system/')
     sleep(1)
@@ -336,6 +338,7 @@ commands = [
     ('s', 'sys',            createSystemAccounts,       True,    "Create system accounts (eosio.*)"),
     ('c', 'contracts',      stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
     ('t', 'tokens',         stepCreateTokens,           True,    "Create tokens"),
+    ('e', 'blkpay',         stepTransferToEosioBlkpay,  True,    "Transfer to eosio.blkpay"),
     ('S', 'sys-contract',   stepSetSystemContract,      True,    "Set system contract"),
     ('T', 'stake',          stepCreateStakedAccounts,   True,    "Create staked accounts"),
     ('p', 'reg-prod',       stepRegProducers,           True,    "Register producers"),
