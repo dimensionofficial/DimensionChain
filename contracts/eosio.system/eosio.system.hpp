@@ -56,6 +56,7 @@ namespace eosiosystem {
       int64_t              stake_to_gnode_fee = 10000;   // 1.0000 EON
       int64_t              new_proposal_fee = 15000;     // 1.5000 EON
       int64_t              proposal_num = 0;
+      int64_t              total_proposal_stake = 0;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
       EOSLIB_SERIALIZE_DERIVED( eosio_global_state, eosio::blockchain_parameters,
@@ -63,7 +64,7 @@ namespace eosiosystem {
                                 (last_producer_schedule_update)(last_pervote_bucket_fill)
                                 (pervote_bucket)(perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
                                 (last_producer_schedule_size)(total_producer_vote_weight)(last_name_close)
-                                (reward_pre_block)(stake_to_gnode_fee)(new_proposal_fee)(proposal_num) )
+                                (reward_pre_block)(stake_to_gnode_fee)(new_proposal_fee)(proposal_num)(total_proposal_stake) )
    };
 
 
@@ -283,6 +284,8 @@ namespace eosiosystem {
          void claimrewards( const account_name& owner );
 
          uint16_t get_producers_size();
+
+         void execproposal( const account_name owner, uint64_t proposal_id );
 
          void newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t status);
 

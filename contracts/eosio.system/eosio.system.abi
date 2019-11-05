@@ -262,7 +262,8 @@
          {"name":"reward_pre_block",              "type":"int64"},
          {"name":"stake_to_gnode_fee",            "type":"int64"},
          {"name":"new_proposal_fee",              "type":"int64"},
-         {"name":"proposal_num",                  "type":"int64"}
+         {"name":"proposal_num",                  "type":"int64"},
+         {"name":"total_proposal_stake",          "type":"int64"}
       ]
     },{
       "name": "producer_info",
@@ -377,6 +378,13 @@
       "base": "",
       "fields": [
         {"name":"owner",   "type":"account_name"}
+      ]
+    },{
+      "name": "execproposal",
+      "base": "",
+      "fields": [
+        {"name":"owner",         "type":"account_name"},
+        {"name":"proposal_id",   "type":"uint64"}
       ]
     },{
       "name": "newproposal",
@@ -586,6 +594,10 @@
    },{
       "name": "newproposal",
       "type": "newproposal",
+      "ricardian_contract": ""
+   },{
+      "name": "execproposal",
+      "type": "execproposal",
       "ricardian_contract": ""
    },{
       "name": "staketognode",

@@ -78,9 +78,49 @@ namespace eosiosystem {
 
 
 
+   void system_contract::execproposal( const account_name owner, uint64_t proposal_id ) {
+       require_auth( owner );
+       const auto now_time = now();
 
+       auto gnd = _gnode.find( owner );
+       eosio_assert(gnd != _gnode.end(), "only governance node can exec proposal");
 
+       auto prop = _proposals.find( proposal_id );
+       eosio_assert(prop != _proposals.end(), "proposal_id not in _proposals");
+       if(get_producers_size() > 7) { // 多于7个时检查
+           eosio_assert(now_time > prop->vote_end_time.slot, "proposal not end");
+       }
+            
+      // 检查proposal == 1是否满足条件，是这执行
+        if( prop->type == 1 ) {
+            if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
+                _proposals.modify(prop, owner, [&](auto &info) {
+                    info.is_satisfy = true;
+                });
+                gnd = _gnode.find( prop->account );
+                eosio_assert(gnd != _gnode.end(), "account not in _gnode");
 
+                add_elected_producers( prop->account, gnd->producer_key, gnd->url, gnd->location, prop->id);
+                _gnode.modify( gnd, owner, [&](auto& info) {
+                    info.is_bp   = true;
+                });
+            }
+        }
+      // 检查proposal == 2是否满足条件，是这执行
+        if( prop->type == 2 ) {
+            if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
+                _proposals.modify(prop, owner, [&](auto &info) {
+                    info.is_satisfy = true;
+                });
+                gnd = _gnode.find( prop->account );
+                eosio_assert(gnd != _gnode.end(), "account not in _gnode");
+                remove_elected_producers( prop->account, prop->id);
+                _gnode.modify( gnd, owner, [&](auto& info) {
+                    info.is_bp   = false;
+                });
+            }
+        }
+   }
 
    //发起提案，只有gnode才可以发起提案。
    // type 1: add bp 2: remove bp 3: switch consensus 
@@ -88,8 +128,8 @@ namespace eosiosystem {
        require_auth( owner );
        const auto now_time = now();
 
-       auto prod3 = _gnode.find( owner );
-       eosio_assert(prod3 != _gnode.end(), "only governance node can new proposal");
+       auto gnd = _gnode.find( owner );
+       eosio_assert(gnd != _gnode.end(), "only governance node can new proposal");
 
        if(type == 1) {
            eosio_assert(owner == account, "can not add other account to bp");
@@ -118,7 +158,7 @@ namespace eosiosystem {
            } else {
                info.vote_end_time = block_timestamp(now_time + blocks_per_day * 30);
            }
-        //    info.vote_end_time = ct; //测试
+           info.vote_end_time = block_timestamp(now_time); //测试
            info.block_height = block_height;
            info.type = type;
            info.is_satisfy = false;
@@ -137,8 +177,8 @@ namespace eosiosystem {
        require_auth( owner );
        const auto now_time = now();
 
-       auto prod3 = _gnode.find( owner );
-       eosio_assert(prod3 == _gnode.end(), "account already in _gnode");
+       auto gnd = _gnode.find( owner );
+       eosio_assert(gnd == _gnode.end(), "account already in _gnode");
 
        int64_t fee = _gstate.stake_to_gnode_fee;
        INLINE_ACTION_SENDER(eosio::token, transfer)(
@@ -146,7 +186,7 @@ namespace eosiosystem {
           { owner, N(eosio.bpstk), asset(fee), "stake 1.0000 EON to governance node" }
        );
 
-       prod3 = _gnode.emplace( owner, [&]( goverance_node_info& info  ) {
+       gnd = _gnode.emplace( owner, [&]( goverance_node_info& info  ) {
             info.owner          = owner;
             info.bp_staked      = fee;
             info.stake_time     = block_timestamp(now_time);
