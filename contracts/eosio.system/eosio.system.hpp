@@ -267,6 +267,10 @@ namespace eosiosystem {
          void claimrewards( const account_name& owner );
 
          void staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location );
+         
+         void unstakegnode( const account_name owner );
+
+         void updategnode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location );
 
          void setpriv( account_name account, uint8_t ispriv );
 

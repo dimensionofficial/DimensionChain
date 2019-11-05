@@ -92,9 +92,51 @@ namespace eosiosystem {
        });
    }
 
+   // unstakegnode
+   void system_contract::unstakegnode( const account_name owner ) {
+       require_auth( owner );
+       const auto now_time = now();
 
+       auto gnd = _gnode.find( owner );
+       eosio_assert(gnd != _gnode.end(), "account not in _gnode");
+       eosio_assert(!gnd->is_bp, "account is bp, can not unstake");
 
+       auto idx = _proposals.get_index<N(byvendtime)>();
+       for(auto it = idx.cbegin(); it != idx.cend(); ++it) {
+             if(it->vote_end_time.slot  <= now_time) continue;
+ 
+             eosio_assert(it->owner != owner, "proposal owner is equal owner");
+             eosio_assert(it->account != owner, "proposal account is equal owner");
+       }
 
+       int64_t fee = gnd->bp_staked;
+       
+       _gnode.erase( gnd );
+
+       INLINE_ACTION_SENDER(eosio::token, transfer)(
+          N(eosio.token), { {N(eosio.bpstk), N(active)} },
+          { N(eosio.bpstk), owner, asset(fee), "unstake goverance node refund" }
+       );
+   }
+
+   // 更新governance node信息
+   void system_contract::updategnode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location ) {
+       require_auth( owner );
+
+       auto gnd = _gnode.find( owner );
+       eosio_assert(gnd != _gnode.end(), "account not in _gnode");
+
+       eosio_assert(!gnd->is_bp, "can not unstake, this account is bp now");
+
+       // 检查是否有与该账号相关的提案
+
+      _gnode.modify( gnd, owner, [&](auto& info) {
+         info.producer_key   = producer_key;
+         info.url            = url;
+         info.location       = location;
+      });
+
+   }
 
 
 
