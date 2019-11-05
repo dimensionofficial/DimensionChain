@@ -126,6 +126,17 @@ namespace eosiosystem {
                                        (block_height)(type)(is_satisfy)(is_exec)(status)(total_yeas)(total_nays) )
    };
 
+   struct proposal_vote_info {
+      account_name            owner;
+      bool                 vote;
+      block_timestamp      vote_time;
+
+      uint64_t primary_key()const { return owner; }
+
+      EOSLIB_SERIALIZE( proposal_vote_info, (owner)(vote)(vote_time) )
+   };
+
+
 
 
    struct voter_info {
@@ -172,6 +183,7 @@ namespace eosiosystem {
                                indexed_by<N(byvendtime), const_mem_fun<proposal_info, uint64_t, &proposal_info::by_vote_end_time>  >
                                > proposals_table;
 
+   typedef eosio::multi_index< N(propvote), proposal_vote_info > proposal_vote_table;
 
    typedef eosio::singleton<N(global), eosio_global_state> global_state_singleton;
 
