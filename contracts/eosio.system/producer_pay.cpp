@@ -6,6 +6,7 @@ namespace eosiosystem {
 
    const int64_t  min_pervote_daily_pay = 100'0000;
    const int64_t  min_activated_stake   = 150'000'000'0000;
+   const int64_t  min_proposal_stake   = 1'000'000;
    const double   continuous_rate       = 0.04879;          // 5% annual rate
    const double   perblock_rate         = 0.0025;           // 0.25%
    const double   standby_rate          = 0.0075;           // 0.75%
@@ -23,7 +24,7 @@ namespace eosiosystem {
       require_auth(N(eosio));
 
       /** until activated stake crosses this threshold no new rewards are paid */
-      if( _gstate.total_activated_stake < min_activated_stake )
+      if( _gstate.total_proposal_stake < min_proposal_stake )
          return;
 
       if( _gstate.last_pervote_bucket_fill == 0 )  /// start the presses
@@ -87,7 +88,7 @@ namespace eosiosystem {
 
        auto prop = _proposals.find( proposal_id );
        eosio_assert(prop != _proposals.end(), "proposal_id not in _proposals");
-       if(get_producers_size() > 7) { // 多于7个时检查
+       if(get_producers_size() > 17) { // 多于7个时检查
            eosio_assert(now_time > prop->vote_end_time.slot, "proposal not end");
        }
             
@@ -158,7 +159,7 @@ namespace eosiosystem {
            } else {
                info.vote_end_time = block_timestamp(now_time + blocks_per_day * 30);
            }
-           info.vote_end_time = block_timestamp(now_time); //测试
+          //  info.vote_end_time = block_timestamp(now_time); //测试
            info.block_height = block_height;
            info.type = type;
            info.is_satisfy = false;
@@ -249,20 +250,14 @@ namespace eosiosystem {
 
 
 
-
-
-
-
-
-
    void system_contract::claimrewards( const account_name& owner ) {
       require_auth(owner);
 
       const auto& prod = _producers.get( owner );
       eosio_assert( prod.active(), "producer does not have an active key" );
 
-      eosio_assert( _gstate.total_activated_stake >= min_activated_stake,
-                    "cannot claim rewards until the chain is activated (at least 15% of all tokens participate in voting)" );
+      eosio_assert( _gstate.total_proposal_stake >= min_proposal_stake,
+                    "cannot claimrewards until the chain is activated (at least 1 000 000)" );
 
       auto ct = current_time();
 

@@ -380,6 +380,32 @@ namespace eosiosystem {
       }
    }
 
+   // 重新计算用户投过票的proposal（未结束）的total_yeas,total_nays
+   void system_contract::update_proposal_votes( const account_name voter_name, int64_t weight ) {
+
+      if(_gstate.proposal_num == 0) return;
+      const auto now_time = now();
+      
+      auto idx = _proposals.get_index<N(byvendtime)>();
+      for(auto it = idx.cbegin(); it != idx.cend(); ++it) {
+            if(it->vote_end_time.slot  <= now_time) continue;
+
+            proposal_vote_table pvotes(_self, it->id);
+            auto vote_info = pvotes.find(voter_name);
+
+            if (vote_info != pvotes.end()) {
+                  idx.modify(it, voter_name, [&](auto& info){
+                        if(vote_info->vote == true) {
+                              info.total_yeas += weight;
+                        } else {
+                              info.total_nays += weight;
+                        }
+                  });
+            }
+      }
+   }
+
+
    void system_contract::delegatebw( account_name from, account_name receiver,
                                      asset stake_net_quantity,
                                      asset stake_cpu_quantity, bool transfer )
@@ -389,7 +415,29 @@ namespace eosiosystem {
       eosio_assert( stake_net_quantity + stake_cpu_quantity > asset(0), "must stake a positive amount" );
       eosio_assert( !transfer || from != receiver, "cannot use transfer flag if delegating to self" );
 
+      int64_t pvote_weight_old = 0;
+      int64_t pvote_weight_new = 0;
+
+      account_name change_account = transfer ? receiver : from;
+
+      auto voter = _voters.find( change_account );
+      if( voter != _voters.end() ) {
+            pvote_weight_old = stake_to_proposal_votes( voter->staked );
+      }
+
       changebw( from, receiver, stake_net_quantity, stake_cpu_quantity, transfer);
+
+      voter = _voters.find( change_account );
+      if( voter != _voters.end() ) {
+            pvote_weight_new = stake_to_proposal_votes( voter->staked );
+      }
+
+      int64_t weight = pvote_weight_new - pvote_weight_old;
+
+      if( weight != 0 ) {
+          update_proposal_votes(change_account, weight);
+          _gstate.total_proposal_stake += weight;
+      }
    } // delegatebw
 
    void system_contract::undelegatebw( account_name from, account_name receiver,
@@ -398,10 +446,29 @@ namespace eosiosystem {
       eosio_assert( asset() <= unstake_cpu_quantity, "must unstake a positive amount" );
       eosio_assert( asset() <= unstake_net_quantity, "must unstake a positive amount" );
       eosio_assert( asset() < unstake_cpu_quantity + unstake_net_quantity, "must unstake a positive amount" );
-      eosio_assert( _gstate.total_activated_stake >= min_activated_stake,
-                    "cannot undelegate bandwidth until the chain is activated (at least 15% of all tokens participate in voting)" );
+      eosio_assert( _gstate.total_proposal_stake >= min_proposal_stake,
+             "cannot undelegate bandwidth until the chain is activated (at least 1 000 000)" );
+
+      int64_t pvote_weight_old = 0;
+      int64_t pvote_weight_new = 0;
+
+      auto voter = _voters.find( from );
+      if( voter != _voters.end() ) {
+            pvote_weight_old = stake_to_proposal_votes( voter->staked );
+      }
 
       changebw( from, receiver, -unstake_net_quantity, -unstake_cpu_quantity, false);
+
+      voter = _voters.find( from );
+      if( voter != _voters.end() ) {
+            pvote_weight_new = stake_to_proposal_votes( voter->staked );
+      }
+
+      int64_t weight = pvote_weight_new - pvote_weight_old;
+      if( weight != 0 ) {
+          update_proposal_votes(from, weight);
+          _gstate.total_proposal_stake += weight; //更新票总数
+      }
    } // undelegatebw
 
 

@@ -312,12 +312,13 @@ namespace eosiosystem {
        * after total_activated_stake hits threshold, we can use last_vote_weight to determine that this is
        * their first vote and should consider their stake activated.
        */
-      if( voter->last_vote_weight <= 0.0 ) {
-         _gstate.total_activated_stake += voter->staked;
-         if( _gstate.total_activated_stake >= min_activated_stake && _gstate.thresh_activated_stake_time == 0 ) {
+      
+      // if( voter->last_vote_weight <= 0.0 ) {
+      //    _gstate.total_activated_stake += voter->staked;
+         if( _gstate.total_proposal_stake >= min_proposal_stake && _gstate.thresh_activated_stake_time == 0 ) {
             _gstate.thresh_activated_stake_time = current_time();
          }
-      }
+      // }
 
       auto new_vote_weight = stake2vote( voter->staked );
       if( voter->is_proxy ) {

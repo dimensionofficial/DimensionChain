@@ -313,6 +313,8 @@ namespace eosiosystem {
          void changebw( account_name from, account_name receiver,
                         asset stake_net_quantity, asset stake_cpu_quantity, bool transfer );
 
+        void update_proposal_votes( const account_name voter_name, int64_t weight );
+
          //defined in voting.hpp
          static eosio_global_state get_default_parameters();
 
