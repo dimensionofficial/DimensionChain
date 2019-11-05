@@ -65,6 +65,48 @@ namespace eosiosystem {
    }
 
    using namespace eosio;
+
+   // 抵押EON成为governance node, 可以发起提案
+   void system_contract::staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location ) {
+       require_auth( owner );
+       const auto now_time = now();
+
+       auto prod3 = _gnode.find( owner );
+       eosio_assert(prod3 == _gnode.end(), "account already in _gnode");
+
+       int64_t fee = _gstate.stake_to_gnode_fee;
+       INLINE_ACTION_SENDER(eosio::token, transfer)(
+          N(eosio.token), { {owner, N(active)} },
+          { owner, N(eosio.bpstk), asset(fee), "stake 1.0000 EON to governance node" }
+       );
+
+       prod3 = _gnode.emplace( owner, [&]( goverance_node_info& info  ) {
+            info.owner          = owner;
+            info.bp_staked      = fee;
+            info.stake_time     = block_timestamp(now_time);
+            info.is_bp          = false;
+            info.status         = 0;
+            info.producer_key   = producer_key;
+            info.url            = url;
+            info.location       = location;
+       });
+   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    void system_contract::claimrewards( const account_name& owner ) {
       require_auth(owner);
 
