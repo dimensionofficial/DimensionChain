@@ -47,6 +47,7 @@ namespace eosiosystem {
 
       // 有proposal时，不再使用update_elected_producers
       // 临时措施
+      // TODO:bidname
       if(_gstate.proposal_num != 0) return;
 
       /// only update block producers once every minute, block_timestamp is in half seconds
