@@ -107,20 +107,19 @@ namespace eosiosystem {
    };
 
    struct proposal_info {
-      uint64_t        id;
-
-      account_name            owner;
-      account_name            account;
-      block_timestamp      start_time;
-      block_timestamp      vote_end_time;
-      block_timestamp      exec_time;
-      uint32_t        block_height;
-      int64_t         type;
-      bool            is_satisfy;
-      bool            is_exec;
-      int64_t         status;
-      int64_t         total_yeas;
-      int64_t         total_nays;
+      uint64_t          id;
+      account_name      owner;
+      account_name      account;
+      block_timestamp   start_time;
+      block_timestamp   vote_end_time;
+      block_timestamp   exec_time;
+      uint32_t          block_height;
+      int64_t           type;
+      bool              is_satisfy;
+      bool              is_exec;
+      int64_t           status;
+      int64_t           total_yeas;
+      int64_t           total_nays;
 
       uint64_t primary_key()const { return id; }
       uint64_t by_vote_end_time()const { return vote_end_time.slot; }
@@ -130,7 +129,7 @@ namespace eosiosystem {
    };
 
    struct proposal_vote_info {
-      account_name            owner;
+      account_name         owner;
       bool                 vote;
       block_timestamp      vote_time;
 
