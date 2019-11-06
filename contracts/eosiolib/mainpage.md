@@ -4,7 +4,7 @@ Welcome to the EOS.IO Documentation
 @note This documentation is in progress and subject to change due to rapid development. Please report inaccuracies identified to the [EOS.IO Developer Telegram Group](https://t.me/joinchat/EaEnSUPktgfoI-XPfMYtcQ)
 
 ## EOS.IO
- - [Additional resources - Github Readme](https://github.com/EOSIO/eos#readme)
+ - [Additional resources - Github Readme](https://github.com/dimensionofficial/dimension#readme)
 
 ## Smart Contract Developers
 - @ref eosiorpc

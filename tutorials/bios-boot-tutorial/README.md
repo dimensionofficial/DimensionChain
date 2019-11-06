@@ -10,4 +10,4 @@ $ cd tutorials/bios-boot-tutorial
 $ ./bios-boot-tutorial.py
 ```
 
-See [dimension Documentation Wiki: Tutorial - Bios Boot](https://github.com/EOSIO/eos/wiki/Tutorial-Bios-Boot-Sequence) for additional information.
+See [dimension Documentation Wiki: Tutorial - Bios Boot](https://github.com/dimensionofficial/dimension/wiki/Tutorial-Bios-Boot-Sequence) for additional information.
