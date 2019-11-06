@@ -683,7 +683,7 @@ class Cluster(object):
 
     def spreadFundsAndValidate(self, transferAmount=1):
         """Sprays 'transferAmount' funds across configured accounts and validates action. The spray is done in a trickle down fashion with account 1
-        receiving transferAmount*n SYS and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
+        receiving transferAmount*n EON and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
 
         if Utils.Debug: Utils.Print("Get initial system balances.")
         initialBalances=self.nodes[0].getEosBalances([self.defproduceraAccount] + self.accounts)
@@ -918,7 +918,7 @@ class Cluster(object):
 
     @staticmethod
     def bootstrap(totalNodes, prodCount, totalProducers, biosHost, biosPort, walletMgr, onlyBios=False):
-        """Create 'prodCount' init accounts and deposits 10000000000 SYS in each. If prodCount is -1 will initialize all possible producers.
+        """Create 'prodCount' init accounts and deposits 10000000000 EON in each. If prodCount is -1 will initialize all possible producers.
         Ensure nodes are inter-connected prior to this call. One way to validate this will be to check if every node has block 1."""
 
         Utils.Print("Starting cluster bootstrap.")

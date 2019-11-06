@@ -26,7 +26,7 @@ The above will build off the most recent commit to the master branch by default.
 docker build -t eosio/eos:v1.5.7 --build-arg branch=v1.5.7 .
 ```
 
-By default, the symbol in eosio.system is set to SYS. You can override this using the symbol argument while building the docker image.
+By default, the symbol in eosio.system is set to EON. You can override this using the symbol argument while building the docker image.
 
 ```bash
 docker build -t eosio/eos --build-arg symbol=<symbol> .
