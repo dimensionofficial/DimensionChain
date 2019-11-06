@@ -142,7 +142,7 @@ namespace eosiosystem {
       const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
       _proposals.modify(proposal_voting, _self, [&](auto &info) {
           info.is_exec = true;
-          info.exec_time = block_timestamp(now_time);
+          info.exec_time = now_time;
       });
    }
 
@@ -192,7 +192,7 @@ namespace eosiosystem {
       const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
       _proposals.modify(proposal_voting, _self, [&](auto &info) {
           info.is_exec = true;
-          info.exec_time = block_timestamp(now_time);
+          info.exec_time = now_time;
       });
    }
 
@@ -218,7 +218,7 @@ namespace eosiosystem {
           if (yea != old_vote) {
               pvotes.modify(vote_info, voter_name, [&](auto &info) {
                   info.vote = yea;
-                  info.vote_time = block_timestamp(now_time);
+                  info.vote_time = now_time;
               });
               _proposals.modify(proposal_voting, voter_name, [&](auto &info) {
                   if (yea) {
@@ -237,7 +237,7 @@ namespace eosiosystem {
           pvotes.emplace(voter_name, [&](auto &info) {
               info.owner = voter_name;
               info.vote = yea;
-              info.vote_time = block_timestamp(now_time);
+              info.vote_time = now_time;
           });
           _proposals.modify(proposal_voting, voter_name, [&](auto &info) {
               if (yea) {

@@ -94,7 +94,7 @@ namespace eosiosystem {
       account_name          owner;
             
       int64_t               bp_staked = 0;
-      block_timestamp       stake_time;
+      time                  stake_time;
       bool                  is_bp;
       int64_t               status;
       eosio::public_key     producer_key;
@@ -110,9 +110,9 @@ namespace eosiosystem {
       uint64_t          id;
       account_name      owner;
       account_name      account;
-      block_timestamp   start_time;
-      block_timestamp   vote_end_time;
-      block_timestamp   exec_time;
+      time              start_time;
+      time              vote_end_time;
+      time              exec_time;
       uint32_t          block_height;
       int64_t           type;
       bool              is_satisfy;
@@ -122,7 +122,7 @@ namespace eosiosystem {
       int64_t           total_nays;
 
       uint64_t primary_key()const { return id; }
-      uint64_t by_vote_end_time()const { return vote_end_time.slot; }
+      uint64_t by_vote_end_time()const { return vote_end_time; }
 
       EOSLIB_SERIALIZE( proposal_info, (id)(owner)(account)(start_time)(vote_end_time)(exec_time)
                                        (block_height)(type)(is_satisfy)(is_exec)(status)(total_yeas)(total_nays) )
@@ -131,7 +131,7 @@ namespace eosiosystem {
    struct proposal_vote_info {
       account_name         owner;
       bool                 vote;
-      block_timestamp      vote_time;
+      time                 vote_time;
 
       uint64_t primary_key()const { return owner; }
 

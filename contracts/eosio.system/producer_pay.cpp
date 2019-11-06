@@ -96,7 +96,7 @@ namespace eosiosystem {
        auto prop = _proposals.find( proposal_id );
        eosio_assert(prop != _proposals.end(), "proposal_id not in _proposals");
        if(get_producers_size() > 17) { // 多于7个时检查
-           eosio_assert(now_time > prop->vote_end_time.slot, "proposal not end");
+           eosio_assert(now_time > prop->vote_end_time, "proposal not end");
        }
             
       // 检查proposal == 1是否满足条件，是这执行
@@ -160,11 +160,11 @@ namespace eosiosystem {
            info.id = id;
            info.owner = owner;
            info.account = account;
-           info.start_time = block_timestamp(now_time);
+           info.start_time = now_time;
            if(type == 1 || type == 2) {
-               info.vote_end_time = block_timestamp(now_time + blocks_per_day * 1);
+               info.vote_end_time = now_time + 24*3600 * 1;
            } else {
-               info.vote_end_time = block_timestamp(now_time + blocks_per_day * 30);
+               info.vote_end_time = now_time + 24*3600 * 30;
            }
           //  info.vote_end_time = block_timestamp(now_time); //测试
            info.block_height = block_height;
@@ -197,7 +197,7 @@ namespace eosiosystem {
        gnd = _gnode.emplace( owner, [&]( goverance_node_info& info  ) {
             info.owner          = owner;
             info.bp_staked      = fee;
-            info.stake_time     = block_timestamp(now_time);
+            info.stake_time     = now_time;
             info.is_bp          = false;
             info.status         = 0;
             info.producer_key   = producer_key;
@@ -217,7 +217,7 @@ namespace eosiosystem {
 
        auto idx = _proposals.get_index<N(byvendtime)>();
        for(auto it = idx.cbegin(); it != idx.cend(); ++it) {
-             if(it->vote_end_time.slot  <= now_time) continue;
+             if(it->vote_end_time  <= now_time) continue;
  
              eosio_assert(it->owner != owner, "proposal owner is equal owner");
              eosio_assert(it->account != owner, "proposal account is equal owner");

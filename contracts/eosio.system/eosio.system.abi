@@ -284,7 +284,7 @@
       "fields": [
          {"name":"owner",          "type":"account_name"},
          {"name":"bp_staked",      "type":"int64"},
-         {"name":"stake_time",     "type":"block_timestamp_type"},
+         {"name":"stake_time",     "type":"time_point_sec"},
          {"name":"is_bp",          "type":"bool"},
          {"name":"status",         "type":"int64"},
          {"name":"producer_key",   "type":"public_key"},
@@ -298,9 +298,9 @@
          {"name":"id",              "type":"uint64"},
          {"name":"owner",           "type":"account_name"},
          {"name":"account",         "type":"account_name"},
-         {"name":"start_time",      "type":"block_timestamp_type"},
-         {"name":"vote_end_time",   "type":"block_timestamp_type"},
-         {"name":"exec_time",       "type":"block_timestamp_type"},
+         {"name":"start_time",      "type":"time_point_sec"},
+         {"name":"vote_end_time",   "type":"time_point_sec"},
+         {"name":"exec_time",       "type":"time_point_sec"},
          {"name":"block_height",    "type":"uint32"},
          {"name":"type",            "type":"int64"},
          {"name":"is_satisfy",      "type":"bool"},
@@ -315,7 +315,7 @@
       "fields": [
          {"name":"owner",          "type":"account_name"},
          {"name":"vote",           "type":"bool"},
-         {"name":"vote_time",      "type":"block_timestamp_type"}
+         {"name":"vote_time",      "type":"time_point_sec"}
       ]
     },{
       "name": "regproducer",

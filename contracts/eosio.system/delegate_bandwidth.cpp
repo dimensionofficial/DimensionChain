@@ -388,7 +388,7 @@ namespace eosiosystem {
       
       auto idx = _proposals.get_index<N(byvendtime)>();
       for(auto it = idx.cbegin(); it != idx.cend(); ++it) {
-            if(it->vote_end_time.slot  <= now_time) continue;
+            if(it->vote_end_time  <= now_time) continue;
 
             proposal_vote_table pvotes(_self, it->id);
             auto vote_info = pvotes.find(voter_name);
