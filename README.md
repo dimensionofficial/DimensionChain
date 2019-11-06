@@ -1,7 +1,7 @@
 
 # EOSIO - The Most Powerful Infrastructure for Decentralized Applications
 
-[![Build status](https://badge.buildkite.com/370fe5c79410f7d695e4e34c500b4e86e3ac021c6b1f739e20.svg?branch=master)](https://buildkite.com/EOSIO/eosio)
+[![Build status](https://badge.buildkite.com/370fe5c79410f7d695e4e34c500b4e86e3ac021c6b1f739e20.svg?branch=master)](https://buildkite.com/EOSIO/eonio)
 
 Welcome to the EOSIO source code repository! This software enables businesses to rapidly build and deploy high-performance and high-security blockchain-based applications.
 
@@ -30,44 +30,44 @@ There is no public testnet running currently.
 
 #### Mac OS X Brew Install
 ```sh
-$ brew tap eosio/eosio
-$ brew install eosio
+$ brew tap eonio/eonio
+$ brew install eonio
 ```
 #### Mac OS X Brew Uninstall
 ```sh
-$ brew remove eosio
+$ brew remove eonio
 ```
 #### Ubuntu 18.04 Debian Package Install
 ```sh
-$ wget https://github.com/eosio/eos/releases/download/v1.5.7/eosio_1.5.7-1-ubuntu-18.04_amd64.deb
+$ wget https://github.com/eonio/eos/releases/download/v1.5.7/eosio_1.5.7-1-ubuntu-18.04_amd64.deb
 $ sudo apt install ./eosio_1.5.7-1-ubuntu-18.04_amd64.deb
 ```
 #### Ubuntu 16.04 Debian Package Install
 ```sh
-$ wget https://github.com/eosio/eos/releases/download/v1.5.7/eosio_1.5.7-1-ubuntu-16.04_amd64.deb
+$ wget https://github.com/eonio/eos/releases/download/v1.5.7/eosio_1.5.7-1-ubuntu-16.04_amd64.deb
 $ sudo apt install ./eosio_1.5.7-1-ubuntu-16.04_amd64.deb
 ```
 #### Debian Package Uninstall
 ```sh
-$ sudo apt remove eosio
+$ sudo apt remove eonio
 ```
 #### Centos RPM Package Install
 ```sh
-$ wget https://github.com/eosio/eos/releases/download/v1.5.7/eosio-1.5.7-1.el7.x86_64.rpm
-$ sudo yum install ./eosio-1.5.7-1.el7.x86_64.rpm
+$ wget https://github.com/eonio/eos/releases/download/v1.5.7/eonio-1.5.7-1.el7.x86_64.rpm
+$ sudo yum install ./eonio-1.5.7-1.el7.x86_64.rpm
 ```
 #### Centos RPM Package Uninstall
 ```sh
-$ sudo yum remove eosio.cdt
+$ sudo yum remove eonio.cdt
 ```
 #### Fedora RPM Package Install
 ```sh
-$ wget https://github.com/eosio/eos/releases/download/v1.5.7/eosio-1.5.7-1.fc27.x86_64.rpm
-$ sudo yum install ./eosio-1.5.7-1.fc27.x86_64.rpm
+$ wget https://github.com/eonio/eos/releases/download/v1.5.7/eonio-1.5.7-1.fc27.x86_64.rpm
+$ sudo yum install ./eonio-1.5.7-1.fc27.x86_64.rpm
 ```
 #### Fedora RPM Package Uninstall
 ```sh
-$ sudo yum remove eosio.cdt
+$ sudo yum remove eonio.cdt
 ```
 
 ## Supported Operating Systems
@@ -82,9 +82,9 @@ EOSIO currently supports the following operating systems:
 
 ## Resources
 1. [Website](https://eos.io)
-1. [Blog](https://medium.com/eosio)
+1. [Blog](https://medium.com/eonio)
 1. [Developer Portal](https://developers.eos.io)
-1. [StackExchange for Q&A](https://eosio.stackexchange.com/)
+1. [StackExchange for Q&A](https://eonio.stackexchange.com/)
 1. [Community Telegram Group](https://t.me/EOSProject)
 1. [Developer Telegram Group](https://t.me/joinchat/EaEnSUPktgfoI-XPfMYtcQ)
 1. [White Paper](https://github.com/EOSIO/Documentation/blob/master/TechnicalWhitePaper.md)
@@ -92,4 +92,4 @@ EOSIO currently supports the following operating systems:
 
 <a name="gettingstarted"></a>
 ## Getting Started
-Instructions detailing the process of getting the software, building it, running a simple test network that produces blocks, account creation and uploading a sample contract to the blockchain can be found in [Getting Started](https://developers.eos.io/eosio-nodeos/docs/overview-1) on the [EOSIO Developer Portal](https://developers.eos.io).
+Instructions detailing the process of getting the software, building it, running a simple test network that produces blocks, account creation and uploading a sample contract to the blockchain can be found in [Getting Started](https://developers.eos.io/eonio-nodeos/docs/overview-1) on the [EOSIO Developer Portal](https://developers.eos.io).
