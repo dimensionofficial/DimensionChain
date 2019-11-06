@@ -17,7 +17,7 @@ namespace eosiosystem {
    const uint64_t useconds_per_day      = 24 * 3600 * uint64_t(1000000);
    const uint64_t useconds_per_year     = seconds_per_year*1000000ll;
 
-   const uint16_t min_producer_size     = 4;
+   const uint16_t min_producer_size     = 4;  //避免bp太少就接替eonio出块
 
 
    void system_contract::onblock( block_timestamp timestamp, account_name producer ) {
