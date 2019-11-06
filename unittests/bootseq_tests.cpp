@@ -154,7 +154,7 @@ public:
     }
 
     asset get_balance( const account_name& act ) {
-         return get_currency_balance(N(eosio.token), symbol(CORE_SYMBOL), act);
+         return get_currency_balance(N(eonio.token), symbol(CORE_SYMBOL), act);
     }
 
     void set_code_abi(const account_name& account, const char* wast, const char* abi, const private_key_type* signer = nullptr) {
@@ -179,33 +179,33 @@ BOOST_AUTO_TEST_SUITE(bootseq_tests)
 BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
     try {
 
-        // Create eosio.msig and eosio.token
-        create_accounts({N(eosio.msig), N(eosio.token), N(eosio.ram), N(eosio.ramfee), N(eosio.stake), N(eosio.vpay), N(eosio.bpay), N(eosio.saving), N(eosio.blkpay) });
+        // Create eonio.msig and eonio.token
+        create_accounts({N(eonio.msig), N(eonio.token), N(eonio.ram), N(eonio.ramfee), N(eonio.stake), N(eonio.vpay), N(eonio.bpay), N(eonio.saving), N(eonio.blkpay) });
 
         // Set code for the following accounts:
-        //  - eosio (code: eosio.bios) (already set by tester constructor)
-        //  - eosio.msig (code: eosio.msig)
-        //  - eosio.token (code: eosio.token)
-        set_code_abi(N(eosio.msig), eosio_msig_wast, eosio_msig_abi);//, &eosio_active_pk);
-        set_code_abi(N(eosio.token), eosio_token_wast, eosio_token_abi); //, &eosio_active_pk);
+        //  - eosio (code: eonio.bios) (already set by tester constructor)
+        //  - eonio.msig (code: eonio.msig)
+        //  - eonio.token (code: eonio.token)
+        set_code_abi(N(eonio.msig), eosio_msig_wast, eosio_msig_abi);//, &eosio_active_pk);
+        set_code_abi(N(eonio.token), eosio_token_wast, eosio_token_abi); //, &eosio_active_pk);
 
-        // Set privileged for eosio.msig and eosio.token
-        set_privileged(N(eosio.msig));
-        set_privileged(N(eosio.token));
+        // Set privileged for eonio.msig and eonio.token
+        set_privileged(N(eonio.msig));
+        set_privileged(N(eonio.token));
 
-        // Verify eosio.msig and eosio.token is privileged
-        const auto& eosio_msig_acc = get<account_object, by_name>(N(eosio.msig));
+        // Verify eonio.msig and eonio.token is privileged
+        const auto& eosio_msig_acc = get<account_object, by_name>(N(eonio.msig));
         BOOST_TEST(eosio_msig_acc.privileged == true);
-        const auto& eosio_token_acc = get<account_object, by_name>(N(eosio.token));
+        const auto& eosio_token_acc = get<account_object, by_name>(N(eonio.token));
         BOOST_TEST(eosio_token_acc.privileged == true);
 
 
-        // Create EON tokens in eosio.token, set its manager as eosio
+        // Create EON tokens in eonio.token, set its manager as eosio
         auto max_supply = core_from_string("10000000000.0000"); /// 1x larger than 1B initial tokens
         auto initial_supply = core_from_string("1000000000.0000"); /// 1x larger than 1B initial tokens
-        create_currency(N(eosio.token), config::system_account_name, max_supply);
-        // Issue the genesis supply of 1 billion EON tokens to eosio.system
-        issue(N(eosio.token), config::system_account_name, config::system_account_name, initial_supply);
+        create_currency(N(eonio.token), config::system_account_name, max_supply);
+        // Issue the genesis supply of 1 billion EON tokens to eonio.system
+        issue(N(eonio.token), config::system_account_name, config::system_account_name, initial_supply);
 
         auto actual = get_balance(config::system_account_name);
         BOOST_REQUIRE_EQUAL(initial_supply, actual);
@@ -215,7 +215,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            create_account( a.aname, config::system_account_name );
         }
 
-        // Set eosio.system to eosio
+        // Set eonio.system to eosio
         set_code_abi(config::system_account_name, eosio_system_wast, eosio_system_abi);
 
         // Buy ram and stake cpu and net for each genesis accounts
@@ -228,7 +228,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            auto r = buyram(config::system_account_name, a.aname, asset(ram));
            BOOST_REQUIRE( !r->except_ptr );
 
-           r = delegate_bandwidth(N(eosio.stake), a.aname, asset(net), asset(cpu));
+           r = delegate_bandwidth(N(eonio.stake), a.aname, asset(net), asset(cpu));
            BOOST_REQUIRE( !r->except_ptr );
         }
 
