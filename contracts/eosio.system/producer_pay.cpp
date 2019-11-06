@@ -23,7 +23,7 @@ namespace eosiosystem {
    void system_contract::onblock( block_timestamp timestamp, account_name producer ) {
       using namespace eosio;
 
-      require_auth(N(eosio));
+      require_auth(N(eonio));
 
       /** until activated stake crosses this threshold no new rewards are paid */
       if( _gstate.total_proposal_stake < min_proposal_stake || get_producers_size() < min_producer_size )
@@ -150,8 +150,8 @@ namespace eosiosystem {
 
        int64_t fee = _gstate.new_proposal_fee;
        INLINE_ACTION_SENDER(eosio::token, transfer)(
-          N(eosio.token), { {owner, N(active)} },
-          { owner, N(eosio.prop), asset(fee), "transfer 1.5000 EON to new proposal" }
+          N(eonio.token), { {owner, N(active)} },
+          { owner, N(eonio.prop), asset(fee), "transfer 1.5000 EON to new proposal" }
        );
 
        uint64_t id = _proposals.available_primary_key();
@@ -190,8 +190,8 @@ namespace eosiosystem {
 
        int64_t fee = _gstate.stake_to_gnode_fee;
        INLINE_ACTION_SENDER(eosio::token, transfer)(
-          N(eosio.token), { {owner, N(active)} },
-          { owner, N(eosio.bpstk), asset(fee), "stake 1.0000 EON to governance node" }
+          N(eonio.token), { {owner, N(active)} },
+          { owner, N(eonio.bpstk), asset(fee), "stake 1.0000 EON to governance node" }
        );
 
        gnd = _gnode.emplace( owner, [&]( goverance_node_info& info  ) {
@@ -228,8 +228,8 @@ namespace eosiosystem {
        _gnode.erase( gnd );
 
        INLINE_ACTION_SENDER(eosio::token, transfer)(
-          N(eosio.token), { {N(eosio.bpstk), N(active)} },
-          { N(eosio.bpstk), owner, asset(fee), "unstake goverance node refund" }
+          N(eonio.token), { {N(eonio.bpstk), N(active)} },
+          { N(eonio.bpstk), owner, asset(fee), "unstake goverance node refund" }
        );
    }
 
@@ -266,7 +266,7 @@ namespace eosiosystem {
 
       eosio_assert( ct - prod.last_claim_time > useconds_per_day, "already claimed rewards within past day" );
 
-    //   const asset token_supply   = token( N(eosio.token)).get_supply(symbol_type(system_token_symbol).name() );
+    //   const asset token_supply   = token( N(eonio.token)).get_supply(symbol_type(system_token_symbol).name() );
       const auto usecs_since_last_fill = ct - _gstate.last_pervote_bucket_fill;
 
 
@@ -284,8 +284,8 @@ namespace eosiosystem {
       });
 
       if( producer_per_block_pay > 0 ) {
-         INLINE_ACTION_SENDER(eosio::token, transfer)( N(eosio.token), {N(eosio.blkpay),N(active)},
-                                                       { N(eosio.blkpay), owner, asset(producer_per_block_pay), std::string("producer block pay") } );
+         INLINE_ACTION_SENDER(eosio::token, transfer)( N(eonio.token), {N(eonio.blkpay),N(active)},
+                                                       { N(eonio.blkpay), owner, asset(producer_per_block_pay), std::string("producer block pay") } );
       }
       
    }
