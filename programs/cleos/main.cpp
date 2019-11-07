@@ -1609,6 +1609,79 @@ struct newproposal_subcommand {
     }
 };
 
+struct add_bp_subcommand {
+    string owner_str;
+    string account;
+    uint32_t block_height = 1;
+    int16_t type = 1;
+    int16_t consensus_type = 1;
+
+    add_bp_subcommand(CLI::App* actionRoot) {
+        auto new_proposal = actionRoot->add_subcommand("addbp", localized("New governance proposal (add owner account to bp)"));
+        new_proposal->add_option("owner", owner_str, localized("The owner of created proposal"))->required();
+        add_standard_transaction_options(new_proposal, "owner@active");
+        new_proposal->set_callback([this] {
+            fc::variant act_payload = fc::mutable_variant_object()
+               ("owner", owner_str)
+               ("account", owner_str)
+               ("block_height", block_height)
+               ("type", type)
+               ("consensus_type", consensus_type);
+               
+            send_actions({create_action({permission_level{owner_str,config::active_name}}, config::system_account_name, N(newproposal), act_payload)});
+         });
+    }
+};
+
+struct remove_bp_subcommand {
+    string owner_str;
+    string account;
+    uint32_t block_height = 1;
+    int16_t type = 2;
+    int16_t consensus_type = 1;
+
+    remove_bp_subcommand(CLI::App* actionRoot) {
+        auto new_proposal = actionRoot->add_subcommand("removebp", localized("New governance proposal (remove account from bp)"));
+        new_proposal->add_option("owner", owner_str, localized("The owner of created proposal"))->required();
+        new_proposal->add_option("account", account, localized("The governance proposal about whom"))->required();
+        add_standard_transaction_options(new_proposal, "owner@active");
+        new_proposal->set_callback([this] {
+            fc::variant act_payload = fc::mutable_variant_object()
+               ("owner", owner_str)
+               ("account", account)
+               ("block_height", block_height)
+               ("type", type)
+               ("consensus_type", consensus_type);
+               
+            send_actions({create_action({permission_level{owner_str,config::active_name}}, config::system_account_name, N(newproposal), act_payload)});
+         });
+    }
+};
+
+struct set_consensus_type_subcommand {
+    string owner_str;
+    string account;
+    uint32_t block_height = 1;
+    int16_t type = 3;
+    int16_t consensus_type;
+
+    set_consensus_type_subcommand(CLI::App* actionRoot) {
+        auto new_proposal = actionRoot->add_subcommand("setcontype", localized("Set consensus type"));
+        new_proposal->add_option("owner", owner_str, localized("The owner of created proposal"))->required();
+        new_proposal->add_option("consensus_type", consensus_type, localized("The consensus type"))->required();
+        add_standard_transaction_options(new_proposal, "owner@active");
+        new_proposal->set_callback([this] {
+            fc::variant act_payload = fc::mutable_variant_object()
+               ("owner", owner_str)
+               ("account", owner_str)
+               ("block_height", block_height)
+               ("type", type)
+               ("consensus_type", consensus_type);
+               
+            send_actions({create_action({permission_level{owner_str,config::active_name}}, config::system_account_name, N(newproposal), act_payload)});
+         });
+    }
+};
 
 
 struct voteproposal_subcommand {
@@ -3574,6 +3647,10 @@ int main( int argc, char** argv ) {
    auto newproposal = newproposal_subcommand(system);
    auto voteproposal = voteproposal_subcommand(system);
    auto execproposal = execproposal_subcommand(system);
+
+   auto addBp = add_bp_subcommand(system);
+   auto removeBp = remove_bp_subcommand(system);
+   auto setConsensusType = set_consensus_type_subcommand(system);
 
    auto claimRewards = claimrewards_subcommand(system);
 
