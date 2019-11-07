@@ -282,9 +282,6 @@ namespace eosiosystem {
 
       eosio_assert( ct - prod.last_claim_time > useconds_per_day, "already claimed rewards within past day" );
 
-    //   const asset token_supply   = token( N(eonio.token)).get_supply(symbol_type(system_token_symbol).name() );
-      const auto usecs_since_last_fill = ct - _gstate.last_pervote_bucket_fill;
-
 
       int64_t producer_per_block_pay = 0;
       if( _gstate.total_unpaid_blocks > 0 ) {
