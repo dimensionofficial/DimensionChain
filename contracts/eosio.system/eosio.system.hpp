@@ -117,7 +117,7 @@ namespace eosiosystem {
       int64_t           type;
       bool              is_satisfy;
       bool              is_exec;
-      int64_t           status;
+      int64_t           consensus_type;
       int64_t           total_yeas;
       int64_t           total_nays;
 
@@ -125,7 +125,7 @@ namespace eosiosystem {
       uint64_t by_vote_end_time()const { return vote_end_time; }
 
       EOSLIB_SERIALIZE( proposal_info, (id)(owner)(account)(start_time)(vote_end_time)(exec_time)
-                                       (block_height)(type)(is_satisfy)(is_exec)(status)(total_yeas)(total_nays) )
+                                       (block_height)(type)(is_satisfy)(is_exec)(consensus_type)(total_yeas)(total_nays) )
    };
 
    struct proposal_vote_info {
@@ -286,7 +286,7 @@ namespace eosiosystem {
 
          void execproposal( const account_name owner, uint64_t proposal_id );
 
-         void newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t status);
+         void newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t consensus_type);
 
          void staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location );
          
@@ -299,10 +299,12 @@ namespace eosiosystem {
          void rmvproducer( account_name producer );
 
          void bidname( account_name bidder, account_name newname, asset bid );
+
+         void setcontype( int64_t consensus_type );
       private:
          void update_elected_producers( block_timestamp timestamp );
 
-         void add_elected_producers( account_name new_producer, public_key key, std::string url, uint16_t loc, uint64_t proposal_id );
+         void add_elected_producers( account_name new_producer, uint64_t proposal_id );
          void remove_elected_producers( account_name new_producer, uint64_t proposal_id );
          int64_t stake_to_proposal_votes( int64_t staked );
 

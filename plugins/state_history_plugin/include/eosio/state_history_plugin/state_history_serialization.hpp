@@ -230,6 +230,7 @@ template <typename ST>
 datastream<ST>& operator<<(datastream<ST>&                                                            ds,
                            const history_serial_wrapper<eosio::chain::shared_producer_schedule_type>& obj) {
    fc::raw::pack(ds, as_type<uint32_t>(obj.obj.version));
+   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.consensus_type));
    history_serialize_container(ds, obj.db,
                                as_type<eosio::chain::shared_vector<eosio::chain::producer_key>>(obj.obj.producers));
    return ds;

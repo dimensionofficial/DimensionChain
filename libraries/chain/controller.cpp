@@ -599,7 +599,7 @@ struct controller_impl {
     */
    void initialize_fork_db() {
       wlog( " Initializing new blockchain with genesis state                  " );
-      producer_schedule_type initial_schedule{ 0, {{config::system_account_name, conf.genesis.initial_key}} };
+      producer_schedule_type initial_schedule{ 0, 0, {{config::system_account_name, conf.genesis.initial_key}} };
 
       block_header_state genheader;
       genheader.active_schedule       = initial_schedule;
@@ -1969,6 +1969,50 @@ void controller::write_snapshot( const snapshot_writer_ptr& snapshot ) const {
 
 void controller::pop_block() {
    my->pop_block();
+}
+
+int64_t controller::set_consensus_type( int64_t consensus_type ) {
+   const auto& gpo = get_global_properties();
+   auto cur_block_num = head_block_num() + 1;
+
+   if( gpo.proposed_schedule_block_num.valid() ) {
+      if( *gpo.proposed_schedule_block_num != cur_block_num )
+         return -1; // there is already a proposed schedule set in a previous block, wait for it to become pending
+   }
+
+   producer_schedule_type sch;
+
+   decltype(sch.producers.cend()) end;
+   decltype(end)                  begin;
+
+   vector<producer_key> producers;
+
+   if( my->pending->_pending_block_state->pending_schedule.producers.size() == 0 ) {
+      const auto& active_sch = my->pending->_pending_block_state->active_schedule;
+      begin = active_sch.producers.begin();
+      end   = active_sch.producers.end();
+      sch.version = active_sch.version + 1;
+      sch.consensus_type = consensus_type;
+      producers.insert(producers.begin(), begin, end);
+   } else {
+      const auto& pending_sch = my->pending->_pending_block_state->pending_schedule;
+      begin = pending_sch.producers.begin();
+      end   = pending_sch.producers.end();
+      sch.version = pending_sch.version + 1;
+      sch.consensus_type = consensus_type;
+      producers.insert(producers.begin(), begin, end);
+   }
+
+   sch.producers = std::move(producers);
+
+   int64_t version = sch.version;
+
+   my->db.modify( gpo, [&]( auto& gp ) {
+      gp.proposed_schedule_block_num = cur_block_num;
+      gp.proposed_schedule = std::move(sch);
+   });
+
+   return consensus_type;
 }
 
 int64_t controller::set_proposed_producers( vector<producer_key> producers ) {

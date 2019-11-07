@@ -152,6 +152,7 @@ extern const char* const state_history_plugin_abi = R"({
                 { "name": "transaction_mroot", "type": "checksum256" },
                 { "name": "action_mroot", "type": "checksum256" },
                 { "name": "schedule_version", "type": "uint32" },
+                { "name": "consensus_type", "type": "int64" },
                 { "name": "new_producers", "type": "producer_schedule?" },
                 { "name": "header_extensions", "type": "extension[]" }
             ]

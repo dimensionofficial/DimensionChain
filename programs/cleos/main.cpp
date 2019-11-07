@@ -1271,6 +1271,7 @@ struct get_schedule_subcommand {
          return;
       }
       printf("%s schedule version %s\n", name, schedule["version"].as_string().c_str());
+      printf("%s consensus type %s\n", name, schedule["consensus_type"].as_string().c_str());
       printf("    %-13s %s\n", "Producer", "Producer key");
       printf("    %-13s %s\n", "=============", "==================");
       for (auto& row: schedule["producers"].get_array())
@@ -1585,7 +1586,7 @@ struct newproposal_subcommand {
     string account;
     uint32_t block_height;
     int16_t type;
-    int16_t status;
+    int16_t consensus_type;
 
     newproposal_subcommand(CLI::App* actionRoot) {
         auto new_proposal = actionRoot->add_subcommand("newproposal", localized("New governance proposal"));
@@ -1593,7 +1594,7 @@ struct newproposal_subcommand {
         new_proposal->add_option("account", account, localized("The governance proposal about whom"))->required();
         new_proposal->add_option("block_height", block_height, localized("The block height that proposal execute"))->required();
         new_proposal->add_option("type", type, localized("type 1: add bp 2: remove bp 3: switch consensus"))->required();
-        new_proposal->add_option("status", status, localized("The proposal status"))->required();
+        new_proposal->add_option("consensus_type", consensus_type, localized("The consensus type (type is 3)"))->required();
         add_standard_transaction_options(new_proposal, "owner@active");
         new_proposal->set_callback([this] {
             fc::variant act_payload = fc::mutable_variant_object()
@@ -1601,7 +1602,7 @@ struct newproposal_subcommand {
                ("account", account)
                ("block_height", block_height)
                ("type", type)
-               ("status", status);
+               ("consensus_type", consensus_type);
                
             send_actions({create_action({permission_level{owner_str,config::active_name}}, config::system_account_name, N(newproposal), act_payload)});
          });

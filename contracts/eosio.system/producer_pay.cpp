@@ -95,9 +95,9 @@ namespace eosiosystem {
 
        auto prop = _proposals.find( proposal_id );
        eosio_assert(prop != _proposals.end(), "proposal_id not in _proposals");
-       if(get_producers_size() > 17) { // 多于7个时检查
-           eosio_assert(now_time > prop->vote_end_time, "proposal not end");
-       }
+    //    if(get_producers_size() > 7) { // 多于7个时检查
+    //        eosio_assert(now_time > prop->vote_end_time, "proposal not end");
+    //    }
             
       // 检查proposal == 1是否满足条件，是这执行
         if( prop->type == 1 ) {
@@ -108,7 +108,7 @@ namespace eosiosystem {
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
 
-                add_elected_producers( prop->account, gnd->producer_key, gnd->url, gnd->location, prop->id);
+                add_elected_producers( prop->account, prop->id);
                 _gnode.modify( gnd, owner, [&](auto& info) {
                     info.is_bp   = true;
                 });
@@ -128,24 +128,40 @@ namespace eosiosystem {
                 });
             }
         }
+      // 检查proposal == 3是否满足条件，是这执行
+        if( prop->type == 3 ) {
+            if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
+                _proposals.modify(prop, owner, [&](auto &info) {
+                    info.is_satisfy = true;
+                });
+                set_consensus_type(prop->consensus_type);
+                
+            }
+        }
    }
 
    //发起提案，只有gnode才可以发起提案。
    // type 1: add bp 2: remove bp 3: switch consensus 
-   void system_contract::newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t status) {
+   void system_contract::newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t consensus_type) {
        require_auth( owner );
        const auto now_time = now();
 
        auto gnd = _gnode.find( owner );
        eosio_assert(gnd != _gnode.end(), "only governance node can new proposal");
 
+       //不能提名其他账号
        if(type == 1) {
            eosio_assert(owner == account, "can not add other account to bp");
        }
-
        //account必须是出块节点
        if(type == 2){
 
+       }
+       //切换共识，对共识类型检查
+       if (type == 3) {
+           eosio_assert(consensus_type == 1
+                     || consensus_type == 2
+                     || consensus_type == 3, "consensus_type must be one of 1, 2, 3");
        }
 
        int64_t fee = _gstate.new_proposal_fee;
@@ -171,7 +187,7 @@ namespace eosiosystem {
            info.type = type;
            info.is_satisfy = false;
            info.is_exec = false;
-           info.status = 0;
+           info.consensus_type = consensus_type;
            info.total_yeas     = 0;
            info.total_nays     = 0;
        });

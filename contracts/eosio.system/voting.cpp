@@ -103,7 +103,7 @@ namespace eosiosystem {
    }
 
    // 提案type==1，将account 加到producer
-   void system_contract::add_elected_producers( account_name new_producer, public_key key, std::string url, uint16_t loc, uint64_t proposal_id ) {
+   void system_contract::add_elected_producers( account_name new_producer, uint64_t proposal_id ) {
 
       const auto now_time = now();
 
@@ -111,7 +111,7 @@ namespace eosiosystem {
       
       auto gnd = _gnode.find( new_producer );
       eosio_assert(gnd != _gnode.end(), "account not in _gnode");
-      regproducer(new_producer, gnd->producer_key, url, gnd->location);
+      regproducer(new_producer, gnd->producer_key, gnd->url, gnd->location);
 
       auto idx = _producers.get_index<N(prototalvote)>();
 

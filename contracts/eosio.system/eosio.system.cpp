@@ -136,6 +136,10 @@ namespace eosiosystem {
       }
    }
 
+   void system_contract::setcontype( int64_t consensus_type ) {
+     int64_t ret = set_consensus_type(consensus_type);
+   }
+
    /**
     *  Called after a new account is created. This code enforces resource-limits rules
     *  for new accounts as well as new account naming conventions.
@@ -190,7 +194,7 @@ EOSIO_ABI( eosiosystem::system_contract,
      // native.hpp (newaccount definition is actually in eosio.system.cpp)
      (newaccount)(updateauth)(deleteauth)(linkauth)(unlinkauth)(canceldelay)(onerror)
      // eosio.system.cpp
-     (setram)(setparams)(setpriv)(rmvproducer)(bidname)
+     (setram)(setparams)(setpriv)(rmvproducer)(bidname)(setcontype)
      // delegate_bandwidth.cpp
      (buyrambytes)(buyram)(sellram)(delegatebw)(undelegatebw)(refund)
      // voting.cpp

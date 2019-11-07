@@ -213,6 +213,7 @@ namespace eosio { namespace chain {
 
          bool is_known_unexpired_transaction( const transaction_id_type& id) const;
 
+         int64_t set_consensus_type( int64_t consensus_type );
          int64_t set_proposed_producers( vector<producer_key> producers );
 
          bool light_validation_allowed(bool replay_opts_disabled_by_policy) const;

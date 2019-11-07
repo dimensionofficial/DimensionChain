@@ -44,6 +44,7 @@ namespace eosio { namespace chain {
     result.header.timestamp                                = when;
     result.header.previous                                 = id;
     result.header.schedule_version                         = active_schedule.version;
+    result.header.consensus_type                           = active_schedule.consensus_type;
                                                            
     auto prokey                                            = get_scheduled_producer(when);
     result.block_signing_key                               = prokey.block_signing_key;
@@ -71,7 +72,15 @@ namespace eosio { namespace chain {
 
     // This uses the previous block active_schedule because thats the "schedule" that signs and therefore confirms _this_ block
     auto num_active_producers = active_schedule.producers.size();
-    uint32_t required_confs = (uint32_t)(num_active_producers * 2 / 3) + 1;
+    uint32_t required_confs = (uint32_t)(num_active_producers * 2 / 3) + 1; 
+
+    if(active_schedule.consensus_type == 1) {
+      required_confs = (uint32_t)(num_active_producers * 2 / 3) + 1; 
+    } else if(active_schedule.consensus_type == 2) {
+      required_confs = (uint32_t)(num_active_producers / 2) + 1;
+    } else if(active_schedule.consensus_type == 3) {
+      required_confs = (uint32_t)(num_active_producers / 3) + 1;
+    }
 
     if( confirm_count.size() < config::maximum_tracked_dpos_confirmations ) {
        result.confirm_count.reserve( confirm_count.size() + 1 );
