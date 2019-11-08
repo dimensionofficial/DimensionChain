@@ -159,9 +159,9 @@ namespace eosiosystem {
        }
        //切换共识，对共识类型检查
        if (type == 3) {
-           eosio_assert(consensus_type == 1
-                     || consensus_type == 2
-                     || consensus_type == 3, "consensus_type must be one of 1, 2, 3");
+           eosio_assert(consensus_type == 0
+                     || consensus_type == 1
+                     || consensus_type == 2, "consensus_type must be one of 0, 1, 2");
        }
 
        int64_t fee = _gstate.new_proposal_fee;

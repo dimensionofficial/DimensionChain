@@ -74,11 +74,11 @@ namespace eosio { namespace chain {
     auto num_active_producers = active_schedule.producers.size();
     uint32_t required_confs = (uint32_t)(num_active_producers * 2 / 3) + 1; 
 
-    if(active_schedule.consensus_type == 1) {
+    if(active_schedule.consensus_type == 0) {
       required_confs = (uint32_t)(num_active_producers * 2 / 3) + 1; 
-    } else if(active_schedule.consensus_type == 2) {
+    } else if(active_schedule.consensus_type == 1) {
       required_confs = (uint32_t)(num_active_producers / 2) + 1;
-    } else if(active_schedule.consensus_type == 3) {
+    } else if(active_schedule.consensus_type == 2) {
       required_confs = (uint32_t)(num_active_producers / 3) + 1;
     }
 
