@@ -192,6 +192,8 @@ namespace eosiosystem {
 
       const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
 
+      eosio_assert(now_time < proposal_voting->vote_end_time, "proposal vote time has elapsed");
+
       proposal_vote_table pvotes(_self, proposal_id);
       auto vote_info = pvotes.find(voter_name);
 
