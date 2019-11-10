@@ -67,9 +67,6 @@ namespace eosiosystem {
                                 (reward_pre_block)(stake_to_gnode_fee)(new_proposal_fee)(proposal_num)(total_proposal_stake) )
    };
 
-
-
-
    struct producer_info {
       account_name          owner;
       double                total_votes = 0;
@@ -140,9 +137,6 @@ namespace eosiosystem {
 
       EOSLIB_SERIALIZE( proposal_vote_info, (owner)(vote)(vote_time) )
    };
-
-
-
 
    struct voter_info {
       account_name                owner = 0; /// the voter

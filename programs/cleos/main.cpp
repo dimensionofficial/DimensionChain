@@ -1263,6 +1263,81 @@ struct list_producers_subcommand {
    }
 };
 
+struct list_proposals_subcommand {
+   bool print_json = false;
+   uint32_t limit = 50;
+   uint64_t lower = 0;
+
+   list_proposals_subcommand(CLI::App* actionRoot) {
+      auto list_proposals = actionRoot->add_subcommand("listproposals", localized("List proposals"));
+      list_proposals->add_flag("--json,-j", print_json, localized("Output in JSON format"));
+      list_proposals->add_option("-l,--limit", limit, localized("The maximum number of rows to return"));
+      list_proposals->add_option("-L,--lower", lower, localized("lower bound value of key, defaults to first"));
+      list_proposals->set_callback([this] {
+         auto rawResult = call(get_proposals_func, fc::mutable_variant_object
+            ("json", true)("lower_bound", lower)("limit", limit));
+         if ( print_json ) {
+            std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+            return;
+         }
+         auto result = rawResult.as<eosio::chain_apis::read_only::get_proposals_result>();
+         if ( result.rows.empty() ) {
+            std::cout << "No proposals found" << std::endl;
+            return;
+         }
+         printf("%5s %-13s %-13s %-6s %-20s %-20s %20s\n", "id", "owner", "account", "type", "total_yeas", "total_nays", "total_nays");
+         for ( auto& row : result.rows )
+            printf("%5u %-13.13s %-13.13s %6d %20d %20d %20d\n",
+                   row["id"].as_uint64(),
+                   row["owner"].as_string().c_str(),
+                   row["account"].as_string().c_str(),
+                   row["type"].as_int64(),
+                   row["total_yeas"].as_int64(),
+                   row["total_nays"].as_int64(),
+                   row["total_staked"].as_int64()
+                   );
+         if ( !result.more.empty() )
+            std::cout << "-L " << result.more << " for more" << std::endl;
+      });
+   }
+};
+
+struct list_gnode_subcommand {
+   bool print_json = false;
+   uint32_t limit = 50;
+   std::string lower;
+
+   list_gnode_subcommand(CLI::App* actionRoot) {
+      auto list_gnode = actionRoot->add_subcommand("listgnode", localized("List goverance node"));
+      list_gnode->add_flag("--json,-j", print_json, localized("Output in JSON format"));
+      list_gnode->add_option("-l,--limit", limit, localized("The maximum number of rows to return"));
+      list_gnode->add_option("-L,--lower", lower, localized("lower bound value of key, defaults to first"));
+      list_gnode->set_callback([this] {
+         auto rawResult = call(get_gnode_func, fc::mutable_variant_object
+            ("json", true)("lower_bound", lower)("limit", limit));
+         if ( print_json ) {
+            std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+            return;
+         }
+         auto result = rawResult.as<eosio::chain_apis::read_only::get_gnode_result>();
+         if ( result.rows.empty() ) {
+            std::cout << "No gnode found" << std::endl;
+            return;
+         }
+         printf("%-13s %-57s %-59s %s\n", "Producer", "Producer key", "Url", "Scaled votes");
+         for ( auto& row : result.rows )
+            printf("%-13.13s %-57.57s %-59.59s %1.4f\n",
+                   row["owner"].as_string().c_str(),
+                   row["producer_key"].as_string().c_str(),
+                   row["url"].as_string().c_str(),
+                   row["total_votes"].as_double());
+         if ( !result.more.empty() )
+            std::cout << "-L " << result.more << " for more" << std::endl;
+      });
+   }
+};
+
+
 struct get_schedule_subcommand {
    bool print_json = false;
 
@@ -3651,6 +3726,8 @@ int main( int argc, char** argv ) {
    auto unapproveProducer = unapprove_producer_subcommand(voteProducer);
 
    auto listProducers = list_producers_subcommand(system);
+   auto listProposals = list_proposals_subcommand(system);
+   auto listGnode = list_gnode_subcommand(system);
 
    auto delegateBandWidth = delegate_bandwidth_subcommand(system);
    auto undelegateBandWidth = undelegate_bandwidth_subcommand(system);

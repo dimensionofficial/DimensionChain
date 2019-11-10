@@ -1383,6 +1383,96 @@ read_only::get_producer_schedule_result read_only::get_producer_schedule( const 
    return result;
 }
 
+
+read_only::get_gnode_result read_only::get_gnode( const read_only::get_gnode_params& p ) const {
+   const abi_def abi = eosio::chain_apis::get_abi(db, config::system_account_name);
+   const auto table_type = get_table_type(abi, N(gnode));
+   const abi_serializer abis{ abi, abi_serializer_max_time };
+   EOS_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table gnode", ("type",table_type));
+
+   const auto& d = db.db();
+   const auto lower = name{p.lower_bound};
+
+   static const uint8_t secondary_index_num = 0;
+   const auto* const table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
+           boost::make_tuple(config::system_account_name, config::system_account_name, N(gnode)));
+   const auto* const secondary_table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
+           boost::make_tuple(config::system_account_name, config::system_account_name, N(gnode) | secondary_index_num));
+   EOS_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing gnode table");
+
+   const auto& kv_index = d.get_index<key_value_index, by_scope_primary>();
+   const auto& secondary_index = d.get_index<index_double_index>().indices();
+   const auto& secondary_index_by_primary = secondary_index.get<by_primary>();
+   const auto& secondary_index_by_secondary = secondary_index.get<by_secondary>();
+
+   read_only::get_gnode_result result;
+   const auto stopTime = fc::time_point::now() + fc::microseconds(1000 * 10); // 10ms
+   vector<char> data;
+
+   auto it = [&]{
+      if(lower.value == 0)
+         return secondary_index_by_secondary.lower_bound(
+            boost::make_tuple(secondary_table_id->id, to_softfloat64(std::numeric_limits<double>::lowest()), 0));
+      else
+         return secondary_index.project<by_secondary>(
+            secondary_index_by_primary.lower_bound(
+               boost::make_tuple(secondary_table_id->id, lower.value)));
+   }();
+
+   for( ; it != secondary_index_by_secondary.end() && it->t_id == secondary_table_id->id; ++it ) {
+      if (result.rows.size() >= p.limit || fc::time_point::now() > stopTime) {
+         result.more = name{it->primary_key}.to_string();
+         break;
+      }
+      copy_inline_row(*kv_index.find(boost::make_tuple(table_id->id, it->primary_key)), data);
+      if (p.json)
+         result.rows.emplace_back( abis.binary_to_variant( abis.get_table_type(N(gnode)), data, abi_serializer_max_time, shorten_abi_errors ) );
+      else
+         result.rows.emplace_back(fc::variant(data));
+   }
+
+   return result;
+}
+
+read_only::get_proposals_result read_only::get_proposals( const read_only::get_proposals_params& p ) const {
+   const abi_def abi = eosio::chain_apis::get_abi(db, config::system_account_name);
+   const auto table_type = get_table_type(abi, N(proposals));
+   const abi_serializer abis{ abi, abi_serializer_max_time };
+   EOS_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table proposals", ("type",table_type));
+
+   const auto& d = db.db();
+   const auto* const table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
+           boost::make_tuple(config::system_account_name, config::system_account_name, N(proposals)));
+   EOS_ASSERT(table_id, chain::contract_table_query_exception, "Missing proposals table");
+   const auto& kv_index = d.get_index<key_value_index, by_scope_primary>();
+
+   read_only::get_proposals_result result;
+   const auto stopTime = fc::time_point::now() + fc::microseconds(1000 * 10); // 10ms
+   vector<char> data;
+   auto it = [&]{
+         return kv_index.lower_bound(
+            boost::make_tuple(table_id->id, 0));
+   }();
+
+   uint32_t tmp_index = 0;
+   for( ; it != kv_index.end() && it->t_id == table_id->id; ++it, ++tmp_index ) {
+      if(tmp_index < p.lower_bound) {
+         continue;
+      }
+      if (result.rows.size() >= p.limit || fc::time_point::now() > stopTime) {
+         result.more = "true";
+         break;
+      }
+      copy_inline_row(*kv_index.find(boost::make_tuple(table_id->id, it->primary_key)), data);
+      if (p.json)
+         result.rows.emplace_back(abis.binary_to_variant(abis.get_table_type(N(proposals)), data, abi_serializer_max_time));
+      else
+         result.rows.emplace_back(fc::variant(data));
+   }
+   
+   return result;
+}
+
 template<typename Api>
 struct resolver_factory {
    static auto make(const Api* api, const fc::microseconds& max_serialization_time) {
