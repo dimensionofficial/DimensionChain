@@ -308,7 +308,8 @@
          {"name":"is_exec",         "type":"bool"},
          {"name":"consensus_type",  "type":"int64"},
          {"name":"total_yeas",      "type":"int64"},
-         {"name":"total_nays",      "type":"int64"}
+         {"name":"total_nays",      "type":"int64"},
+         {"name":"total_staked",    "type":"int64"}
       ]
     },{
       "name": "proposal_vote_info",

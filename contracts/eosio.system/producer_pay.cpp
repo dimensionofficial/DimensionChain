@@ -97,14 +97,13 @@ namespace eosiosystem {
     //        eosio_assert(now_time > prop->vote_end_time, "proposal not end");
     //    }
        eosio_assert(now_time < prop->exec_end_time, "proposal execution time has elapsed");
+       eosio_assert( ! prop->is_exec, "proposal execution time has elapsed");
             
       // 检查proposal == 1是否满足条件，是这执行
         if( prop->type == 1 ) {
             if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
                 _proposals.modify(prop, owner, [&](auto &info) {
                     info.is_satisfy = true;
-                    info.is_exec = true;
-                    info.exec_time = now_time;
                 });
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
@@ -120,11 +119,10 @@ namespace eosiosystem {
             if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
                 _proposals.modify(prop, owner, [&](auto &info) {
                     info.is_satisfy = true;
-                    info.is_exec = true;
-                    info.exec_time = now_time;
                 });
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
+
                 remove_elected_producers( prop->account, prop->id);
                 _gnode.modify( gnd, owner, [&](auto& info) {
                     info.is_bp   = false;
@@ -136,13 +134,18 @@ namespace eosiosystem {
             if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
                 _proposals.modify(prop, owner, [&](auto &info) {
                     info.is_satisfy = true;
-                    info.is_exec = true;
-                    info.exec_time = now_time;
                 });
                 set_consensus_type(prop->consensus_type);
                 
             }
         }
+
+        _proposals.modify(prop, owner, [&](auto &info) {
+            info.is_exec = true;
+            info.exec_time = now_time;
+            info.total_staked = _gstate.total_proposal_stake;
+        });
+
    }
 
    //发起提案，只有gnode才可以发起提案。
@@ -196,6 +199,7 @@ namespace eosiosystem {
            info.consensus_type = consensus_type;
            info.total_yeas     = 0;
            info.total_nays     = 0;
+           info.total_staked   = 0;
        });
 
        _gstate.proposal_num += 1;

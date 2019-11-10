@@ -121,12 +121,13 @@ namespace eosiosystem {
       int64_t           consensus_type;
       int64_t           total_yeas;
       int64_t           total_nays;
+      int64_t           total_staked;
 
       uint64_t primary_key()const { return id; }
       uint64_t by_vote_end_time()const { return vote_end_time; }
 
       EOSLIB_SERIALIZE( proposal_info, (id)(owner)(account)(start_time)(vote_end_time)(exec_end_time)(exec_time)
-                                       (block_height)(type)(is_satisfy)(is_exec)(consensus_type)(total_yeas)(total_nays) )
+                                       (block_height)(type)(is_satisfy)(is_exec)(consensus_type)(total_yeas)(total_nays)(total_staked) )
    };
 
    struct proposal_vote_info {
