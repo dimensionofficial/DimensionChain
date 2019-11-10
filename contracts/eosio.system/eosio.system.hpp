@@ -92,6 +92,7 @@ namespace eosiosystem {
 
    struct goverance_node_info {
       account_name          owner;
+      account_name          payer;
             
       int64_t               bp_staked = 0;
       time                  stake_time;
@@ -103,7 +104,7 @@ namespace eosiosystem {
 
       uint64_t primary_key()const { return owner; }
 
-      EOSLIB_SERIALIZE( goverance_node_info, (owner)(bp_staked)(stake_time)(is_bp)(status)(producer_key)(url)(location) )
+      EOSLIB_SERIALIZE( goverance_node_info, (owner)(payer)(bp_staked)(stake_time)(is_bp)(status)(producer_key)(url)(location) )
    };
 
    struct proposal_info {
@@ -290,7 +291,7 @@ namespace eosiosystem {
 
          void newproposal( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t consensus_type);
 
-         void staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location );
+         void staketognode( const account_name payer, const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location );
          
          void unstakegnode( const account_name owner );
 

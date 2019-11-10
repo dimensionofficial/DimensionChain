@@ -566,8 +566,9 @@ fc::variant regproducer_variant(const account_name& producer, const public_key_t
             ;
 }
 
-fc::variant staketognode_variant(const account_name& owner, const public_key_type& key, const string& url, uint16_t location) {
+fc::variant staketognode_variant(const account_name& payer, const account_name& owner, const public_key_type& key, const string& url, uint16_t location) {
    return fc::mutable_variant_object()
+            ("payer", payer)
             ("owner", owner)
             ("producer_key", key)
             ("url", url)
@@ -1529,17 +1530,19 @@ struct sellram_subcommand {
 
 struct staketognode_subcommand {
    string owner;
+   string payer;
    string producer_key_str;
    string url;
    uint16_t loc = 0;
 
    staketognode_subcommand(CLI::App* actionRoot) {
       auto stake_to_gnode = actionRoot->add_subcommand("staketognode", localized("Account stake EON to governance node"));
+      stake_to_gnode->add_option("payer", payer, localized("The account to pay the fee"))->required();
       stake_to_gnode->add_option("owner", owner, localized("The account to stake"))->required();
       stake_to_gnode->add_option("producer_key", producer_key_str, localized("The public key for produce block"))->required();
       stake_to_gnode->add_option("url", url, localized("Url where info about governance node can be found"), true);
       stake_to_gnode->add_option("location", loc, localized("Relative location for purpose of nearest neighbor scheduling"), true);
-      add_standard_transaction_options(stake_to_gnode, "owner@active");
+      add_standard_transaction_options(stake_to_gnode, "payer@active");
 
       stake_to_gnode->set_callback([this] {
          public_key_type producer_key;
@@ -1547,7 +1550,7 @@ struct staketognode_subcommand {
             producer_key = public_key_type(producer_key_str);
          } EOS_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid producer public key: ${public_key}", ("public_key", producer_key_str))
 
-         auto staketognode_var = staketognode_variant(owner, producer_key, url, loc );
+         auto staketognode_var = staketognode_variant(payer, owner, producer_key, url, loc );
          auto accountPermissions = get_account_permissions(tx_permission, {owner,config::active_name});
          send_actions({create_action(accountPermissions, config::system_account_name, N(staketognode), staketognode_var)});
       });

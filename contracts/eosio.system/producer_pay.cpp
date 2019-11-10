@@ -136,7 +136,6 @@ namespace eosiosystem {
                     info.is_satisfy = true;
                 });
                 set_consensus_type(prop->consensus_type);
-                
             }
         }
 
@@ -188,7 +187,7 @@ namespace eosiosystem {
            if(type == 1 || type == 2) {
                info.vote_end_time = now_time + 24*3600 * 1;
            } else {
-               info.vote_end_time = now_time + 24*3600 * 30;
+               info.vote_end_time = now_time + 24*3600 * 1;
            }
           //  info.vote_end_time = block_timestamp(now_time); //测试
            info.exec_end_time = info.vote_end_time + 24*3600 * 3;
@@ -207,8 +206,8 @@ namespace eosiosystem {
    }
 
    // 抵押EON成为governance node, 可以发起提案
-   void system_contract::staketognode( const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location ) {
-       require_auth( owner );
+   void system_contract::staketognode( const account_name payer, const account_name owner, const public_key& producer_key, const std::string& url, uint16_t location ) {
+       require_auth( payer );
        const auto now_time = now();
 
        auto gnd = _gnode.find( owner );
@@ -216,12 +215,13 @@ namespace eosiosystem {
 
        int64_t fee = _gstate.stake_to_gnode_fee;
        INLINE_ACTION_SENDER(eosio::token, transfer)(
-          N(eonio.token), { {owner, N(active)} },
-          { owner, N(eonio.bpstk), asset(fee), "stake 1.0000 EON to governance node" }
+          N(eonio.token), { {payer, N(active)} },
+          { payer, N(eonio.bpstk), asset(fee), "stake 1.0000 EON to governance node" }
        );
 
        gnd = _gnode.emplace( owner, [&]( goverance_node_info& info  ) {
             info.owner          = owner;
+            info.payer          = payer;
             info.bp_staked      = fee;
             info.stake_time     = now_time;
             info.is_bp          = false;
@@ -250,12 +250,13 @@ namespace eosiosystem {
        }
 
        int64_t fee = gnd->bp_staked;
+       account_name receiver = gnd->payer;
        
        _gnode.erase( gnd );
 
        INLINE_ACTION_SENDER(eosio::token, transfer)(
           N(eonio.token), { {N(eonio.bpstk), N(active)} },
-          { N(eonio.bpstk), owner, asset(fee), "unstake goverance node refund" }
+          { N(eonio.bpstk), receiver, asset(fee), "unstake goverance node refund" }
        );
    }
 

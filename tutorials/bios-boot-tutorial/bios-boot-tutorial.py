@@ -187,7 +187,7 @@ def regProducers(b, e):
 def stakeGnodes(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.cleos + 'system staketognode ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
+        retry(args.cleos + 'system staketognode ' + a['name'] + ' ' +  a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
 
 def newProposals(b, e):
     for i in range(b, e):
