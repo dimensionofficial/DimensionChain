@@ -1527,6 +1527,22 @@ struct sellram_subcommand {
    }
 };
 
+struct unstakegnode_subcommand {
+   string owner;
+
+   unstakegnode_subcommand(CLI::App* actionRoot) {
+      auto unstake_gnode = actionRoot->add_subcommand("unstakegnode", localized("Gnode unstake and fee will return to payer account"));
+      unstake_gnode->add_option("owner", owner, localized("The account to unstake"))->required();
+      add_standard_transaction_options(unstake_gnode, "owner@active");
+
+      unstake_gnode->set_callback([this] {
+            fc::variant act_payload = fc::mutable_variant_object()
+               ("owner", owner);
+            auto accountPermissions = get_account_permissions(tx_permission, {owner,config::active_name});
+            send_actions({create_action(accountPermissions, config::system_account_name, N(unstakegnode), act_payload)});
+         });
+   }
+};
 
 struct staketognode_subcommand {
    string owner;
@@ -3645,6 +3661,7 @@ int main( int argc, char** argv ) {
    auto biyram = buyram_subcommand(system);
    auto sellram = sellram_subcommand(system);
 
+   auto unstakeGnode = unstakegnode_subcommand(system);
    auto stakeToGnode = staketognode_subcommand(system);
    auto updateGnode = updategnode_subcommand(system);
    auto newproposal = newproposal_subcommand(system);
