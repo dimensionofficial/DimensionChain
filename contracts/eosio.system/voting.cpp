@@ -138,12 +138,6 @@ namespace eosiosystem {
          _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
       }
 
-      // 更新 proposals_table _proposals
-      const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
-      _proposals.modify(proposal_voting, _self, [&](auto &info) {
-          info.is_exec = true;
-          info.exec_time = now_time;
-      });
    }
 
    // 提案type==2，将account 从producer移除
@@ -188,16 +182,7 @@ namespace eosiosystem {
          _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
       }
 
-      // 更新 proposals_table _proposals
-      const auto& proposal_voting = _proposals.get(proposal_id, "proposal not exist");
-      _proposals.modify(proposal_voting, _self, [&](auto &info) {
-          info.is_exec = true;
-          info.exec_time = now_time;
-      });
    }
-
-
-
 
 
    // 对提案投票

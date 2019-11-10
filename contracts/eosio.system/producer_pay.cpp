@@ -84,8 +84,6 @@ namespace eosiosystem {
        return count;
    }
 
-
-
    void system_contract::execproposal( const account_name owner, uint64_t proposal_id ) {
        require_auth( owner );
        const auto now_time = now();
@@ -98,12 +96,15 @@ namespace eosiosystem {
     //    if(get_producers_size() > 7) { // 多于7个时检查
     //        eosio_assert(now_time > prop->vote_end_time, "proposal not end");
     //    }
+       eosio_assert(now_time < prop->exec_end_time, "proposal execution time has elapsed");
             
       // 检查proposal == 1是否满足条件，是这执行
         if( prop->type == 1 ) {
             if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
                 _proposals.modify(prop, owner, [&](auto &info) {
                     info.is_satisfy = true;
+                    info.is_exec = true;
+                    info.exec_time = now_time;
                 });
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
@@ -119,6 +120,8 @@ namespace eosiosystem {
             if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
                 _proposals.modify(prop, owner, [&](auto &info) {
                     info.is_satisfy = true;
+                    info.is_exec = true;
+                    info.exec_time = now_time;
                 });
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
@@ -133,6 +136,8 @@ namespace eosiosystem {
             if(prop->total_yeas - prop->total_nays > _gstate.total_proposal_stake / 10) {  // 提案是否满足条件 yeas-nays > staked/10 ?
                 _proposals.modify(prop, owner, [&](auto &info) {
                     info.is_satisfy = true;
+                    info.is_exec = true;
+                    info.exec_time = now_time;
                 });
                 set_consensus_type(prop->consensus_type);
                 
@@ -183,6 +188,7 @@ namespace eosiosystem {
                info.vote_end_time = now_time + 24*3600 * 30;
            }
           //  info.vote_end_time = block_timestamp(now_time); //测试
+           info.exec_end_time = info.vote_end_time + 24*3600 * 3;
            info.block_height = block_height;
            info.type = type;
            info.is_satisfy = false;

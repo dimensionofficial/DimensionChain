@@ -112,6 +112,7 @@ namespace eosiosystem {
       account_name      account;
       time              start_time;
       time              vote_end_time;
+      time              exec_end_time;
       time              exec_time;
       uint32_t          block_height;
       int64_t           type;
@@ -124,7 +125,7 @@ namespace eosiosystem {
       uint64_t primary_key()const { return id; }
       uint64_t by_vote_end_time()const { return vote_end_time; }
 
-      EOSLIB_SERIALIZE( proposal_info, (id)(owner)(account)(start_time)(vote_end_time)(exec_time)
+      EOSLIB_SERIALIZE( proposal_info, (id)(owner)(account)(start_time)(vote_end_time)(exec_end_time)(exec_time)
                                        (block_height)(type)(is_satisfy)(is_exec)(consensus_type)(total_yeas)(total_nays) )
    };
 

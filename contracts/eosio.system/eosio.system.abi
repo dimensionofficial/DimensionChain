@@ -300,6 +300,7 @@
          {"name":"account",         "type":"account_name"},
          {"name":"start_time",      "type":"time_point_sec"},
          {"name":"vote_end_time",   "type":"time_point_sec"},
+         {"name":"exec_end_time",   "type":"time_point_sec"},
          {"name":"exec_time",       "type":"time_point_sec"},
          {"name":"block_height",    "type":"uint32"},
          {"name":"type",            "type":"int64"},
