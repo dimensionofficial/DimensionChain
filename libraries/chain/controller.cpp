@@ -2038,11 +2038,13 @@ int64_t controller::set_proposed_producers( vector<producer_key> producers ) {
       begin = active_sch.producers.begin();
       end   = active_sch.producers.end();
       sch.version = active_sch.version + 1;
+      sch.consensus_type = active_sch.consensus_type;
    } else {
       const auto& pending_sch = my->pending->_pending_block_state->pending_schedule;
       begin = pending_sch.producers.begin();
       end   = pending_sch.producers.end();
       sch.version = pending_sch.version + 1;
+      sch.consensus_type = pending_sch.consensus_type;
    }
 
    if( std::equal( producers.begin(), producers.end(), begin, end ) )
