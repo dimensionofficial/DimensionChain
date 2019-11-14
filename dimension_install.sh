@@ -1,7 +1,5 @@
 #!/bin/bash
 ##########################################################################
-# This is the EOSIO automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/EOSIO/eos
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -27,7 +25,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/EOSIO/eos/blob/master/LICENSE.txt
 ##########################################################################
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -65,19 +62,19 @@ fi
    }
 
    install_symlinks() {
-      printf "\\n\\tInstalling EOSIO Binary Symlinks\\n\\n"
-      create_symlink "cleos"
+      printf "\\n\\tInstalling Dimension Binary Symlinks\\n\\n"
+      create_symlink "cleon"
       create_symlink "eosio-abigen"
-      create_symlink "eosio-launcher"
+      create_symlink "dimension-launcher"
       create_symlink "eosio-s2wasm"
       create_symlink "eosio-wast2wasm"
       create_symlink "eosiocpp"
-      create_symlink "keosd"
-      create_symlink "nodeos"
+      create_symlink "keond"
+      create_symlink "nodeon"
    }
 
    if [ ! -d "${BUILD_DIR}" ]; then
-      printf "\\n\\tError, eosio_build.sh has not ran.  Please run ./eosio_build.sh first!\\n\\n"
+
       exit -1
    fi
 
@@ -95,7 +92,7 @@ fi
    
    if ! make install
    then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE installing EOSIO has exited with the above error.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE installing Dimension has exited with the above error.\\n\\n"
       exit -1
    fi
    popd &> /dev/null 
@@ -103,18 +100,14 @@ fi
    install_symlinks   
    create_cmake_symlink "eosio-config.cmake"
 
-   printf "\n\n${bldred}\t _______  _______  _______ _________ _______\n"
-   printf '\t(  ____ \(  ___  )(  ____ \\\\__   __/(  ___  )\n'
-   printf "\t| (    \/| (   ) || (    \/   ) (   | (   ) |\n"
-   printf "\t| (__    | |   | || (_____    | |   | |   | |\n"
-   printf "\t|  __)   | |   | |(_____  )   | |   | |   | |\n"
-   printf "\t| (      | |   | |      ) |   | |   | |   | |\n"
-   printf "\t| (____/\| (___) |/\____) |___) (___| (___) |\n"
-   printf "\t(_______/(_______)\_______)\_______/(_______)\n${txtrst}"
 
-   printf "\\tFor more information:\\n"
-   printf "\\tEOSIO website: https://eos.io\\n"
-   printf "\\tEOSIO Telegram channel @ https://t.me/EOSProject\\n"
-   printf "\\tEOSIO resources: https://eos.io/resources/\\n"
-   printf "\\tEOSIO Stack Exchange: https://eosio.stackexchange.com\\n"
-   printf "\\tEOSIO wiki: https://github.com/EOSIO/eos/wiki\\n\\n\\n"
+
+printf "\n${bldred} \n"
+printf "      \n\n${txtrst}"
+
+printf "==============================================================================================\\n"
+printf "Dimension has been installed into ${OPT_LOCATION}/eosio/bin!\\n"
+printf "If you need to, you can fully uninstall using dimension_uninstall.sh && scripts/clean_old_install.sh.\\n"
+printf "==============================================================================================\\n\\n"
+
+printf "Dimension website: https://dimensionchain.io\\n"

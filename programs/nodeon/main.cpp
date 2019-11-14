@@ -91,11 +91,11 @@ enum return_codes {
 int main(int argc, char** argv)
 {
    try {
-      app().set_version(eosio::nodeos::config::version);
+      app().set_version(eosio::nodeon::config::version);
 
       auto root = fc::app_path();
-      app().set_default_data_dir(root / "eosio/nodeos/data" );
-      app().set_default_config_dir(root / "eosio/nodeos/config" );
+      app().set_default_data_dir(root / "dimension/nodeon/data" );
+      app().set_default_config_dir(root / "dimension/nodeon/config" );
       http_plugin::set_defaults({
          .address_config_prefix = "",
          .default_unix_socket_path = "",
@@ -104,10 +104,10 @@ int main(int argc, char** argv)
       if(!app().initialize<chain_plugin, http_plugin, net_plugin, producer_plugin>(argc, argv))
          return INITIALIZE_FAIL;
       initialize_logging();
-      ilog("nodeos version ${ver}", ("ver", app().version_string()));
+      ilog("nodeon version ${ver}", ("ver", app().version_string()));
       ilog("eosio root is ${root}", ("root", root.string()));
-      ilog("nodeos using configuration file ${c}", ("c", app().full_config_file_path().string()));
-      ilog("nodeos data directory is ${d}", ("d", app().data_dir().string()));
+      ilog("nodeon using configuration file ${c}", ("c", app().full_config_file_path().string()));
+      ilog("nodeon data directory is ${d}", ("d", app().data_dir().string()));
       app().startup();
       app().exec();
    } catch( const extract_genesis_state_exception& e ) {

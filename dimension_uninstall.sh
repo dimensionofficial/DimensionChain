@@ -1,13 +1,13 @@
 #! /bin/bash
 
-binaries=(cleos
+binaries=(cleon
           eosio-abigen
-          eosio-launcher
+          dimension-launcher
           eosio-s2wasm
           eosio-wast2wasm
           eosiocpp
-          keosd
-          nodeos
+          keond
+          nodeon
           eosio-applesdemo)
 
 if [ -d "/usr/local/eosio" ]; then
@@ -29,7 +29,7 @@ if [ -d "/usr/local/eosio" ]; then
             # Handle cleanup of directories created from installation
             if [ "$1" == "--full" ]; then
                if [ -d ~/Library/Application\ Support/eosio ]; then rm -rf ~/Library/Application\ Support/eosio; fi # Mac OS
-               if [ -d ~/.local/share/eosio ]; then rm -rf ~/.local/share/eosio; fi # Linux
+               if [ -d ~/.local/share/dimension ]; then rm -rf ~/.local/share/dimension; fi # Linux
             fi
             popd &> /dev/null
             break;;

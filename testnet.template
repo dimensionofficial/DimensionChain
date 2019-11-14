@@ -37,16 +37,16 @@ echo Initializing ignition sequence  at $(date) | tee $logfile
 
 echo "http-server-address = $wdaddr" > $wddir/config.ini
 
-programs/keosd/keosd --config-dir $wddir --data-dir $wddir 2> $wddir/wdlog.txt &
+programs/keond/keond --config-dir $wddir --data-dir $wddir 2> $wddir/wdlog.txt &
 echo $$ > ignition_wallet.pid
-echo keosd log in $wddir/wdlog.txt >> $logfile
+echo keond log in $wddir/wdlog.txt >> $logfile
 sleep 1
 
 ecmd () {
     echo ===== Start: $step ============ >> $logfile
-    echo executing: cleos --wallet-url $wdurl --url http://$bioshost:$biosport $* | tee -a $logfile
+    echo executing: cleon --wallet-url $wdurl --url http://$bioshost:$biosport $* | tee -a $logfile
     echo ----------------------- >> $logfile
-    programs/cleos/cleos  --wallet-url $wdurl --url http://$bioshost:$biosport $* >> $logfile 2>&1
+    programs/cleon/cleon  --wallet-url $wdurl --url http://$bioshost:$biosport $* >> $logfile 2>&1
     echo ==== End: $step ============== >> $logfile
     step=$(($step + 1))
 }
@@ -56,7 +56,7 @@ wcmd () {
 }
 
 cacmd () {
-    programs/cleos/cleos  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 EON" --stake-cpu "10000000.0000 EON"  --buy-ram "10000000.0000 EON" eonio $* >> $logfile 2>&1
+    programs/cleon/cleon  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 EON" --stake-cpu "10000000.0000 EON"  --buy-ram "10000000.0000 EON" eonio $* >> $logfile 2>&1
     ecmd system regproducer $1 $2
     ecmd system voteproducer prods $1 $1
 }
@@ -99,11 +99,11 @@ ecmd set contract eonio.msig contracts/eosio.msig eosio.msig.wasm eosio.msig.abi
 ecmd set contract eonio.sudo contracts/eosio.sudo eosio.sudo.wasm eosio.sudo.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: cleos --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token create '[ "eonio", "10000000000.0000 EON" ]' -p eonio.token | tee -a $logfile
-echo executing: cleos --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token issue '[ "eonio", "1000000000.0000 EON", "memo" ]' -p eonio | tee -a $logfile
+echo executing: cleon --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token create '[ "eonio", "10000000000.0000 EON" ]' -p eonio.token | tee -a $logfile
+echo executing: cleon --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token issue '[ "eonio", "1000000000.0000 EON", "memo" ]' -p eonio | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/cleos/cleos --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token create '[ "eonio", "10000000000.0000 EON" ]' -p eonio.token >> $logfile 2>&1
-programs/cleos/cleos --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token issue '[ "eonio", "1000000000.0000 EON", "memo" ]' -p eonio >> $logfile 2>&1
+programs/cleon/cleon --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token create '[ "eonio", "10000000000.0000 EON" ]' -p eonio.token >> $logfile 2>&1
+programs/cleon/cleon --wallet-url $wdurl --url http://$bioshost:$biosport push action eonio.token issue '[ "eonio", "1000000000.0000 EON", "memo" ]' -p eonio >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
@@ -119,4 +119,4 @@ ecmd set contract eonio contracts/eosio.system eosio.system.wasm eosio.system.ab
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT cacmd
 
-pkill -15 keosd
+pkill -15 keond

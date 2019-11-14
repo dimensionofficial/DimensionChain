@@ -16,18 +16,18 @@ services:
       - IPC_LOCK
     stop_grace_period: 10m
 
-  keosd:
+  keond:
     image: eosio/eos:latest
-    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address=127.0.0.1:8900 --http-alias=keosd:8900 --http-alias=localhost:8900
-    hostname: keosd
+    command: /opt/eosio/bin/keond --wallet-dir /opt/eosio/bin/data-dir --http-server-address=127.0.0.1:8900 --http-alias=keond:8900 --http-alias=localhost:8900
+    hostname: keond
     links:
       - nodeosd
     volumes:
-      - keosd-data-volume:/opt/eosio/bin/data-dir
+      - keond-data-volume:/opt/eosio/bin/data-dir
     stop_grace_period: 10m
 
 volumes:
  nodeos-data-volume:
    external: true
- keosd-data-volume:
+ keond-data-volume:
    external: true

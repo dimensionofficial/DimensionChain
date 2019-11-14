@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# eosio-tn_roll is used to have all of the instances of the EOS daemon on a host brought down
+# dimension-tn_roll is used to have all of the instances of the EOS daemon on a host brought down
 # so that the underlying executable image file (the "text file") can be replaced. Then
 # all instances are restarted.
-# usage: eosio-tn_roll.sh [arglist]
+# usage: dimension-tn_roll.sh [arglist]
 # arglist will be passed to the node's command line. First with no modifiers
 # then with --hard-replay-blockchain and then a third time with --delete-all-blocks
 #
@@ -39,7 +39,7 @@ fi
 
 prog=""
 RD=""
-for p in eosd eosiod nodeos; do
+for p in eosd eosiod nodeon; do
     prog=$p
     RD=bin
     if [ -f $RD/$prog ]; then
@@ -55,7 +55,7 @@ for p in eosd eosiod nodeos; do
 done
 
 if [ \( -z "$prog" \) -o \( -z "$RD" \) ]; then
-    echo unable to locate binary for eosd or eosiod or nodeos
+    echo unable to locate binary for eosd or eosiod or nodeon
     exit 1
 fi
 
@@ -76,16 +76,16 @@ fi
 
 echo DD = $DD
 
-bash $EOSIO_HOME/scripts/eosio-tn_down.sh
+bash $EOSIO_HOME/scripts/dimension-tn_down.sh
 
 cp $SDIR/$RD/$prog $RD/$prog
 
 if [ $DD = "all" ]; then
     for EOSIO_RESTART_DATA_DIR in `ls -d var/lib/node_??`; do
-        bash $EOSIO_HOME/scripts/eosio-tn_up.sh "$*"
+        bash $EOSIO_HOME/scripts/dimension-tn_up.sh "$*"
     done
 else
-    bash $EOSIO_HOME/scripts/eosio-tn_up.sh "$*"
+    bash $EOSIO_HOME/scripts/dimension-tn_up.sh "$*"
 fi
 unset EOSIO_RESTART_DATA_DIR
 

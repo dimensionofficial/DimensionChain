@@ -1,7 +1,7 @@
 #!/bin/bash
 ##########################################################################
-# This is the EOSIO automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/EOSIO/eos
+# This is the Dimension automated install script for Linux and Mac OS.
+# This file was downloaded from https://github.com/dimensionofficial
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -27,7 +27,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/EOSIO/eos/blob/master/LICENSE
 ##########################################################################
 
    SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -127,8 +126,6 @@
 
    if [ ! -d "${SOURCE_DIR}/.git" ]; then
       printf "\\n\\tThis build script only works with sources cloned from git\\n"
-      printf "\\tPlease clone a new eos directory with 'git clone https://github.com/EOSIO/eos --recursive'\\n"
-      printf "\\tSee the wiki for instructions: https://github.com/EOSIO/eos/wiki\\n"
       exit 1
    fi
 
@@ -153,7 +150,7 @@
    if [ "$ARCH" == "Linux" ]; then
 
       if [ ! -e /etc/os-release ]; then
-         printf "\\n\\tEOSIO currently supports Amazon, Centos, Fedora, Mint & Ubuntu Linux only.\\n"
+         printf "\\n\\t currently supports Ubuntu Linux only.\\n"
          printf "\\tPlease install on the latest version of one of these Linux distributions.\\n"
          printf "\\thttps://aws.amazon.com/amazon-linux-ami/\\n"
          printf "\\thttps://www.centos.org/\\n"
@@ -168,7 +165,7 @@
 
       case "$OS_NAME" in
          "Amazon Linux AMI"|"Amazon Linux")
-            FILE="${SOURCE_DIR}/scripts/eosio_build_amazon.sh"
+            FILE="${SOURCE_DIR}/scripts/dimension_build_amazon.sh"
             CXX_COMPILER=g++
             C_COMPILER=gcc
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
@@ -177,7 +174,7 @@
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "CentOS Linux")
-            FILE="${SOURCE_DIR}/scripts/eosio_build_centos.sh"
+            FILE="${SOURCE_DIR}/scripts/dimension_build_centos.sh"
             CXX_COMPILER=g++
             C_COMPILER=gcc
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
@@ -186,35 +183,35 @@
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "elementary OS")
-            FILE="${SOURCE_DIR}/scripts/eosio_build_ubuntu.sh"
+            FILE="${SOURCE_DIR}/scripts/dimension_build_ubuntu.sh"
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "Fedora")
-            FILE="${SOURCE_DIR}/scripts/eosio_build_fedora.sh"
+            FILE="${SOURCE_DIR}/scripts/dimension_build_fedora.sh"
             CXX_COMPILER=g++
             C_COMPILER=gcc
             MONGOD_CONF=/etc/mongod.conf
             export LLVM_DIR=${HOME}/opt/wasm/lib/cmake/llvm
          ;;
          "Linux Mint")
-            FILE="${SOURCE_DIR}/scripts/eosio_build_ubuntu.sh"
+            FILE="${SOURCE_DIR}/scripts/dimension_build_ubuntu.sh"
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "Ubuntu")
-            FILE="${SOURCE_DIR}/scripts/eosio_build_ubuntu.sh"
+            FILE="${SOURCE_DIR}/scripts/dimension_build_ubuntu.sh"
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "Debian GNU/Linux")
-            FILE=${SOURCE_DIR}/scripts/eosio_build_ubuntu.sh
+            FILE=${SOURCE_DIR}/scripts/dimension_build_ubuntu.sh
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
@@ -230,7 +227,7 @@
    fi
 
    if [ "$ARCH" == "Darwin" ]; then
-      FILE="${SOURCE_DIR}/scripts/eosio_build_darwin.sh"
+      FILE="${SOURCE_DIR}/scripts/dimension_build_darwin.sh"
       CXX_COMPILER=clang++
       C_COMPILER=clang
       MONGOD_CONF=/usr/local/etc/mongod.conf
@@ -245,7 +242,7 @@
 
    . "$FILE"
 
-   printf "\\n\\n>>>>>>>> ALL dependencies sucessfully found or installed . Installing EOSIO\\n\\n"
+   printf "\\n\\n>>>>>>>> ALL dependencies sucessfully found or installed . Installing \\n\\n"
    printf ">>>>>>>> CMAKE_BUILD_TYPE=%s\\n" "${CMAKE_BUILD_TYPE}"
    printf ">>>>>>>> ENABLE_COVERAGE_TESTING=%s\\n" "${ENABLE_COVERAGE_TESTING}"
    printf ">>>>>>>> DOXYGEN=%s\\n\\n" "${DOXYGEN}"
@@ -274,41 +271,33 @@
       -DENABLE_COVERAGE_TESTING="${ENABLE_COVERAGE_TESTING}" -DBUILD_DOXYGEN="${DOXYGEN}" \
       -DCMAKE_INSTALL_PREFIX="/usr/local/eosio" ${LOCAL_CMAKE_FLAGS} "${SOURCE_DIR}"
    then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> CMAKE building EOSIO has exited with the above error.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> CMAKE building has exited with the above error.\\n\\n"
       exit -1
    fi
 
    if [ "${START_MAKE}" == "false" ]; then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> EOSIO has been successfully configured but not yet built.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> Dimension has been successfully configured but not yet built.\\n\\n"
       exit 0
    fi
 
-   if [ -z ${JOBS} ]; then JOBS=$CPU_CORE; fi # Future proofing: Ensure $JOBS is set (usually set in scripts/eosio_build_*.sh scripts)
+   if [ -z ${JOBS} ]; then JOBS=$CPU_CORE; fi # Future proofing: Ensure $JOBS is set (usually set in scripts/dimension_build_*.sh scripts)
    if ! make -j"${JOBS}"
    then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE building EOSIO has exited with the above error.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE building Dimension has exited with the above error.\\n\\n"
       exit -1
    fi
 
    TIME_END=$(( $(date -u +%s) - ${TIME_BEGIN} ))
+printf "${bldred}\n\n \n"
+printf "\n\n${txtrst}"
 
-   printf "\n\n${bldred}\t _______  _______  _______ _________ _______\n"
-   printf '\t(  ____ \(  ___  )(  ____ \\\\__   __/(  ___  )\n'
-   printf "\t| (    \/| (   ) || (    \/   ) (   | (   ) |\n"
-   printf "\t| (__    | |   | || (_____    | |   | |   | |\n"
-   printf "\t|  __)   | |   | |(_____  )   | |   | |   | |\n"
-   printf "\t| (      | |   | |      ) |   | |   | |   | |\n"
-   printf "\t| (____/\| (___) |/\____) |___) (___| (___) |\n"
-   printf "\t(_______/(_______)\_______)\_______/(_______)\n${txtrst}"
+printf "\\nDimension has been successfully built. %02d:%02d:%02d\\n\n\n\n" $(($TIME_END/3600)) $(($TIME_END%3600/60)) $(($TIME_END%60))
+printf "==============================================================================================\\n${bldred}"
+printf "(Optional) Testing Instructions:\\n"
+print_instructions
+printf "${BIN_LOCATION}/mongod --dbpath ${MONGODB_DATA_LOCATION} -f ${MONGODB_CONF} --logpath ${MONGODB_LOG_LOCATION}/mongod.log &\\n"
+printf "cd ./build && PATH=\$PATH:$HOME/opt/mongodb/bin make test\\n" # PATH is set as currently 'mongo' binary is required for the mongodb test
+printf "${txtrst}==============================================================================================\\n"
+printf "For more information:\\n"
+printf "Dimension website: https://dimensionchain.io\\n"
 
-   printf "\\n\\tEOSIO has been successfully built. %02d:%02d:%02d\\n\\n" $(($TIME_END/3600)) $(($TIME_END%3600/60)) $(($TIME_END%60))
-   printf "\\tTo verify your installation run the following commands:\\n"
-
-   print_instructions
-
-   printf "\\tFor more information:\\n"
-   printf "\\tEOSIO website: https://eos.io\\n"
-   printf "\\tEOSIO Telegram channel @ https://t.me/EOSProject\\n"
-   printf "\\tEOSIO resources: https://eos.io/resources/\\n"
-   printf "\\tEOSIO Stack Exchange: https://eosio.stackexchange.com\\n"
-   printf "\\tEOSIO wiki: https://github.com/EOSIO/eos/wiki\\n\\n\\n"

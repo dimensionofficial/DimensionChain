@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Usage:
-# Go into cmd loop: sudo ./cleos.sh
-# Run single cmd:  sudo ./cleos.sh <cleos paramers>
+# Go into cmd loop: sudo ./cleon.sh
+# Run single cmd:  sudo ./cleon.sh <cleon paramers>
 
-PREFIX="docker-compose exec nodeosd cleos"
+PREFIX="docker-compose exec nodeosd cleon"
 if [ -z $1 ] ; then
   while :
   do
-    read -e -p "cleos " cmd
+    read -e -p "cleon " cmd
     history -s "$cmd"
     $PREFIX $cmd
   done

@@ -73,12 +73,12 @@ def sleep(t):
 def startWallet():
     run('rm -rf ' + os.path.abspath(args.wallet_dir))
     run('mkdir -p ' + os.path.abspath(args.wallet_dir))
-    background(args.keosd + ' --unlock-timeout %d --http-server-address 127.0.0.1:6666 --wallet-dir %s' % (unlockTimeout, os.path.abspath(args.wallet_dir)))
+    background(args.keond + ' --unlock-timeout %d --http-server-address 127.0.0.1:6666 --wallet-dir %s' % (unlockTimeout, os.path.abspath(args.wallet_dir)))
     sleep(.4)
-    run(args.cleos + 'wallet create --to-console')
+    run(args.cleon + 'wallet create --to-console')
 
 def importKeys():
-    run(args.cleos + 'wallet import --private-key ' + args.private_key)
+    run(args.cleon + 'wallet import --private-key ' + args.private_key)
     keys = {}
     for a in accounts:
         key = a['pvt']
@@ -86,13 +86,13 @@ def importKeys():
             if len(keys) >= args.max_user_keys:
                 break
             keys[key] = True
-            run(args.cleos + 'wallet import --private-key ' + key)
+            run(args.cleon + 'wallet import --private-key ' + key)
     for i in range(firstProducer, firstProducer + numProducers):
         a = accounts[i]
         key = a['pvt']
         if not key in keys:
             keys[key] = True
-            run(args.cleos + 'wallet import --private-key ' + key)
+            run(args.cleon + 'wallet import --private-key ' + key)
 
 def startNode(nodeIndex, account):
     dir = args.nodes_dir + ('%02d-' % nodeIndex) + account['name'] + '/'
@@ -104,7 +104,7 @@ def startNode(nodeIndex, account):
         '    --plugin eosio::history_api_plugin'
     )
     cmd = (
-        args.nodeos +
+        args.nodeon +
         '    --max-irreversible-block-age -1'
         '    --contracts-console'
         '    --genesis-json ' + os.path.abspath(args.genesis) +
@@ -135,7 +135,7 @@ def startProducers(b, e):
 
 def createSystemAccounts():
     for a in systemAccounts:
-        run(args.cleos + 'create account eonio ' + a + ' ' + args.public_key)
+        run(args.cleon + 'create account eonio ' + a + ' ' + args.public_key)
 
 def intToCurrency(i):
     return '%d.%04d %s' % (i // 10000, i % 10000, args.symbol)
@@ -174,52 +174,52 @@ def createStakedAccounts(b, e):
         stakeCpu = stake - stakeNet
         print('%s: total funds=%s, ram=%s, net=%s, cpu=%s, unstaked=%s' % (a['name'], intToCurrency(a['funds']), intToCurrency(ramFunds), intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(unstaked)))
         assert(funds == ramFunds + stakeNet + stakeCpu + unstaked)
-        retry(args.cleos + 'system newaccount --transfer eonio %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' % 
+        retry(args.cleon + 'system newaccount --transfer eonio %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' % 
             (a['name'], a['pub'], intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(ramFunds)))
         if unstaked:
-            retry(args.cleos + 'transfer eonio %s "%s"' % (a['name'], intToCurrency(unstaked)))
+            retry(args.cleon + 'transfer eonio %s "%s"' % (a['name'], intToCurrency(unstaked)))
 
 def regProducers(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.cleos + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
+        retry(args.cleon + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
 
 def stakeGnodes(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.cleos + 'system staketognode ' + a['name'] + ' ' +  a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
+        retry(args.cleon + 'system staketognode ' + a['name'] + ' ' +  a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
 
 def newProposals(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.cleos + 'system newproposal ' + a['name'] + ' ' + a['name'] + ' 100000' + ' 1' + ' 0')
+        retry(args.cleon + 'system newproposal ' + a['name'] + ' ' + a['name'] + ' 100000' + ' 1' + ' 0')
 
 def voteProposals(b, e):
     for i in range(b, e):
         for j in range(0, len(accounts)):
             a = accounts[j]
-            retry(args.cleos + 'system voteproposal ' + a['name'] + ' ' + str(i) + ' 1')
+            retry(args.cleon + 'system voteproposal ' + a['name'] + ' ' + str(i) + ' 1')
 
 def stepVoteAProp():
     for j in range(0, len(accounts)):
         a = accounts[j]
-        retry(args.cleos + 'system voteproposal ' + a['name'] + ' ' + str(args.default_id) + ' 1')
+        retry(args.cleon + 'system voteproposal ' + a['name'] + ' ' + str(args.default_id) + ' 1')
 
 
 def execProposals(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.cleos + 'system execproposal ' + a['name'] + ' ' + str(i-b))
+        retry(args.cleon + 'system execproposal ' + a['name'] + ' ' + str(i-b))
 
 
 def listProducers():
-    run(args.cleos + 'system listproducers')
+    run(args.cleon + 'system listproducers')
 
 def listGnodes():
-    run(args.cleos + 'get table eonio eonio gnode')
+    run(args.cleon + 'get table eonio eonio gnode')
 
 def listProposals():
-    run(args.cleos + 'get table eonio eonio proposals')
+    run(args.cleon + 'get table eonio eonio proposals')
 
 def vote(b, e):
     for i in range(b, e):
@@ -229,27 +229,27 @@ def vote(b, e):
             k = numProducers - 1
         prods = random.sample(range(firstProducer, firstProducer + numProducers), k)
         prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
-        retry(args.cleos + 'system voteproducer prods ' + voter + ' ' + prods)
+        retry(args.cleon + 'system voteproducer prods ' + voter + ' ' + prods)
 
 def claimRewards():
-    table = getJsonOutput(args.cleos + 'get table eonio eonio producers -l 100')
+    table = getJsonOutput(args.cleon + 'get table eonio eonio producers -l 100')
     times = []
     for row in table['rows']:
         if row['unpaid_blocks'] and not row['last_claim_time']:
-            times.append(getJsonOutput(args.cleos + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
+            times.append(getJsonOutput(args.cleon + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
     print('Elapsed time for claimrewards:', times)
 
 def proxyVotes(b, e):
     vote(firstProducer, firstProducer + 1)
     proxy = accounts[firstProducer]['name']
-    retry(args.cleos + 'system regproxy ' + proxy)
+    retry(args.cleon + 'system regproxy ' + proxy)
     sleep(1.0)
     for i in range(b, e):
         voter = accounts[i]['name']
-        retry(args.cleos + 'system voteproducer proxy ' + voter + ' ' + proxy)
+        retry(args.cleon + 'system voteproducer proxy ' + voter + ' ' + proxy)
 
 def updateAuth(account, permission, parent, controller):
-    run(args.cleos + 'push action eonio updateauth' + jsonArg({
+    run(args.cleon + 'push action eonio updateauth' + jsonArg({
         'account': account,
         'permission': permission,
         'parent': parent,
@@ -266,7 +266,7 @@ def resign(account, controller):
     updateAuth(account, 'owner', '', controller)
     updateAuth(account, 'active', 'owner', controller)
     sleep(1)
-    run(args.cleos + 'get account ' + account)
+    run(args.cleon + 'get account ' + account)
 
 def randomTransfer(b, e):
     for j in range(20):
@@ -274,7 +274,7 @@ def randomTransfer(b, e):
         dest = src
         while dest == src:
             dest = accounts[random.randint(b, e - 1)]['name']
-        run(args.cleos + 'transfer -f ' + src + ' ' + dest + ' "0.0001 ' + args.symbol + '"' + ' || true')
+        run(args.cleon + 'transfer -f ' + src + ' ' + dest + ' "0.0001 ' + args.symbol + '"' + ' || true')
 
 def msigProposeReplaceSystem(proposer, proposalName):
     requestedPermissions = []
@@ -283,20 +283,20 @@ def msigProposeReplaceSystem(proposer, proposalName):
     trxPermissions = [{'actor': 'eonio', 'permission': 'active'}]
     with open(fastUnstakeSystem, mode='rb') as f:
         setcode = {'account': 'eonio', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
-    run(args.cleos + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) + 
+    run(args.cleon + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) + 
         jsonArg(trxPermissions) + 'eonio setcode' + jsonArg(setcode) + ' -p ' + proposer)
 
 def msigApproveReplaceSystem(proposer, proposalName):
     for i in range(firstProducer, firstProducer + numProducers):
-        run(args.cleos + 'multisig approve ' + proposer + ' ' + proposalName +
+        run(args.cleon + 'multisig approve ' + proposer + ' ' + proposalName +
             jsonArg({'actor': accounts[i]['name'], 'permission': 'active'}) +
             '-p ' + accounts[i]['name'])
 
 def msigExecReplaceSystem(proposer, proposalName):
-    retry(args.cleos + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
+    retry(args.cleon + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
 
 def msigReplaceSystem():
-    run(args.cleos + 'push action eonio buyrambytes' + jsonArg(['eonio', accounts[0]['name'], 200000]) + '-p eonio')
+    run(args.cleon + 'push action eonio buyrambytes' + jsonArg(['eonio', accounts[0]['name'], 200000]) + '-p eonio')
     sleep(1)
     msigProposeReplaceSystem(accounts[0]['name'], 'fast.unstake')
     sleep(1)
@@ -306,7 +306,7 @@ def msigReplaceSystem():
 def produceNewAccounts():
     with open('newusers', 'w') as f:
         for i in range(120_000, 200_000):
-            x = getOutput(args.cleos + 'create key --to-console')
+            x = getOutput(args.cleon + 'create key --to-console')
             r = re.match('Private key: *([^ \n]*)\nPublic key: *([^ \n]*)', x, re.DOTALL | re.MULTILINE)
             name = 'user'
             for j in range(7, -1, -1):
@@ -315,7 +315,7 @@ def produceNewAccounts():
             f.write('        {"name":"%s", "pvt":"%s", "pub":"%s"},\n' % (name, r[1], r[2]))
 
 def stepKillAll():
-    run('killall keosd nodeos || true')
+    run('killall keond nodeon || true')
     sleep(1.5)
 def stepStartWallet():
     startWallet()
@@ -324,19 +324,19 @@ def stepStartBoot():
     startNode(0, {'name': 'eonio', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(10)
 def stepInstallSystemContracts():
-    run(args.cleos + 'set contract eonio.token ' + args.contracts_dir + 'eosio.token/')
-    run(args.cleos + 'set contract eonio.msig ' + args.contracts_dir + 'eosio.msig/')
+    run(args.cleon + 'set contract eonio.token ' + args.contracts_dir + 'eosio.token/')
+    run(args.cleon + 'set contract eonio.msig ' + args.contracts_dir + 'eosio.msig/')
 def stepCreateTokens():
-    run(args.cleos + 'push action eonio.token create \'["eonio", "20000000000.0000 %s"]\' -p eonio.token' % (args.symbol))
+    run(args.cleon + 'push action eonio.token create \'["eonio", "20000000000.0000 %s"]\' -p eonio.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts)) + 10000000
-    run(args.cleos + 'push action eonio.token issue \'["eonio", "%s", "memo"]\' -p eonio' % intToCurrency(totalAllocation))
+    run(args.cleon + 'push action eonio.token issue \'["eonio", "%s", "memo"]\' -p eonio' % intToCurrency(totalAllocation))
     sleep(1)
 def stepTransferToEosioBlkpay():
-    retry(args.cleos + 'transfer eonio eonio.blkpay "%s"' % intToCurrency(10000000))
+    retry(args.cleon + 'transfer eonio eonio.blkpay "%s"' % intToCurrency(10000000))
 def stepSetSystemContract():
-    retry(args.cleos + 'set contract eonio ' + args.contracts_dir + 'eosio.system/')
+    retry(args.cleon + 'set contract eonio ' + args.contracts_dir + 'eosio.system/')
     sleep(1)
-    run(args.cleos + 'push action eonio setpriv' + jsonArg(['eonio.msig', 1]) + '-p eonio@active')
+    run(args.cleon + 'push action eonio setpriv' + jsonArg(['eonio.msig', 1]) + '-p eonio@active')
 def stepCreateStakedAccounts():
     createStakedAccounts(0, len(accounts))
 def stepRegProducers():
@@ -388,8 +388,8 @@ def stepLog():
 parser = argparse.ArgumentParser()
 
 commands = [
-    ('k', 'kill',           stepKillAll,                True,    "Kill all nodeos and keosd processes"),
-    ('w', 'wallet',         stepStartWallet,            True,    "Start keosd, create wallet, fill with keys"),
+    ('k', 'kill',           stepKillAll,                True,    "Kill all nodeon and keond processes"),
+    ('w', 'wallet',         stepStartWallet,            True,    "Start keond, create wallet, fill with keys"),
     ('b', 'boot',           stepStartBoot,              True,    "Start boot node"),
     ('s', 'sys',            createSystemAccounts,       True,    "Create system accounts (eonio.*)"),
     ('c', 'contracts',      stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
@@ -413,11 +413,11 @@ commands = [
     ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="EOSIO Public Key", default='EOS8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--public-key', metavar='', help="EOSIO Public Key", default='EON8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
 parser.add_argument('--private-Key', metavar='', help="EOSIO Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
-parser.add_argument('--cleos', metavar='', help="Cleos command", default='../../build/programs/cleos/cleos --wallet-url http://127.0.0.1:6666 ')
-parser.add_argument('--nodeos', metavar='', help="Path to nodeos binary", default='../../build/programs/nodeos/nodeos')
-parser.add_argument('--keosd', metavar='', help="Path to keosd binary", default='../../build/programs/keosd/keosd')
+parser.add_argument('--cleon', metavar='', help="Cleos command", default='../../build/programs/cleon/cleon --wallet-url http://127.0.0.1:6666 ')
+parser.add_argument('--nodeon', metavar='', help="Path to nodeon binary", default='../../build/programs/nodeon/nodeon')
+parser.add_argument('--keond', metavar='', help="Path to keond binary", default='../../build/programs/keond/keond')
 parser.add_argument('--contracts-dir', metavar='', help="Path to contracts directory", default='../../build/contracts/')
 parser.add_argument('--nodes-dir', metavar='', help="Path to nodes directory", default='./nodes/')
 parser.add_argument('--genesis', metavar='', help="Path to genesis.json", default="./genesis.json")
@@ -437,7 +437,7 @@ parser.add_argument('--num-senders', metavar='', help="Number of users to transf
 parser.add_argument('--producer-sync-delay', metavar='', help="Time (s) to sleep to allow producers to sync", type=int, default=40)
 parser.add_argument('--default-id', metavar='', help="default proposal id", type=int, default=0)
 parser.add_argument('-a', '--all', action='store_true', help="Do everything marked with (*)")
-parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for cleos')
+parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for cleon')
 
 for (flag, command, function, inAll, help) in commands:
     prefix = ''
@@ -450,7 +450,7 @@ for (flag, command, function, inAll, help) in commands:
         
 args = parser.parse_args()
 
-args.cleos += '--url http://127.0.0.1:%d ' % args.http_port
+args.cleon += '--url http://127.0.0.1:%d ' % args.http_port
 
 logFile = open(args.log_path, 'a')
 
