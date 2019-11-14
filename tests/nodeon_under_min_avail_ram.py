@@ -50,8 +50,8 @@ class NamedAccounts:
 
 
 ###############################################################
-# nodeos_voting_test
-# --dump-error-details <Upon error print etc/eosio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodeon_voting_test
+# --dump-error-details <Upon error print etc/eonio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -71,7 +71,7 @@ killEosInstances=not dontKill
 killWallet=not dontKill
 
 WalletdName=Utils.EosWalletName
-ClientName="cleos"
+ClientName="cleon"
 
 try:
     TestHelper.printSystemInfo("BEGIN")

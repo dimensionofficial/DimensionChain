@@ -17,7 +17,7 @@ if [ -d "/usr/local/include/eosio" ]; then
             popd &> /dev/null
 
             pushd bin &> /dev/null
-            rm cleos eosio-abigen eosio-applesdemo eosio-launcher eosio-s2wasm eosio-wast2wasm eosiocpp keosd nodeos &> /dev/null
+            rm cleon eosio-abigen eosio-applesdemo dimension-launcher eosio-s2wasm eosio-wast2wasm eosiocpp keond nodeon &> /dev/null
             popd &> /dev/null
 
             libraries=(libeosio_testing

@@ -66,7 +66,7 @@ verifyErrorCode()
 
 killAll()
 {
-  programs/eosio-launcher/eosio-launcher -k 15
+  programs/dimension-launcher/dimension-launcher -k 15
 }
 
 cleanup()
@@ -79,8 +79,8 @@ cleanup()
 # result stored in HEAD_BLOCK_NUM
 getHeadBlockNum()
 {
-  INFO="$(programs/cleos/cleos get info)"
-  verifyErrorCode "cleos get info"
+  INFO="$(programs/cleon/cleon get info)"
+  verifyErrorCode "cleon get info"
   HEAD_BLOCK_NUM="$(echo "$INFO" | awk '/head_block_num/ {print $2}')"
   # remove trailing coma
   HEAD_BLOCK_NUM=${HEAD_BLOCK_NUM%,}
@@ -113,8 +113,8 @@ cleanup
 
 # stand up nodeos cluster
 launcherOpts="-p $pnodes -n $total_nodes -s $topo -d $delay"
-echo Launcher options: --nodeos \"--plugin eosio::wallet_api_plugin\" $launcherOpts
-programs/eosio-launcher/eosio-launcher --nodeos "--plugin eosio::wallet_api_plugin" $launcherOpts
+echo Launcher options: --nodeon \"--plugin eosio::wallet_api_plugin\" $launcherOpts
+programs/dimension-launcher/dimension-launcher --nodeon "--plugin eosio::wallet_api_plugin" $launcherOpts
 sleep 7
 
 startPort=8888
@@ -126,22 +126,22 @@ echo endPort: $endPort
 port2=$startPort
 while [ $port2  -ne $endport ]; do
     echo Request block 1 from node on port $port2
-    TRANS_INFO="$(programs/cleos/cleos --port $port2 get block 1)"
-    verifyErrorCode "cleos get block"
+    TRANS_INFO="$(programs/cleon/cleon --port $port2 get block 1)"
+    verifyErrorCode "cleon get block"
     port2=`expr $port2 + 1`
 done
 
 # create 3 keys
-KEYS="$(programs/cleos/cleos create key)"
-verifyErrorCode "cleos create key"
+KEYS="$(programs/cleon/cleon create key)"
+verifyErrorCode "cleon create key"
 PRV_KEY1="$(echo "$KEYS" | awk '/Private/ {print $3}')"
 PUB_KEY1="$(echo "$KEYS" | awk '/Public/ {print $3}')"
-KEYS="$(programs/cleos/cleos create key)"
-verifyErrorCode "cleos create key"
+KEYS="$(programs/cleon/cleon create key)"
+verifyErrorCode "cleon create key"
 PRV_KEY2="$(echo "$KEYS" | awk '/Private/ {print $3}')"
 PUB_KEY2="$(echo "$KEYS" | awk '/Public/ {print $3}')"
-KEYS="$(programs/cleos/cleos create key)"
-verifyErrorCode "cleos create key"
+KEYS="$(programs/cleon/cleon create key)"
+verifyErrorCode "cleon create key"
 PRV_KEY3="$(echo "$KEYS" | awk '/Private/ {print $3}')"
 PUB_KEY3="$(echo "$KEYS" | awk '/Public/ {print $3}')"
 if [ -z "$PRV_KEY1" ] || [ -z "$PRV_KEY2" ] || [ -z "$PRV_KEY3" ] || [ -z "$PUB_KEY1" ] || [ -z "$PUB_KEY2" ] || [ -z "$PUB_KEY3" ]; then
@@ -150,21 +150,21 @@ fi
 
 
 # create wallet for inita
-PASSWORD_INITA="$(programs/cleos/cleos wallet create --name inita)"
-verifyErrorCode "cleos wallet create"
+PASSWORD_INITA="$(programs/cleon/cleon wallet create --name inita)"
+verifyErrorCode "cleon wallet create"
 # strip out password from output
 PASSWORD_INITA="$(echo "$PASSWORD_INITA" | awk '/PW/ {print $1}')"
 # remove leading/trailing quotes
 PASSWORD_INITA=${PASSWORD_INITA#\"}
 PASSWORD_INITA=${PASSWORD_INITA%\"}
-programs/cleos/cleos wallet import --name inita --private-key $INITA_PRV_KEY
-verifyErrorCode "cleos wallet import"
-programs/cleos/cleos wallet import --name inita --private-key $PRV_KEY1
-verifyErrorCode "cleos wallet import"
-programs/cleos/cleos wallet import --name inita --private-key $PRV_KEY2
-verifyErrorCode "cleos wallet import"
-programs/cleos/cleos wallet import --name inita --private-key $PRV_KEY3
-verifyErrorCode "cleos wallet import"
+programs/cleon/cleon wallet import --name inita --private-key $INITA_PRV_KEY
+verifyErrorCode "cleon wallet import"
+programs/cleon/cleon wallet import --name inita --private-key $PRV_KEY1
+verifyErrorCode "cleon wallet import"
+programs/cleon/cleon wallet import --name inita --private-key $PRV_KEY2
+verifyErrorCode "cleon wallet import"
+programs/cleon/cleon wallet import --name inita --private-key $PRV_KEY3
+verifyErrorCode "cleon wallet import"
 
 #
 # Account and Transfer Tests
@@ -172,12 +172,12 @@ verifyErrorCode "cleos wallet import"
 
 # create new account
 echo Creating account testera
-ACCOUNT_INFO="$(programs/cleos/cleos create account inita testera $PUB_KEY1 $PUB_KEY3)"
-verifyErrorCode "cleos create account"
+ACCOUNT_INFO="$(programs/cleon/cleon create account inita testera $PUB_KEY1 $PUB_KEY3)"
+verifyErrorCode "cleon create account"
 waitForNextBlock
 # verify account created
-ACCOUNT_INFO="$(programs/cleos/cleos get account testera)"
-verifyErrorCode "cleos get account"
+ACCOUNT_INFO="$(programs/cleon/cleon get account testera)"
+verifyErrorCode "cleon get account"
 count=`echo $ACCOUNT_INFO | grep -c "staked_balance"`
 if [ $count == 0 ]; then
   error "FAILURE - account creation failed: $ACCOUNT_INFO"
@@ -189,8 +189,8 @@ echo Producing node port: $pPort
 while [ $port  -ne $endport ]; do
 
     echo Sending transfer request to node on port $port.
-    TRANSFER_INFO="$(programs/cleos/cleos transfer inita testera 975321 "test transfer")"
-    verifyErrorCode "cleos transfer"
+    TRANSFER_INFO="$(programs/cleon/cleon transfer inita testera 975321 "test transfer")"
+    verifyErrorCode "cleon transfer"
     getTransactionId "$TRANSFER_INFO"
     echo Transaction id: $TRANS_ID
 
@@ -200,8 +200,8 @@ while [ $port  -ne $endport ]; do
     port2=$startPort
     while [ $port2  -ne $endport ]; do
 	echo Verifying transaction exists on node on port $port2
-   TRANS_INFO="$(programs/cleos/cleos --port $port2 get transaction $TRANS_ID)"
-   verifyErrorCode "cleos get transaction trans_id of <$TRANS_INFO> from node on port $port2"
+   TRANS_INFO="$(programs/cleon/cleon --port $port2 get transaction $TRANS_ID)"
+   verifyErrorCode "cleon get transaction trans_id of <$TRANS_INFO> from node on port $port2"
 	port2=`expr $port2 + 1`
     done
 

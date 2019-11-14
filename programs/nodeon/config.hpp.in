@@ -9,7 +9,7 @@
 #ifndef CONFIG_HPP_IN
 #define CONFIG_HPP_IN
 
-namespace eosio { namespace nodeos { namespace config {
+namespace eosio { namespace nodeon { namespace config {
   constexpr uint64_t version = 0x${nodeos_BUILD_VERSION};
 }}}
 

@@ -61,9 +61,9 @@ $ ./nodeos -d ~/eos.data/generator_node --config-dir ~/eos.data/generator_node -
 
 ### Create a wallet on the non-producer and set bios contract
 ```bash
-$ ./cleos wallet create --to-console
-$ ./cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
-$ ./cleos set contract eonio ~/eos/build.release/contracts/eonio.bios/ 
+$ ./cleon wallet create --to-console
+$ ./cleon wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+$ ./cleon set contract eonio ~/eos/build.release/contracts/eonio.bios/ 
 ```
 
 ### Initialize the accounts txn_test_gen_plugin uses

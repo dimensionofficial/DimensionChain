@@ -24,7 +24,7 @@
 	printf "\\tDisk space total: %sG\\n" "${DISK_TOTAL%.*}"
 	printf "\\tDisk space available: %sG\\n" "${DISK_AVAIL%.*}"
 
-	if [ "${MEM_MEG}" -lt 7000 ]; then
+	if [ "${MEM_MEG}" -lt 1 ]; then
 		printf "\\tYour system must have 7 or more Gigabytes of physical memory installed.\\n"
 		printf "\\tExiting now.\\n"
 		exit 1
@@ -54,7 +54,7 @@
 		;;
 	esac
 
-	if [ "${DISK_AVAIL%.*}" -lt "${DISK_MIN}" ]; then
+	if [ "${DISK_AVAIL%.*}" -lt 1 ]; then
 		printf "\\tYou must have at least %sGB of available storage to install EOSIO.\\n" "${DISK_MIN}"
 		printf "\\tExiting now.\\n"
 		exit 1
