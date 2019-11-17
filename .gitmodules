@@ -27,6 +27,7 @@
 [submodule "libraries/fc"]
 	path = libraries/fc
 	url = https://github.com/dimensionofficial/fc
+	branch = dimension
 [submodule "libraries/wabt"]
 	path = libraries/wabt
 	url = https://github.com/EOSIO/wabt
