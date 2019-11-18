@@ -93,9 +93,9 @@ namespace eosiosystem {
 
        auto prop = _proposals.find( proposal_id );
        eosio_assert(prop != _proposals.end(), "proposal_id not in _proposals");
-    //    if(get_producers_size() > 7) { // 多于7个时检查
-    //        eosio_assert(now_time > prop->vote_end_time, "proposal not end");
-    //    }
+       if(get_producers_size() > 7) { // 多于7个时检查
+           eosio_assert(now_time > prop->vote_end_time, "proposal not end");
+       }
        eosio_assert(now_time < prop->exec_end_time, "proposal execution time has elapsed");
        eosio_assert( ! prop->is_exec, "proposal execution time has elapsed");
             
