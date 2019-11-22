@@ -82,6 +82,10 @@ public:
       create_account_with_resources( N(bob111111111), config::system_account_name, core_from_string("0.4500"), false );
       create_account_with_resources( N(carol1111111), config::system_account_name, core_from_string("1.0000"), false );
 
+      create_account_with_resources( N(tmpaccount11), config::system_account_name, core_from_string("1.0000"), false );
+
+      stake( "eonio", "tmpaccount11", core_from_string("100000000.0000"), core_from_string("200.0000") );
+
       BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("eonio")  + get_balance("eonio.ramfee") + get_balance("eonio.stake") + get_balance("eonio.ram") );
    }
 

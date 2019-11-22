@@ -64,7 +64,7 @@ BOOST_FIXTURE_TEST_CASE( buysell, eosio_system_tester ) try {
    wdump((init_bytes)(bought_bytes)(bytes) );
 
    BOOST_REQUIRE_EQUAL( true, total["ram_bytes"].as_uint64() == init_bytes );
-   BOOST_REQUIRE_EQUAL( core_from_string("99901248.0041"), get_balance( "alice1111111" ) );
+   BOOST_REQUIRE_EQUAL( core_from_string("99901248.0044"), get_balance( "alice1111111" ) );
 
    BOOST_REQUIRE_EQUAL( success(), buyram( "alice1111111", "alice1111111", core_from_string("100.0000") ) );
    BOOST_REQUIRE_EQUAL( success(), buyram( "alice1111111", "alice1111111", core_from_string("100.0000") ) );
