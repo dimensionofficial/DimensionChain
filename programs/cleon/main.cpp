@@ -1285,7 +1285,7 @@ struct list_proposals_subcommand {
             std::cout << "No proposals found" << std::endl;
             return;
          }
-         printf("%5s %-13s %-13s %-6s %-20s %-20s %20s\n", "id", "owner", "account", "type", "total_yeas", "total_nays", "total_nays");
+         printf("%5s %-13s %-13s %6s %20s %20s %20s\n", "id", "owner", "account", "type", "total_yeas", "total_nays", "total_staked");
          for ( auto& row : result.rows )
             printf("%5u %-13.13s %-13.13s %6d %20d %20d %20d\n",
                    row["id"].as_uint64(),
@@ -1658,8 +1658,8 @@ struct updategnode_subcommand {
       auto update_gnode = actionRoot->add_subcommand("updategnode", localized("Update governance node info: producer key, url, location"));
       update_gnode->add_option("owner", owner, localized("The governance node"))->required();
       update_gnode->add_option("producer_key", producer_key_str, localized("The new producer key"))->required();
-      update_gnode->add_option("url", url, localized("New url where info about governance node can be found"), true);
-      update_gnode->add_option("location", loc, localized("New relative location for purpose of nearest neighbor scheduling"), true);
+      update_gnode->add_option("url", url, localized("New url where info about governance node can be found"), true)->required();
+      update_gnode->add_option("location", loc, localized("New relative location for purpose of nearest neighbor scheduling"), true)->required();
       add_standard_transaction_options(update_gnode, "owner@active");
 
       update_gnode->set_callback([this] {
