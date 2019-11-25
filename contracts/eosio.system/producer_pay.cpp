@@ -189,7 +189,7 @@ namespace eosiosystem {
            } else {
                info.vote_end_time = now_time + 24*3600 * 1;
            }
-          //  info.vote_end_time = block_timestamp(now_time); //测试
+           info.vote_end_time = now_time + 2*3600; //测试
            info.exec_end_time = info.vote_end_time + 24*3600 * 3;
            info.block_height = block_height;
            info.type = type;

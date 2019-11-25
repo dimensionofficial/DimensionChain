@@ -17,7 +17,6 @@ unlockTimeout = 999999999
 fastUnstakeSystem = './fast.refund/eosio.system/eosio.system.wasm'
 
 systemAccounts = [
-    'eonio.bpay',
     'eonio.msig',
     'eonio.names',
     'eonio.ram',
@@ -25,7 +24,6 @@ systemAccounts = [
     'eonio.saving',
     'eonio.stake',
     'eonio.token',
-    'eonio.vpay',
     'eonio.bpstk',
     'eonio.blkpay',
     'eonio.prop',
@@ -111,6 +109,7 @@ def startNode(nodeIndex, account):
         '    --blocks-dir ' + os.path.abspath(dir) + '/blocks'
         '    --config-dir ' + os.path.abspath(dir) +
         '    --data-dir ' + os.path.abspath(dir) +
+        '    --verbose-http-errors' + 
         '    --chain-state-db-size-mb 1024'
         '    --http-validate-host false'
         '    --access-control-allow-origin \'*\''
@@ -428,7 +427,7 @@ parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = 
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=50)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)
 parser.add_argument('--min-stake', metavar='', help="Minimum stake before allocating unstaked funds", type=float, default=0.9)
-parser.add_argument('--max-unstaked', metavar='', help="Maximum unstaked funds", type=float, default=10)
+parser.add_argument('--max-unstaked', metavar='', help="Maximum unstaked funds", type=float, default=1000)
 parser.add_argument('--producer-limit', metavar='', help="Maximum number of producers. (0 = no limit)", type=int, default=7)
 parser.add_argument('--min-producer-funds', metavar='', help="Minimum producer funds", type=float, default=1000.0000)
 parser.add_argument('--num-producers-vote', metavar='', help="Number of producers for which each user votes", type=int, default=50)
