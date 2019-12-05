@@ -72,10 +72,6 @@ namespace eosiosystem {
 
    void system_contract::update_elected_producers( block_timestamp block_time ) {
       _gstate.last_producer_schedule_update = block_time;
-      
-      if(_gstate.producer_num == _gstate.last_producer_schedule_size) {
-          return;
-      }
 
       auto idx = _producers.get_index<N(prototalvote)>();
 
