@@ -17,7 +17,7 @@ namespace eosiosystem {
    const uint64_t useconds_per_day      = 24 * 3600 * uint64_t(1000000);
    const uint64_t useconds_per_year     = seconds_per_year*1000000ll;
 
-   const uint16_t min_producer_size     = 4;  //避免bp太少就接替eonio出块
+   const uint16_t min_producer_size     = 7;  //避免bp太少就接替eonio出块
 
 
    void system_contract::onblock( block_timestamp timestamp, account_name producer ) {
@@ -26,7 +26,7 @@ namespace eosiosystem {
       require_auth(N(eonio));
 
       /** until activated stake crosses this threshold no new rewards are paid */
-      if( _gstate.total_proposal_stake < min_proposal_stake || get_producers_size() < min_producer_size )
+      if( _gstate.total_proposal_stake < min_proposal_stake || _gstate.producer_num < min_producer_size )
          return;
 
       if( _gstate.last_pervote_bucket_fill == 0 )  /// start the presses
@@ -45,13 +45,8 @@ namespace eosiosystem {
          });
       }
 
-      // 有proposal时，不再使用update_elected_producers
-      // 临时措施
-      // TODO:bidname
-      if(_gstate.proposal_num != 0) return;
-
       /// only update block producers once every minute, block_timestamp is in half seconds
-      if( timestamp.slot - _gstate.last_producer_schedule_update.slot > 120 ) {
+      if( timestamp.slot - _gstate.last_producer_schedule_update.slot > 240 ) {
          update_elected_producers( timestamp );
 
          if( (timestamp.slot - _gstate.last_name_close.slot) > blocks_per_day ) {
@@ -93,9 +88,9 @@ namespace eosiosystem {
 
        auto prop = _proposals.find( proposal_id );
        eosio_assert(prop != _proposals.end(), "proposal_id not in _proposals");
-       if(get_producers_size() > 7) { // 多于7个时检查
-           eosio_assert(now_time > prop->vote_end_time, "proposal not end");
-       }
+    //    if(get_producers_size() > 7) { // 多于7个时检查
+    //        eosio_assert(now_time > prop->vote_end_time, "proposal not end");
+    //    }
        eosio_assert(now_time < prop->exec_end_time, "proposal execution time has elapsed");
        eosio_assert( ! prop->is_exec, "proposal execution time has elapsed");
             
@@ -108,7 +103,8 @@ namespace eosiosystem {
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
 
-                add_elected_producers( prop->account, prop->id);
+                add_elected_producers( prop->account);
+                _gstate.producer_num ++;
                 _gnode.modify( gnd, owner, [&](auto& info) {
                     info.is_bp   = true;
                 });
@@ -123,7 +119,8 @@ namespace eosiosystem {
                 gnd = _gnode.find( prop->account );
                 eosio_assert(gnd != _gnode.end(), "account not in _gnode");
 
-                remove_elected_producers( prop->account, prop->id);
+                remove_elected_producers( prop->account);
+                _gstate.producer_num --;
                 _gnode.modify( gnd, owner, [&](auto& info) {
                     info.is_bp   = false;
                 });

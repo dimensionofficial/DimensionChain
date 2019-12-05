@@ -71,20 +71,21 @@ namespace eosiosystem {
    }
 
    void system_contract::update_elected_producers( block_timestamp block_time ) {
+      if(_gstate.producer_num == _gstate.last_producer_schedule_size) {
+          return;
+      }
       _gstate.last_producer_schedule_update = block_time;
 
       auto idx = _producers.get_index<N(prototalvote)>();
 
       std::vector< std::pair<eosio::producer_key,uint16_t> > top_producers;
-      top_producers.reserve(21);
+      top_producers.reserve((int32_t)_gstate.producer_num);
 
-      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < 21 && 0 < it->total_votes && it->active(); ++it ) {
-         top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
+      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < _gstate.producer_num; ++it ) {
+         if(it->active()) {
+             top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
+         }
       }
-
-      // if ( top_producers.size() < _gstate.last_producer_schedule_size ) {
-      //    return;
-      // }
 
       /// sort by producer name
       std::sort( top_producers.begin(), top_producers.end() );
@@ -103,84 +104,18 @@ namespace eosiosystem {
    }
 
    // 提案type==1，将account 加到producer
-   void system_contract::add_elected_producers( account_name new_producer, uint64_t proposal_id ) {
+   void system_contract::add_elected_producers( account_name new_producer ) {
 
-      const auto now_time = now();
-
-      _gstate.last_producer_schedule_update = block_timestamp(now_time);
-      
       auto gnd = _gnode.find( new_producer );
       eosio_assert(gnd != _gnode.end(), "account not in _gnode");
       regproducer(new_producer, gnd->producer_key, gnd->url, gnd->location);
 
-      auto idx = _producers.get_index<N(prototalvote)>();
-
-      std::vector< std::pair<eosio::producer_key,uint16_t> > top_producers;
-      uint16_t new_size = get_producers_size(); //原有数量加一
-      top_producers.reserve( new_size );
-
-      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < new_size && it->active(); ++it ) {
-         top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
-      }
-
-      /// sort by producer name
-      std::sort( top_producers.begin(), top_producers.end() );
-
-      std::vector<eosio::producer_key> producers;
-
-      producers.reserve(top_producers.size());
-      for( const auto& item : top_producers )
-         producers.push_back(item.first);
-
-      auto packed_schedule = pack(producers);
-
-      if( set_proposed_producers( packed_schedule.data(),  packed_schedule.size() ) >= 0 ) {
-         _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
-      }
-
    }
 
    // 提案type==2，将account 从producer移除
-   void system_contract::remove_elected_producers( account_name remove_producer, uint64_t proposal_id ) {
+   void system_contract::remove_elected_producers( account_name remove_producer ) {
 
-      const auto now_time = now();
-      
-      _gstate.last_producer_schedule_update = block_timestamp(now_time);
-
-      auto idx = _producers.get_index<N(prototalvote)>();
-      // remove_producer是否在bp中
-      bool isExist = false;
-      for ( auto it = idx.cbegin(); it != idx.cend(); ++it ) {
-         if(remove_producer == it->owner) {
-            isExist = true;
-            break;
-         }
-      }
-      if( !isExist ) return;
-
-      std::vector< std::pair<eosio::producer_key,uint16_t> > top_producers;
-      uint16_t new_size = get_producers_size() - 1; //原有数量加一
-      top_producers.reserve(new_size);
-
-      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < new_size && it->active(); ++it ) {
-         if(remove_producer != it->owner)
-            top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
-      }
-
-      /// sort by producer name
-      std::sort( top_producers.begin(), top_producers.end() );
-
-      std::vector<eosio::producer_key> producers;
-
-      producers.reserve(top_producers.size());
-      for( const auto& item : top_producers )
-         producers.push_back(item.first);
-
-      auto packed_schedule = pack(producers);
-
-      if( set_proposed_producers( packed_schedule.data(),  packed_schedule.size() ) >= 0 ) {
-         _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
-      }
+      unregprod(remove_producer);
 
    }
 

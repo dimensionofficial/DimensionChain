@@ -56,6 +56,7 @@ namespace eosiosystem {
       int64_t              stake_to_gnode_fee = 10000;   // 1.0000 EON
       int64_t              new_proposal_fee = 15000;     // 1.5000 EON
       int64_t              proposal_num = 0;
+      int64_t              producer_num = 0;
       int64_t              total_proposal_stake = 0;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
@@ -64,7 +65,7 @@ namespace eosiosystem {
                                 (last_producer_schedule_update)(last_pervote_bucket_fill)
                                 (pervote_bucket)(perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
                                 (last_producer_schedule_size)(total_producer_vote_weight)(last_name_close)
-                                (reward_pre_block)(stake_to_gnode_fee)(new_proposal_fee)(proposal_num)(total_proposal_stake) )
+                                (reward_pre_block)(stake_to_gnode_fee)(new_proposal_fee)(proposal_num)(producer_num)(total_proposal_stake) )
    };
 
    struct producer_info {
@@ -300,8 +301,8 @@ namespace eosiosystem {
       private:
          void update_elected_producers( block_timestamp timestamp );
 
-         void add_elected_producers( account_name new_producer, uint64_t proposal_id );
-         void remove_elected_producers( account_name new_producer, uint64_t proposal_id );
+         void add_elected_producers( account_name new_producer );
+         void remove_elected_producers( account_name new_producer );
          int64_t stake_to_proposal_votes( int64_t staked );
 
          // Implementation details:

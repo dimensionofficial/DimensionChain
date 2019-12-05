@@ -263,6 +263,7 @@
          {"name":"stake_to_gnode_fee",            "type":"int64"},
          {"name":"new_proposal_fee",              "type":"int64"},
          {"name":"proposal_num",                  "type":"int64"},
+         {"name":"producer_num",                  "type":"int64"},
          {"name":"total_proposal_stake",          "type":"int64"}
       ]
     },{
