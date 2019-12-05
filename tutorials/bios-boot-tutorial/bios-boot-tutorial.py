@@ -425,7 +425,7 @@ parser.add_argument('--log-path', metavar='', help="Path to log file", default='
 parser.add_argument('--symbol', metavar='', help="The eonio.system symbol", default='EON')
 parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=50)
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=50)
-parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)
+parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=10.1)
 parser.add_argument('--min-stake', metavar='', help="Minimum stake before allocating unstaked funds", type=float, default=0.9)
 parser.add_argument('--max-unstaked', metavar='', help="Maximum unstaked funds", type=float, default=1000)
 parser.add_argument('--producer-limit', metavar='', help="Maximum number of producers. (0 = no limit)", type=int, default=7)
