@@ -47,7 +47,7 @@ public:
       produce_blocks( 2 );
 
       create_accounts({ N(eonio.token), N(eonio.ram), N(eonio.ramfee), N(eonio.stake),
-               N(eonio.bpay), N(eonio.vpay), N(eonio.saving), N(eonio.names), N(eonio.blkpay) });
+               N(eonio.bpay), N(eonio.vpay), N(eonio.saving), N(eonio.names), N(eonio.blkpay), N(eonio.prop), N(eonio.bpstk) });
 
 
       produce_blocks( 100 );
@@ -62,9 +62,9 @@ public:
          token_abi_ser.set_abi(abi, abi_serializer_max_time);
       }
 
-      create_currency( N(eonio.token), config::system_account_name, core_from_string("10000000000.0000") );
-      issue(config::system_account_name,      core_from_string("1000000000.0000"));
-      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "eonio" ) );
+      create_currency( N(eonio.token), config::system_account_name, core_from_string("20000000000.0000") );
+      issue(config::system_account_name,      core_from_string("2000000000.0000"));
+      BOOST_REQUIRE_EQUAL( core_from_string("2000000000.0000"), get_balance( "eonio" ) );
 
       set_code( config::system_account_name, eosio_system_wast );
       set_abi( config::system_account_name, eosio_system_abi );
@@ -79,14 +79,14 @@ public:
       produce_blocks();
 
       create_account_with_resources( N(alice1111111), config::system_account_name, core_from_string("1.0000"), false );
-      create_account_with_resources( N(bob111111111), config::system_account_name, core_from_string("0.4500"), false );
+      create_account_with_resources( N(bob111111111), config::system_account_name, core_from_string("1.0000"), false );
       create_account_with_resources( N(carol1111111), config::system_account_name, core_from_string("1.0000"), false );
 
       create_account_with_resources( N(tmpaccount11), config::system_account_name, core_from_string("1.0000"), false );
 
-      stake( "eonio", "tmpaccount11", core_from_string("100000000.0000"), core_from_string("200.0000") );
+      stake( "eonio", "tmpaccount11", core_from_string("100000000.0000"), core_from_string("200.0000") ); //激活网络
 
-      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("eonio")  + get_balance("eonio.ramfee") + get_balance("eonio.stake") + get_balance("eonio.ram") );
+      BOOST_REQUIRE_EQUAL( core_from_string("2000000000.0000"), get_balance("eonio")  + get_balance("eonio.ramfee") + get_balance("eonio.stake") + get_balance("eonio.ram") );
    }
 
 
@@ -252,6 +252,47 @@ public:
       return stake( acnt, acnt, net, cpu );
    }
 
+
+   action_result stake_to_gnode_t( const account_name& payer) {
+         return push_action( name(payer), N(staketognode), mvo()
+                             ("payer",        payer)
+                             ("owner",        payer)
+                             ("producer_key", get_public_key( payer, "owner" ))
+                             ("url",          "dimension.com")
+                             ("location",     1)
+         );
+   }
+
+   action_result unstake_gnode_t( const account_name& owner) {
+         return push_action( name(owner), N(unstakegnode), mvo()
+                             ("owner",        owner)
+         );
+   }
+
+   action_result update_gnode_t( const account_name owner, const std::string& url, uint16_t location ) {
+         return push_action( name(owner), N(updategnode), mvo()
+                             ("owner",        owner)
+                             ("producer_key", get_public_key( N(bob111111111), "owner" )) //用bob的公钥
+                             ("url",          url)
+                             ("location",     location)
+         );
+   }
+
+
+   action_result new_proposal_t( const account_name owner, const account_name account, uint32_t block_height, int64_t type, int64_t consensus_type) {
+         return push_action( name(owner), N(newproposal), mvo()
+                             ("owner",           owner)
+                             ("account",         account)
+                             ("block_height",    block_height)
+                             ("type",            type)
+                             ("consensus_type",  consensus_type)
+         );
+   }
+
+
+
+
+
    action_result stake_with_transfer( const account_name& from, const account_name& to, const asset& net, const asset& cpu ) {
       return push_action( name(from), N(delegatebw), mvo()
                           ("from",     from)
@@ -350,6 +391,11 @@ public:
    fc::variant get_producer_info( const account_name& act ) {
       vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(producers), act );
       return abi_ser.binary_to_variant( "producer_info", data, abi_serializer_max_time );
+   }
+
+   fc::variant get_gnode_info( const account_name& act ) {
+      vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(gnode), act );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "goverance_node_info", data, abi_serializer_max_time );
    }
 
    void create_currency( name contract, name manager, asset maxsupply ) {
