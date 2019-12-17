@@ -216,6 +216,7 @@ namespace eosio { namespace testing {
                                                              const account_name& account ) const;
 
          vector<char> get_row_by_account( uint64_t code, uint64_t scope, uint64_t table, const account_name& act ) const;
+         vector<char> get_row_by_id( uint64_t code, uint64_t scope, uint64_t table, const uint64_t id ) const;
 
          map<account_name, block_id_type> get_last_produced_block_map()const { return last_produced_block; };
          void set_last_produced_block_map( const map<account_name, block_id_type>& lpb ) { last_produced_block = lpb; }

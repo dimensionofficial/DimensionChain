@@ -770,6 +770,27 @@ namespace eosio { namespace testing {
       return data;
    }
 
+   vector<char> base_tester::get_row_by_id( uint64_t code, uint64_t scope, uint64_t table, const uint64_t id ) const {
+      vector<char> data;
+      const auto& db = control->db();
+      const auto* t_id = db.find<chain::table_id_object, chain::by_code_scope_table>( boost::make_tuple( code, scope, table ) );
+      if ( !t_id ) {
+         return data;
+      }
+      //FC_ASSERT( t_id != 0, "object not found" );
+
+      const auto& idx = db.get_index<chain::key_value_index, chain::by_scope_primary>();
+
+      auto itr = idx.lower_bound( boost::make_tuple( t_id->id, id ) );
+      if ( itr == idx.end() || itr->t_id != t_id->id || id != itr->primary_key ) {
+         return data;
+      }
+
+      data.resize( itr->value.size() );
+      memcpy( data.data(), itr->value.data(), data.size() );
+      return data;
+   }
+
 
    vector<uint8_t> base_tester::to_uint8_vector(const string& s) {
       vector<uint8_t> v(s.size());

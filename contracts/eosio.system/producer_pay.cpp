@@ -92,7 +92,7 @@ namespace eosiosystem {
            eosio_assert(now_time > prop->vote_end_time, "proposal not end");
        }
        eosio_assert(now_time < prop->exec_end_time, "proposal execution time has elapsed");
-       eosio_assert( ! prop->is_exec, "proposal execution time has elapsed");
+       eosio_assert( ! prop->is_exec, "proposal has been executed");
             
       // 检查proposal == 1是否满足条件，是这执行
         if( prop->type == 1 ) {

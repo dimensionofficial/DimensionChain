@@ -289,7 +289,20 @@ public:
          );
    }
 
+   action_result vote_proposal_t( const account_name voter_name, const uint64_t proposal_id, const bool yea ) {
+         return push_action( name(voter_name), N(voteproposal), mvo()
+                             ("voter_name",      voter_name)
+                             ("proposal_id",     proposal_id)
+                             ("yea",             yea)
+         );
+   }
 
+   action_result exec_proposal_t( const account_name owner, uint64_t proposal_id ) {
+         return push_action( name(owner), N(execproposal), mvo()
+                             ("owner",        owner)
+                             ("proposal_id",  proposal_id)
+         );
+   }
 
 
 
@@ -397,6 +410,12 @@ public:
       vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(gnode), act );
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "goverance_node_info", data, abi_serializer_max_time );
    }
+
+   fc::variant get_proposal_info( const uint64_t id ) {
+      vector<char> data = get_row_by_id( config::system_account_name, config::system_account_name, N(proposals), id );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "proposal_info", data, abi_serializer_max_time );
+   }
+
 
    void create_currency( name contract, name manager, asset maxsupply ) {
       auto act =  mutable_variant_object()

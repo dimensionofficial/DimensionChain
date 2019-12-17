@@ -118,6 +118,102 @@ BOOST_FIXTURE_TEST_CASE( new_proposals_type_test, eosio_system_tester ) try {
    BOOST_REQUIRE_EQUAL( wasm_assert_msg("consensus_type must be one of 0, 1, 2"), new_proposal_t("alice1111111", "bob111111111", 0, 3, 3) ); 
    BOOST_REQUIRE_EQUAL( wasm_assert_msg("consensus_type must be one of 0, 1, 2"), new_proposal_t("alice1111111", "bob111111111", 0, 3, 4) ); 
 
+   auto proposal = get_proposal_info(0);
+
+   BOOST_REQUIRE_EQUAL(0, proposal["id"].as_uint64());
+   BOOST_REQUIRE_EQUAL("alice1111111", proposal["owner"]);
+   BOOST_REQUIRE_EQUAL("alice1111111", proposal["account"]);
+   BOOST_REQUIRE_EQUAL(1, proposal["type"].as_int64());
+   BOOST_REQUIRE_EQUAL(1, proposal["consensus_type"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_yeas"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_nays"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_staked"].as_int64());
+
+
+} FC_LOG_AND_RETHROW()
+
+
+BOOST_FIXTURE_TEST_CASE( vote_proposals, eosio_system_tester ) try {
+
+   produce_blocks( 1 );
+
+   BOOST_REQUIRE_EQUAL( core_from_string("0.0000"), get_balance( "alice1111111" ) );
+   transfer( "eonio", "alice1111111", core_from_string("1000.0000"), "eonio" );
+   produce_blocks( 1 );
+
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("alice1111111") ); // 成为gnode消耗1.000 EON
+
+
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("alice1111111", "alice1111111", 0, 1, 1) ); 
+
+   auto proposal = get_proposal_info(0);
+   BOOST_REQUIRE_EQUAL(0, proposal["total_yeas"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_nays"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_staked"].as_int64());
+
+   stake( "eonio", "bob111111111", core_from_string("1000.0000"), core_from_string("0.0000") );
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg("proposal not exist"), vote_proposal_t("bob111111111", 1, true) ); //对id为1的投票 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 0, true) ); //对id为0的投票 
+
+
+   proposal = get_proposal_info(0);
+   BOOST_REQUIRE_EQUAL(1, proposal["type"].as_int64());
+   BOOST_REQUIRE_EQUAL(1, proposal["consensus_type"].as_int64());
+//    BOOST_REQUIRE_EQUAL(11, proposal["total_yeas"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_nays"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_staked"].as_int64());
+
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 0, false) ); //对id为0的投反对票 
+
+   proposal = get_proposal_info(0);
+   BOOST_REQUIRE_EQUAL(0, proposal["total_yeas"].as_int64());
+//    BOOST_REQUIRE_EQUAL(11, proposal["total_nays"].as_int64());
+   BOOST_REQUIRE_EQUAL(0, proposal["total_staked"].as_int64());
+
+   produce_block(fc::minutes(2*60-1)); //接近2小时
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 0, true) );
+   produce_block(fc::minutes(1));
+   produce_blocks(1);
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg("proposal vote time has elapsed"), vote_proposal_t("bob111111111", 0, true) ); //超时
+
+} FC_LOG_AND_RETHROW()
+
+
+BOOST_FIXTURE_TEST_CASE( exec_proposals, eosio_system_tester ) try {
+
+   produce_blocks( 1 );
+
+   BOOST_REQUIRE_EQUAL( core_from_string("0.0000"), get_balance( "alice1111111" ) );
+   transfer( "eonio", "alice1111111", core_from_string("1000.0000"), "eonio" );
+   produce_blocks( 1 );
+
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("alice1111111") ); // 成为gnode消耗1.000 EON
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("alice1111111", "alice1111111", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("alice1111111", "alice1111111", 0, 3, 1) ); 
+
+   stake( "eonio", "bob111111111", core_from_string("100000000.0000"), core_from_string("0.0000") );
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 0, true) ); //对id为0的投票 
+
+   produce_block(fc::hours(2)); //2小时
+   produce_blocks(1);
+
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg("only governance node can exec proposal"), exec_proposal_t("bob111111111", 0) ); 
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg("proposal_id not in _proposals"), exec_proposal_t("alice1111111", 2) ); //id为2的不存在
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("alice1111111", 0) );
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg("proposal has been executed"), exec_proposal_t("alice1111111", 0) );  //重复执行id为0的提案
+
+   produce_block(fc::hours(24 * 3)); //3天后
+   BOOST_REQUIRE_EQUAL( wasm_assert_msg("proposal execution time has elapsed"), exec_proposal_t("alice1111111", 1) );  //过了执行提案时间
+
+} FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE( add_producers, eosio_system_tester ) try {
+
+   produce_blocks( 1 );
+
+   
 } FC_LOG_AND_RETHROW()
 
 
