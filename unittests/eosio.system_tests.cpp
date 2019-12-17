@@ -168,7 +168,7 @@ BOOST_FIXTURE_TEST_CASE( vote_proposals, eosio_system_tester ) try {
 
    proposal = get_proposal_info(0);
    BOOST_REQUIRE_EQUAL(0, proposal["total_yeas"].as_int64());
-//    BOOST_REQUIRE_EQUAL(11, proposal["total_nays"].as_int64());
+//    BOOST_REQUIRE_EQUAL(11, proposal["total_nays"].as<int64_t>());
    BOOST_REQUIRE_EQUAL(0, proposal["total_staked"].as_int64());
 
    produce_block(fc::minutes(2*60-1)); //接近2小时
@@ -209,11 +209,126 @@ BOOST_FIXTURE_TEST_CASE( exec_proposals, eosio_system_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( add_producers, eosio_system_tester ) try {
+BOOST_FIXTURE_TEST_CASE( add_remove_producers, eosio_system_tester ) try {
 
    produce_blocks( 1 );
 
-   
+   create_account_with_resources( N(producer111a), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111b), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111c), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111d), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111e), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111f), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111g), config::system_account_name, core_from_string("1.0000"), false );
+   create_account_with_resources( N(producer111h), config::system_account_name, core_from_string("1.0000"), false );
+
+   transfer( "eonio", "producer111a", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111b", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111c", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111d", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111e", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111f", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111g", core_from_string("1000.0000"), "eonio" );
+   transfer( "eonio", "producer111h", core_from_string("1000.0000"), "eonio" );
+
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111a") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111b") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111c") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111d") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111e") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111f") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111g") );
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("producer111h") );
+
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111a", "producer111a", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111b", "producer111b", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111c", "producer111c", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111d", "producer111d", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111e", "producer111e", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111f", "producer111f", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111g", "producer111g", 0, 1, 1) ); 
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111h", "producer111h", 0, 1, 1) ); 
+
+   stake( "eonio", "bob111111111", core_from_string("100000000.0000"), core_from_string("0.0000") );
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 0, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 1, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 2, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 3, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 4, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 5, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 6, true) ); 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 7, true) ); 
+
+   produce_block(fc::hours(2)); //2小时
+   produce_blocks(1);
+
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111a", 0) );
+   produce_block(fc::minutes(10));
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111b", 1) );
+   produce_block(fc::minutes(10));
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111c", 2) );
+   produce_block(fc::minutes(10));
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111d", 3) );
+   produce_block(fc::minutes(10));
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111e", 4) );
+   produce_block(fc::minutes(10));
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111f", 5) );
+   produce_block(fc::minutes(10));
+//    BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111g", 6) );
+//    produce_block(fc::minutes(10));
+//    BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111h", 7) );
+//    produce_block(fc::minutes(10));
+
+   produce_blocks( 500 );
+   BOOST_REQUIRE_EQUAL(6, get_global_state()["producer_num"].as<uint16_t>());
+//    BOOST_REQUIRE_EQUAL( 8, control->head_block_state()->active_schedule.producers.size() );
+
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("producer111a", "producer111a", 0, 2, 1) ); 
+
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 8, true) ); 
+
+   produce_block(fc::hours(2)); //2小时
+   produce_blocks(1);
+
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("producer111a", 8) );
+
+   produce_blocks( 500 );
+   BOOST_REQUIRE_EQUAL(5, get_global_state()["producer_num"].as<uint16_t>());
+
+} FC_LOG_AND_RETHROW()
+
+
+BOOST_FIXTURE_TEST_CASE( set_consensus_test, eosio_system_tester ) try {
+
+   produce_blocks( 1 );
+
+   BOOST_REQUIRE_EQUAL( core_from_string("0.0000"), get_balance( "alice1111111" ) );
+   transfer( "eonio", "alice1111111", core_from_string("1000.0000"), "eonio" );
+   produce_blocks( 1 );
+
+   BOOST_REQUIRE_EQUAL( success(), stake_to_gnode_t("alice1111111") ); // 成为gnode消耗1.000 EON
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("alice1111111", "alice1111111", 0, 3, 1) ); // consensus_type = 1
+   BOOST_REQUIRE_EQUAL( success(), new_proposal_t("alice1111111", "alice1111111", 0, 3, 2) ); // consensus_type = 2
+
+   stake( "eonio", "bob111111111", core_from_string("100000000.0000"), core_from_string("0.0000") );
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 0, true) ); //对id为0的投票 
+   BOOST_REQUIRE_EQUAL( success(), vote_proposal_t("bob111111111", 1, true) ); //对id为1的投票 
+
+   produce_block(fc::hours(2)); //2小时
+   produce_blocks(1);
+
+   BOOST_REQUIRE_EQUAL( 0, control->head_block_state()->active_schedule.consensus_type );
+
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("alice1111111", 0) );
+   produce_blocks( 500 );
+   produce_block(fc::minutes(30));
+   BOOST_REQUIRE_EQUAL( 1, control->head_block_state()->active_schedule.consensus_type );
+
+   BOOST_REQUIRE_EQUAL( success(), exec_proposal_t("alice1111111", 1) );
+   produce_blocks( 500 );
+   produce_block(fc::minutes(30));
+   BOOST_REQUIRE_EQUAL( 2, control->head_block_state()->active_schedule.consensus_type );
+
 } FC_LOG_AND_RETHROW()
 
 
