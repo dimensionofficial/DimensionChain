@@ -263,15 +263,9 @@ namespace eosiosystem {
 
          // functions defined in voting.cpp
 
-         void regproducer( const account_name producer, const public_key& producer_key, const std::string& url, uint16_t location );
-
-         void unregprod( const account_name producer );
-
          void voteproposal( const account_name voter_name, const uint64_t proposal_id, const bool yea );
 
          void setram( uint64_t max_ram_size );
-
-         void voteproducer( const account_name voter, const account_name proxy, const std::vector<account_name>& producers );
 
          void regproxy( const account_name proxy, bool isproxy );
 
@@ -299,6 +293,12 @@ namespace eosiosystem {
          void bidname( account_name bidder, account_name newname, asset bid );
 
       private:
+
+         void regproducer( const account_name producer, const public_key& producer_key, const std::string& url, uint16_t location );
+         void unregprod( const account_name producer );
+         void voteproducer( const account_name voter, const account_name proxy, const std::vector<account_name>& producers );
+
+
          void update_elected_producers( block_timestamp timestamp );
 
          void add_elected_producers( account_name new_producer );

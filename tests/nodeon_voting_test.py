@@ -194,57 +194,57 @@ try:
 
     Print("Wallet \"%s\" password=%s." % (testWalletName, testWallet.password.encode("utf-8")))
 
-    for i in range(0, totalNodes):
-        node=cluster.getNode(i)
-        node.producers=Cluster.parseProducers(i)
-        for prod in node.producers:
-            trans=node.regproducer(cluster.defProducerAccounts[prod], "http::/mysite.com", 0, waitForTransBlock=False, exitOnError=True)
+    # for i in range(0, totalNodes):
+    #     node=cluster.getNode(i)
+    #     node.producers=Cluster.parseProducers(i)
+    #     for prod in node.producers:
+    #         trans=node.regproducer(cluster.defProducerAccounts[prod], "http::/mysite.com", 0, waitForTransBlock=False, exitOnError=True)
 
-    node0=cluster.getNode(0)
-    node1=cluster.getNode(1)
-    node2=cluster.getNode(2)
-    node3=cluster.getNode(3)
+    # node0=cluster.getNode(0)
+    # node1=cluster.getNode(1)
+    # node2=cluster.getNode(2)
+    # node3=cluster.getNode(3)
 
-    node=node0
-    # create accounts via eosio as otherwise a bid is needed
-    for account in accounts:
-        Print("Create new account %s via %s" % (account.name, cluster.eosioAccount.name))
-        trans=node.createInitializeAccount(account, cluster.eosioAccount, stakedDeposit=0, waitForTransBlock=False, stakeNet=1000, stakeCPU=1000, buyRAM=1000, exitOnError=True)
-        transferAmount="100000000.0000 {0}".format(CORE_SYMBOL)
-        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.eosioAccount.name, account.name))
-        node.transferFunds(cluster.eosioAccount, account, transferAmount, "test transfer")
-        trans=node.delegatebw(account, 20000000.0000, 20000000.0000, waitForTransBlock=True, exitOnError=True)
+    # node=node0
+    # # create accounts via eosio as otherwise a bid is needed
+    # for account in accounts:
+    #     Print("Create new account %s via %s" % (account.name, cluster.eosioAccount.name))
+    #     trans=node.createInitializeAccount(account, cluster.eosioAccount, stakedDeposit=0, waitForTransBlock=False, stakeNet=1000, stakeCPU=1000, buyRAM=1000, exitOnError=True)
+    #     transferAmount="100000000.0000 {0}".format(CORE_SYMBOL)
+    #     Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.eosioAccount.name, account.name))
+    #     node.transferFunds(cluster.eosioAccount, account, transferAmount, "test transfer")
+    #     trans=node.delegatebw(account, 20000000.0000, 20000000.0000, waitForTransBlock=True, exitOnError=True)
 
-    # containers for tracking producers
-    prodsActive={}
-    for i in range(0, 4):
-        node=cluster.getNode(i)
-        ProducerToNode.populate(node, i)
-        for prod in node.producers:
-            prodsActive[prod]=False
+    # # containers for tracking producers
+    # prodsActive={}
+    # for i in range(0, 4):
+    #     node=cluster.getNode(i)
+    #     ProducerToNode.populate(node, i)
+    #     for prod in node.producers:
+    #         prodsActive[prod]=False
 
-    #first account will vote for node0 producers, all others will vote for node1 producers
-    node=node0
-    for account in accounts:
-        trans=node.vote(account, node.producers, waitForTransBlock=True)
-        node=node1
+    # #first account will vote for node0 producers, all others will vote for node1 producers
+    # node=node0
+    # for account in accounts:
+    #     trans=node.vote(account, node.producers, waitForTransBlock=True)
+    #     node=node1
 
-    setActiveProducers(prodsActive, node1.producers)
+    # setActiveProducers(prodsActive, node1.producers)
 
-    verifyProductionRounds(trans, node2, prodsActive, 2)
+    # verifyProductionRounds(trans, node2, prodsActive, 2)
 
-    # test shifting all 21 away from one node to another
-    # first account will vote for node2 producers, all others will vote for node3 producers
-    node1
-    for account in accounts:
-        trans=node.vote(account, node.producers, waitForTransBlock=True)
-        node=node2
+    # # test shifting all 21 away from one node to another
+    # # first account will vote for node2 producers, all others will vote for node3 producers
+    # node1
+    # for account in accounts:
+    #     trans=node.vote(account, node.producers, waitForTransBlock=True)
+    #     node=node2
 
-    setActiveProducers(prodsActive, node2.producers)
+    # setActiveProducers(prodsActive, node2.producers)
 
-    verifyProductionRounds(trans, node1, prodsActive, 2)
+    # verifyProductionRounds(trans, node1, prodsActive, 2)
 
-    testSuccessful=True
+    # testSuccessful=True
 finally:
     TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 

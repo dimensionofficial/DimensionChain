@@ -130,17 +130,6 @@ public:
        return r;
     }
 
-    auto register_producer(name producer) {
-       auto r = base_tester::push_action(config::system_account_name, N(regproducer), producer, mvo()
-                       ("producer",  name(producer))
-                       ("producer_key", get_public_key( producer, "active" ) )
-                       ("url", "" )
-                       ("location", 0 )
-                    );
-       produce_block();
-       return r;
-    }
-
 
     auto undelegate_bandwidth( name from, name receiver, asset net, asset cpu ) {
        auto r = base_tester::push_action(config::system_account_name, N(undelegatebw), from, mvo()
@@ -238,14 +227,14 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
                 N(prodo), N(prodp), N(prodq), N(prodr), N(prods), N(prodt), N(produ),
                 N(runnerup1), N(runnerup2), N(runnerup3)
         };
-
+//TODO
+//没有voteproducer,以下先注释
+#if 0
         // Register producers
         for( auto pro : producer_candidates ) {
            register_producer(pro);
         }
-//TODO
-//没有voteproducer,以下先注释
-#if 0
+
 
         // Vote for producers
         auto votepro = [&]( account_name voter, vector<account_name> producers ) {

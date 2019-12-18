@@ -385,7 +385,7 @@ BOOST_FIXTURE_TEST_CASE( unstake_negative, eosio_system_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-
+#if 0
 BOOST_FIXTURE_TEST_CASE( unstake_more_than_at_stake, eosio_system_tester ) try {
    cross_15_percent_threshold();
 
@@ -636,7 +636,7 @@ BOOST_FIXTURE_TEST_CASE( stake_to_another_user_not_from_refund, eosio_system_tes
 
 } FC_LOG_AND_RETHROW()
 
-
+#endif
 
 
 

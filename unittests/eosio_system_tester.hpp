@@ -364,16 +364,6 @@ public:
          ("ram_reserve_ratio", 100 + n);
    }
 
-   action_result regproducer( const account_name& acnt, int params_fixture = 1 ) {
-      action_result r = push_action( acnt, N(regproducer), mvo()
-                          ("producer",  acnt )
-                          ("producer_key", get_public_key( acnt, "active" ) )
-                          ("url", "" )
-                          ("location", 0 )
-      );
-      BOOST_REQUIRE_EQUAL( success(), r);
-      return r;
-   }
 
    action_result vote( const account_name& voter, const std::vector<account_name>& producers, const account_name& proxy = name(0) ) {
       return push_action(voter, N(voteproducer), mvo()
@@ -498,101 +488,6 @@ public:
       return msig_abi_ser;
    }
 
-   vector<name> active_and_vote_producers() {
-      //stake more than 15% of total EOS supply to activate chain
-      transfer( "eonio", "alice1111111", core_from_string("650000000.0000"), "eonio" );
-      BOOST_REQUIRE_EQUAL( success(), stake( "alice1111111", "alice1111111", core_from_string("300000000.0000"), core_from_string("300000000.0000") ) );
-
-      // create accounts {defproducera, defproducerb, ..., defproducerz} and register as producers
-      std::vector<account_name> producer_names;
-      {
-         producer_names.reserve('z' - 'a' + 1);
-         const std::string root("defproducer");
-         for ( char c = 'a'; c < 'a'+21; ++c ) {
-            producer_names.emplace_back(root + std::string(1, c));
-         }
-         setup_producer_accounts(producer_names);
-         for (const auto& p: producer_names) {
-
-            BOOST_REQUIRE_EQUAL( success(), regproducer(p) );
-         }
-      }
-      produce_blocks( 250);
-
-      auto trace_auth = TESTER::push_action(config::system_account_name, updateauth::get_name(), config::system_account_name, mvo()
-                                            ("account", name(config::system_account_name).to_string())
-                                            ("permission", name(config::active_name).to_string())
-                                            ("parent", name(config::owner_name).to_string())
-                                            ("auth",  authority(1, {key_weight{get_public_key( config::system_account_name, "active" ), 1}}, {
-                                                  permission_level_weight{{config::system_account_name, config::eosio_code_name}, 1},
-                                                     permission_level_weight{{config::producers_account_name,  config::active_name}, 1}
-                                               }
-                                            ))
-      );
-      BOOST_REQUIRE_EQUAL(transaction_receipt::executed, trace_auth->receipt->status);
-
-      //vote for producers
-      {
-         transfer( config::system_account_name, "alice1111111", core_from_string("100000000.0000"), config::system_account_name );
-         BOOST_REQUIRE_EQUAL(success(), stake( "alice1111111", core_from_string("30000000.0000"), core_from_string("30000000.0000") ) );
-         BOOST_REQUIRE_EQUAL(success(), buyram( "alice1111111", "alice1111111", core_from_string("30000000.0000") ) );
-         BOOST_REQUIRE_EQUAL(success(), push_action(N(alice1111111), N(voteproducer), mvo()
-                                                    ("voter",  "alice1111111")
-                                                    ("proxy", name(0).to_string())
-                                                    ("producers", vector<account_name>(producer_names.begin(), producer_names.begin()+21))
-                             )
-         );
-      }
-      produce_blocks( 250 );
-
-      auto producer_keys = control->head_block_state()->active_schedule.producers;
-      BOOST_REQUIRE_EQUAL( 21, producer_keys.size() );
-      BOOST_REQUIRE_EQUAL( name("defproducera"), producer_keys[0].producer_name );
-
-      return producer_names;
-   }
-
-   void cross_15_percent_threshold() {
-      setup_producer_accounts({N(producer1111)});
-      regproducer(N(producer1111));
-      {
-         signed_transaction trx;
-         set_transaction_headers(trx);
-
-         trx.actions.emplace_back( get_action( config::system_account_name, N(delegatebw),
-                                               vector<permission_level>{{config::system_account_name, config::active_name}},
-                                               mvo()
-                                               ("from", name{config::system_account_name})
-                                               ("receiver", "producer1111")
-                                               ("stake_net_quantity", core_from_string("150000000.0000") )
-                                               ("stake_cpu_quantity", core_from_string("0.0000") )
-                                               ("transfer", 1 )
-                                             )
-                                 );
-         trx.actions.emplace_back( get_action( config::system_account_name, N(voteproducer),
-                                               vector<permission_level>{{N(producer1111), config::active_name}},
-                                               mvo()
-                                               ("voter", "producer1111")
-                                               ("proxy", name(0).to_string())
-                                               ("producers", vector<account_name>(1, N(producer1111)))
-                                             )
-                                 );
-         trx.actions.emplace_back( get_action( config::system_account_name, N(undelegatebw),
-                                               vector<permission_level>{{N(producer1111), config::active_name}},
-                                               mvo()
-                                               ("from", "producer1111")
-                                               ("receiver", "producer1111")
-                                               ("unstake_net_quantity", core_from_string("150000000.0000") )
-                                               ("unstake_cpu_quantity", core_from_string("0.0000") )
-                                             )
-                                 );
-
-         set_transaction_headers(trx);
-         trx.sign( get_private_key( config::system_account_name, "active" ), control->get_chain_id()  );
-         trx.sign( get_private_key( N(producer1111), "active" ), control->get_chain_id()  );
-         push_transaction( trx );
-      }
-   }
 
    abi_serializer abi_ser;
    abi_serializer token_abi_ser;

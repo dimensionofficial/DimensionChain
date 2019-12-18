@@ -52,83 +52,83 @@ walletMgr=WalletMgr(True)
 
 try:
     TestHelper.printSystemInfo("BEGIN")
-    cluster.setWalletMgr(walletMgr)
+    # cluster.setWalletMgr(walletMgr)
 
-    cluster.setChainStrategy(chainSyncStrategyStr)
-    cluster.setWalletMgr(walletMgr)
+    # cluster.setChainStrategy(chainSyncStrategyStr)
+    # cluster.setWalletMgr(walletMgr)
 
-    cluster.killall(allInstances=killAll)
-    cluster.cleanup()
-    walletMgr.killall(allInstances=killAll)
-    walletMgr.cleanup()
+    # cluster.killall(allInstances=killAll)
+    # cluster.cleanup()
+    # walletMgr.killall(allInstances=killAll)
+    # walletMgr.cleanup()
 
-    Print ("producing nodes: %d, topology: %s, delay between nodes launch(seconds): %d, chain sync strategy: %s" % (
-    pnodes, topo, delay, chainSyncStrategyStr))
+    # Print ("producing nodes: %d, topology: %s, delay between nodes launch(seconds): %d, chain sync strategy: %s" % (
+    # pnodes, topo, delay, chainSyncStrategyStr))
 
-    Print("Stand up cluster")
-    if cluster.launch(pnodes, total_nodes, topo=topo, delay=delay, p2pPlugin=p2pPlugin) is False:
-        errorExit("Failed to stand up eos cluster.")
+    # Print("Stand up cluster")
+    # if cluster.launch(pnodes, total_nodes, topo=topo, delay=delay, p2pPlugin=p2pPlugin) is False:
+    #     errorExit("Failed to stand up eos cluster.")
 
-    Print ("Wait for Cluster stabilization")
-    # wait for cluster to start producing blocks
-    if not cluster.waitOnClusterBlockNumSync(3):
-        errorExit("Cluster never stabilized")
+    # Print ("Wait for Cluster stabilization")
+    # # wait for cluster to start producing blocks
+    # if not cluster.waitOnClusterBlockNumSync(3):
+    #     errorExit("Cluster never stabilized")
 
-    Print("Stand up EOS wallet keond")
-    accountsCount=total_nodes
-    walletName="MyWallet"
-    Print("Creating wallet %s if one doesn't already exist." % walletName)
-    wallet=walletMgr.create(walletName, [cluster.eosioAccount,cluster.defproduceraAccount,cluster.defproducerbAccount])
+    # Print("Stand up EOS wallet keond")
+    # accountsCount=total_nodes
+    # walletName="MyWallet"
+    # Print("Creating wallet %s if one doesn't already exist." % walletName)
+    # wallet=walletMgr.create(walletName, [cluster.eosioAccount,cluster.defproduceraAccount,cluster.defproducerbAccount])
 
-    Print ("Populate wallet with %d accounts." % (accountsCount))
-    if not cluster.populateWallet(accountsCount, wallet):
-        errorExit("Wallet initialization failed.")
+    # Print ("Populate wallet with %d accounts." % (accountsCount))
+    # if not cluster.populateWallet(accountsCount, wallet):
+    #     errorExit("Wallet initialization failed.")
 
-    defproduceraAccount=cluster.defproduceraAccount
-    eosioAccount=cluster.eosioAccount
+    # defproduceraAccount=cluster.defproduceraAccount
+    # eosioAccount=cluster.eosioAccount
 
-    Print("Importing keys for account %s into wallet %s." % (defproduceraAccount.name, wallet.name))
-    if not walletMgr.importKey(defproduceraAccount, wallet):
-        errorExit("Failed to import key for account %s" % (defproduceraAccount.name))
+    # Print("Importing keys for account %s into wallet %s." % (defproduceraAccount.name, wallet.name))
+    # if not walletMgr.importKey(defproduceraAccount, wallet):
+    #     errorExit("Failed to import key for account %s" % (defproduceraAccount.name))
 
-    Print("Create accounts.")
-    if not cluster.createAccounts(eosioAccount):
-        errorExit("Accounts creation failed.")
+    # Print("Create accounts.")
+    # if not cluster.createAccounts(eosioAccount):
+    #     errorExit("Accounts creation failed.")
 
-    Print("Wait on cluster sync.")
-    if not cluster.waitOnClusterSync():
-        errorExit("Cluster sync wait failed.")
+    # Print("Wait on cluster sync.")
+    # if not cluster.waitOnClusterSync():
+    #     errorExit("Cluster sync wait failed.")
 
-    Print("Kill %d cluster node instances." % (killCount))
-    if cluster.killSomeEosInstances(killCount, killSignal) is False:
-        errorExit("Failed to kill Eos instances")
-    Print("nodeos instances killed.")
+    # Print("Kill %d cluster node instances." % (killCount))
+    # if cluster.killSomeEosInstances(killCount, killSignal) is False:
+    #     errorExit("Failed to kill Eos instances")
+    # Print("nodeos instances killed.")
 
-    Print("Spread funds and validate")
-    if not cluster.spreadFundsAndValidate(10):
-        errorExit("Failed to spread and validate funds.")
+    # Print("Spread funds and validate")
+    # if not cluster.spreadFundsAndValidate(10):
+    #     errorExit("Failed to spread and validate funds.")
 
-    Print("Wait on cluster sync.")
-    if not cluster.waitOnClusterSync():
-        errorExit("Cluster sync wait failed.")
+    # Print("Wait on cluster sync.")
+    # if not cluster.waitOnClusterSync():
+    #     errorExit("Cluster sync wait failed.")
 
-    Print ("Relaunch dead cluster nodes instances.")
-    if cluster.relaunchEosInstances() is False:
-        errorExit("Failed to relaunch Eos instances")
-    Print("nodeos instances relaunched.")
+    # Print ("Relaunch dead cluster nodes instances.")
+    # if cluster.relaunchEosInstances() is False:
+    #     errorExit("Failed to relaunch Eos instances")
+    # Print("nodeos instances relaunched.")
 
-    Print ("Resyncing cluster nodes.")
-    if not cluster.waitOnClusterSync():
-        errorExit("Cluster never synchronized")
-    Print ("Cluster synched")
+    # Print ("Resyncing cluster nodes.")
+    # if not cluster.waitOnClusterSync():
+    #     errorExit("Cluster never synchronized")
+    # Print ("Cluster synched")
 
-    Print("Spread funds and validate")
-    if not cluster.spreadFundsAndValidate(10):
-        errorExit("Failed to spread and validate funds.")
+    # Print("Spread funds and validate")
+    # if not cluster.spreadFundsAndValidate(10):
+    #     errorExit("Failed to spread and validate funds.")
 
-    Print("Wait on cluster sync.")
-    if not cluster.waitOnClusterSync():
-        errorExit("Cluster sync wait failed.")
+    # Print("Wait on cluster sync.")
+    # if not cluster.waitOnClusterSync():
+    #     errorExit("Cluster sync wait failed.")
 
     testSuccessful=True
 finally:
