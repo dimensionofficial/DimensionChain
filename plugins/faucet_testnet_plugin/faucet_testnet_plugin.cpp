@@ -16,6 +16,7 @@
 
 #include <utility>
 
+//using namespace
 namespace eosio { namespace detail {
   struct faucet_testnet_empty {};
 
