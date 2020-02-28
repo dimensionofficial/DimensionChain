@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-
+## not build in dimension
 DWORD GetChatColor(BYTE bIdx)
 {
 	DWORD dwClr = 0;
