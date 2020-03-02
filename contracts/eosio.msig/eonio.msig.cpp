@@ -7,7 +7,6 @@ namespace eosio {
 /*
 propose function manually parses input data (instead of taking parsed arguments from dispatcher)
 because parsing data in the dispatcher uses too much CPU in case if proposed transaction is big
-
 If we use dispatcher the function signature should be:
 
 void multisig::propose( account_name proposer,
