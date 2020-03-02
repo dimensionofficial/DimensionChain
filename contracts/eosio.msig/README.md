@@ -88,7 +88,7 @@ $ cleon multisig review tester test -p treasury
         ],
         "data": {
           "to": "tester",
-          "quantity": "1000.0000 EOS",
+          "quantity": "1000.0000 EON",
           "memo": ""
         },
         "hex_data": "000000005c95b1ca809698000000000004454f530000000000"
