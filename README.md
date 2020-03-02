@@ -1,5 +1,5 @@
 
-# dimension - The Most Powerful Infrastructure for Decentralized Applications
+# Dimension - Connecting businesses through blockchain
 
 # Overview
 The community is a crucial part of a blockchain project. The community members provide important guidance and suggestions on technology, government and sustainability. The KOLs (key opinion leaders), as active leaders in the community, also forward their thoughts on various issues such as how to structure a better blockchain network with actual business adoption.
