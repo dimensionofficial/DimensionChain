@@ -25,7 +25,8 @@
          {"name": "name", "type": "action_name"},
          {"name": "authorization", "type": "permission_level[]"},
          {"name": "data", "type": "bytes"}
-      ]
+     
+     ]
     },{
       "name": "transaction_header",
       "base": "",
