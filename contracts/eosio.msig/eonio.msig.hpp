@@ -33,4 +33,4 @@ namespace eosio {
          typedef eosio::multi_index<N(approvals),approvals_info> approvals;
    };
 
-} /// namespace eosio
+} /// namespace eonio
