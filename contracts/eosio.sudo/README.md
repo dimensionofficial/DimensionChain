@@ -34,7 +34,7 @@ Three unsigned transactions will be generated using cleon and then the actions w
 
 First, generate a transaction to capture the necessary actions involved in creating a new account:
 ```
-$ cleon system newaccount -s -j -d --transfer --stake-net "1.000 EON" --stake-cpu "1.000 EON" --buy-ram-kbytes 50 eonio eonio.sudo EOS8MMUW11TAdTDxqdSwSqJodefSoZbFhcprndomgLi9MeR2o8MT4 > generated_account_creation_trx.json
+$ cleon system newaccount -s -j -d --transfer --stake-net "1.000 EON" --stake-cpu "1.000 EON" --buy-ram-kbytes 50 eonio eonio.sudo EONMMUW11TAdTDxqdSwSqJodefSoZbFhcprndomgLi9MeR2o8MT4 > generated_account_creation_trx.json
 726964ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea305500c80000"} arg: {"code":"eonio","action":"buyrambytes","args":{"payer":"eonio","receiver":"eonio.sudo","bytes":51200}}
 726967ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea3055102700000000000004535953000000001027000000000000045359530000000001"} arg: {"code":"eonio","action":"delegatebw","args":{"from":"eonio","receiver":"eonio.sudo","stake_net_quantity":"1.0000 EON","stake_cpu_quantity":"1.0000 EON","transfer":true}}
 $ cat generated_account_creation_trx.json
