@@ -50,7 +50,7 @@ set( GUI_CLIENT_EXECUTABLE_NAME eosio )
 set( CUSTOM_URL_SCHEME "gcs" )
 set( INSTALLER_APP_ID "68ad7005-8eee-49c9-95ce-9eed97e5b347" )
 
-# http://stackoverflow.com/a/18369825
+# http://stackoverflow.com/
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0)
         message(FATAL_ERROR "GCC version must be at least 6.0!")
