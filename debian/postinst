@@ -8,6 +8,7 @@
 
 set -e
 
+
 PACKAGE="eosio"
 USER="eosio"
 GROUP=${USER}
