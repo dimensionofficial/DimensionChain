@@ -20,7 +20,7 @@
 	printf "\\tCPU speed: %sMhz\\n" "${CPU_SPEED}"
 	printf "\\tCPU cores: %s\\n" "${CPU_CORE}"
 	printf "\\tPhysical Memory: %s Mgb\\n" "${MEM_MEG}"
-	printf "\\tDisk install: %s\\n" "${DISK_INSTALL}"
+	printf "\\tDisk  install: %s\\n" "${DISK_INSTALL}"
 	printf "\\tDisk space total: %sG\\n" "${DISK_TOTAL%.*}"
 	printf "\\tDisk space available: %sG\\n" "${DISK_AVAIL%.*}"
 
