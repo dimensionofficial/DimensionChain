@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in eos/LICENSE.txt
+ *  @copyright defined
  */
 #pragma once
 #include <eosiolib/types.hpp>
