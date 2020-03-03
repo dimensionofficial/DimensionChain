@@ -8,6 +8,7 @@ foreach(ADDITIONAL_PLUGIN_SOURCE_DIR ${EOSIO_ADDITIONAL_PLUGINS})
     add_subdirectory(${ADDITIONAL_PLUGIN_SOURCE_DIR} ${CMAKE_BINARY_DIR}/additional_plugins/${ADDITIONAL_PLUGIN_SOURCE_DIR_MD5})
 endforeach()
 
+
 foreach(ADDITIONAL_PLUGIN_TARGET ${ADDITIONAL_PLUGINS_TARGET})
     target_link_libraries( nodeon PRIVATE -Wl,${whole_archive_flag} ${ADDITIONAL_PLUGIN_TARGET} -Wl,${no_whole_archive_flag} )
 endforeach()
