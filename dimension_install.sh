@@ -1,6 +1,5 @@
 #!/bin/bash
 ##########################################################################
-#
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
 # After June 1, 2018 this software is available under the following terms:
