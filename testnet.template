@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# set up a wallet just for holding the key used during blockchain ignition
+# set up a wallet just for holding the key used during blockchain ignition.
 
 bioshost=$BIOS_HOSTNAME
 if [ -z "$bioshost" ]; then
