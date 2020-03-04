@@ -1,0 +1,41 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <style name="game_sdk_PopupAnimation" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/game_sdk_ani_in</item>
+        <item name="android:windowExitAnimation">@anim/game_sdk_ani_out</item>
+    </style>
+
+    <style name="game_sdk_MyAnim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/game_sdk_anim_in</item>
+        <item name="android:windowExitAnimation">@anim/game_sdk_anim_out</item>
+    </style>
+
+    <style name="game_sdk_dialog_exit" parent="android:style/Theme.Dialog">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="game_sdk_plugin_splash">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <style name="game_sdk_processDialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+</resources>

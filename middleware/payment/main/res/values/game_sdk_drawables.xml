@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="game_sdk_one">#00b4ff</drawable>
+    <drawable name="game_sdk_two">#00b4ff</drawable>
+    <drawable name="game_sdk_three">#f7f3ed</drawable>
+    <drawable name="game_sdk_four">#f88f99</drawable>   
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true" android:drawable="@drawable/game_sdk_longbluebutton_click"></item>
+    <item android:drawable="@drawable/game_sdk_longbluebutton" android:state_enabled="true" ></item>
+    <item android:state_enabled="false"  android:drawable="@drawable/game_sdk_longbluebutton_disable"></item>
+
+</selector>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="game_sdk_base_color">#0575FB</color>
+    <color name="game_sdk_tv_gray">#757575</color>
+    <color name="game_sdk_tv_blue">#0086ff</color>
+</resources>

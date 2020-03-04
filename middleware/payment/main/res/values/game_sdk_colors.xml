@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="game_sdk_translate">#ffffffff</color>
+    <color name="game_sdk_wt">#ffffff</color>
+    <color name="game_sdk_black">#000000</color>
+    <color name="game_sdk_tv">#a35d0b</color>
+    <color name="game_sdk_bg_pay_img">#949494</color>
+</resources>
