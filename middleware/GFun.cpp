@@ -17,5 +17,6 @@ DWORD GetChatColor(BYTE bIdx)
 	case _CHAT_COLOR8:		dwClr = RGB(255, 128,   0);		break;
 	}
 
+	
 	return dwClr;
 }
