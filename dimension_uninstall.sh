@@ -26,7 +26,7 @@ if [ -d "/usr/local/eosio" ]; then
             for binary in ${binaries[@]}; do
                rm ${binary}
             done
-            # Handle cleanup of directories created from installation
+            # Handle cleanup of directories created from installation.
             if [ "$1" == "--full" ]; then
                if [ -d ~/Library/Application\ Support/eosio ]; then rm -rf ~/Library/Application\ Support/eosio; fi # Mac OS
                if [ -d ~/.local/share/dimension ]; then rm -rf ~/.local/share/dimension; fi # Linux
