@@ -1,14 +1,7 @@
 #! /bin/bash
 
 binaries=(cleon
-          eosio-abigen
-          dimension-launcher
-          eosio-s2wasm
-          eosio-wast2wasm
-          eosiocpp
-          keond
-          nodeon
-          eosio-applesdemo)
+         )
 
 if [ -d "/usr/local/eosio" ]; then
    printf "\tDo you wish to remove this install? (requires sudo)\n"
