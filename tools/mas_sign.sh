@@ -30,7 +30,6 @@ cat > $FILENAME.app/Contents/Info.plist <<ENDENDEND
 	<key>CFBundleIdentifier</key>
 	<string>$BUNDLEID</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$FILENAME</string>
 	<key>CFBundlePackageType</key>
