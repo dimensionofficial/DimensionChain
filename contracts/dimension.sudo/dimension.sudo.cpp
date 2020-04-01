@@ -19,7 +19,7 @@ void sudo::exec() {
    constexpr size_t max_stack_buffer_size = 512;
    size_t size = action_data_size();
    char* buffer = (char*)( max_stack_buffer_size < size ? malloc(size) : alloca(size) );
-   read_action_data( buffer, size );
+ 
 
    account_name executer;
 
