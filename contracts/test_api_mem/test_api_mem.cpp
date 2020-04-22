@@ -13,7 +13,11 @@ extern "C" {
       require_auth(code);
 
       //test_extended_memory
-     
+      WASM_TEST_HANDLER(test_extended_memory, test_initial_buffer);
+      WASM_TEST_HANDLER(test_extended_memory, test_page_memory);
+      WASM_TEST_HANDLER(test_extended_memory, test_page_memory_exceeded);
+      WASM_TEST_HANDLER(test_extended_memory, test_page_memory_negative_bytes);
+      
       //test_memory
       WASM_TEST_HANDLER(test_memory, test_memory_allocs);
       WASM_TEST_HANDLER(test_memory, test_memory_hunk);
