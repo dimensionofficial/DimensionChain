@@ -15,3 +15,6 @@ if [ -z $1 ] ; then
 else
   $PREFIX "$@"
 fi
+#if [ ! -d "/opt/eosio/bin/data-dir" ]; then
+#    mkdir /opt/eosio/bin/data-dir
+#fi
