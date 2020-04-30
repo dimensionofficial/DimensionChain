@@ -87,7 +87,9 @@
                DOXYGEN=true
             ;;
             s)
-               if [ "${#OPTARG}" -gt 7 ] || [ -z "${#OPTARG}" ]; then
+           
+            
+            if [ "${#OPTARG}" -gt 7 ] || [ -z "${#OPTARG}" ]; then
                   printf "\\n\\tInvalid argument: %s\\n" "${OPTARG}" 1>&2
                   usage
                   exit 1
@@ -136,7 +138,9 @@
       printf "\\tPlease run the command 'git submodule update --init --recursive'.\\n"
       exit 1
    fi
-
+    if [ -f "$file" ];then
+            echo "OK"
+            fi
    printf "\\n\\tBeginning build version: %s\\n" "${VERSION}"
    printf "\\t%s\\n" "$( date -u )"
    printf "\\tUser: %s\\n" "$( whoami )"
