@@ -45,7 +45,26 @@ cat > $FILENAME.app/Contents/Info.plist <<ENDENDEND
 </dict>
 </plist>
 ENDENDEND
+ 
+ TMPFILE=$(mktemp /tmp/signscript.XXXXXX)
+ trap "rm $TMPFILE" EXIT
 
+cat > $TMPFILE <<ENDENDEND
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.application-identifier</key>
+	<string>$APPID</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>$TEAMID</string>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$KCG</string>
+	</array>
+</dict>
+</plist>
+ENDENDEND
 
 
 codesign --force --sign $CERT --timestamp=none --entitlements $TMPFILE $FILENAME.app
