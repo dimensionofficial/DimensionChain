@@ -10,7 +10,8 @@ class LossyNetwork:
 
     resetcmd="tc qdisc del dev {dev} root"
 
-  
+   def maxIndex(self):
+        return len(self.args)
 
     def execute(self, cmdInd, node, testerAccount, eosio):
         print("\n==== lossy network test: set loss ratio to %s ====" % (self.args[cmdInd]))
