@@ -39,3 +39,4 @@ if [ -d "/usr/local/eosio" ]; then
       esac
    done
 fi
+echo "done"
