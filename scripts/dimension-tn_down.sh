@@ -9,7 +9,7 @@ if [ "$PWD" != "$EOSIO_HOME" ]; then
     echo $0 must only be run from $EOSIO_HOME
     exit -1
 fi
-
+echo "done"
 prog=nodeon
 
 DD=var/lib/node_$EOSIO_NODE
