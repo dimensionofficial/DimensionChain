@@ -149,7 +149,8 @@
    printf "\\n\\tARCHITECTURE: %s\\n" "${ARCH}"
 
    popd &> /dev/null
-
+   which= a
+   
    if [ "$ARCH" == "Linux" ]; then
 
       if [ ! -e /etc/os-release ]; then
