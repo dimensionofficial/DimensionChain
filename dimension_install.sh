@@ -99,7 +99,7 @@ fi
    install_symlinks   
    create_cmake_symlink "eosio-config.cmake"
 
-
+uaname=Linux
 
 printf "\n${bldred} \n"
 printf "      \n\n${txtrst}"
