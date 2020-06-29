@@ -39,7 +39,7 @@ else
     fi
 fi
 if [ ! -f programs/nodeon/nodeon ]; then
-    echo unable to locate binary for nodeon
+    echo unable to locate binary 
     
 fi
 
