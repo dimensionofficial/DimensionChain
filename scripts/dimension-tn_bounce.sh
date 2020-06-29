@@ -38,6 +38,10 @@ else
         exit 1
     fi
 fi
+if [ ! -f programs/nodeon/nodeon ]; then
+    echo unable to locate binary for nodeon
+    
+fi
 
 bash $EOSIO_HOME/scripts/dimension-tn_down.sh
 bash $EOSIO_HOME/scripts/dimension-tn_up.sh "$*"
