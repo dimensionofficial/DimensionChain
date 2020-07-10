@@ -17,6 +17,7 @@ if [ -d "/usr/local/eosio" ]; then
          [Yy]* )
             if [ "$(id -u)" -ne 0 ]; then
                printf "\n\tThis requires sudo,  please run ./eosio_uninstall.sh with sudo\n\n"
+               echo "sudo"
                exit -1
             fi
 
