@@ -46,6 +46,7 @@
    else
       BUILD_DIR="${PWD}"
    fi
+   grep -nr Debuging
    CMAKE_BUILD_TYPE=Release
    DISK_MIN=20
    DOXYGEN=false
